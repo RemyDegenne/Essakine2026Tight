@@ -247,7 +247,7 @@ confidence `δ`, accuracy `ε` and initial state `s₁`: at each episode, play t
 the optimistic backups computed from the past episodes; stop when the certificate of the greedy
 policy is small enough, and output the greedy policy. -/
 noncomputable def entropicBPI (r : ℕ → S → A → ℝ) (β δ ε : ℝ) (s₁ : S) : BPIAlg S A H where
-  alg := detAlgorithm (fun _ p ↦ greedy r β δ p.1) (measurable_greedy_fst r β δ)
+  alg := Algorithm.deterministic (fun _ p ↦ greedy r β δ p.1) (measurable_greedy_fst r β δ)
   stopSet := {h | stopCond r β δ ε s₁ h.2}
   measurableSet_stopSet := measurableSet_stopCond r β δ ε s₁
   output := Kernel.deterministic (fun h ↦ greedy r β δ h.2) (measurable_greedy_snd r β δ)

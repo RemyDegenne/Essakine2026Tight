@@ -63,7 +63,7 @@ theorem probReal_stoppingTime_entropicBPI_le_ge (r : ℕ → S → A → ℝ)
     (X : ℕ → Ω → Policy S A H) (Y : ℕ → Ω → Traj S H) (out : Ω → Policy S A H)
     (h : (entropicBPI H r β δ ε s₁).IsRun (statesEnv M H s₁) (fun _ _ ↦ ()) X Y out P) :
     1 - δ ≤ P.real {ω |
-      ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞) ≤
+      ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω) ≤
         ENNReal.ofReal
           (upperBound (Fintype.card S) (Fintype.card A) H β ε δ (maxReturn M H s₁))} := by
   rcases hβ.lt_or_gt with hneg | hpos

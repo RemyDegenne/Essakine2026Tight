@@ -103,13 +103,13 @@ lemma klDiv_map_stoppedProcess_sigmaPrefix_compProd {hZ : ∀ n, Measurable (Z n
         (map_restrict_stoppedProcess_sigmaPrefix_apply_compl_fst_le hZ hτm _ M)
         (Measure.map_sigmaMk_succ_apply_fst_le _) (Measure.map_sigmaMk_succ_apply_fst_le _),
       klDiv_add_add_of_measure_eq_zero ((measurableSet_sigma_fst_lt M).union
-          ((measurableEmbedding_sigma_mk M).measurableSet_image.2 hB))
+          ((measurableEmbedding_sigmaMk M).measurableSet_image.2 hB))
         (map_restrict_le_stoppedProcess_sigmaPrefix_apply_compl hZ hτm (P := P) hB hBτ)
         (map_restrict_le_stoppedProcess_sigmaPrefix_apply_compl hZ hτm (P := P') hB hBτ)
         (map_restrict_lt_map_finPrefix_map_sigmaMk_apply hZ (P := P) hB hBτ)
         (map_restrict_lt_map_finPrefix_map_sigmaMk_apply hZ (P := P') hB hBτ),
-      klDiv_map_measurableEmbedding _ _ (measurableEmbedding_sigma_mk (M + 1)),
-      klDiv_map_measurableEmbedding _ _ (measurableEmbedding_sigma_mk M),
+      klDiv_map_measurableEmbedding _ _ (measurableEmbedding_sigmaMk (M + 1)),
+      klDiv_map_measurableEmbedding _ _ (measurableEmbedding_sigmaMk M),
       map_finPrefix_succ_of_hasCondDistrib hZ ((hκ M).restrict_lt_of_isStoppingTime (hZ M) hτ),
       map_finPrefix_succ_of_hasCondDistrib hZ ((hκ' M).restrict_lt_of_isStoppingTime (hZ M) hτ),
       klDiv_map_measurableEquiv, add_assoc]

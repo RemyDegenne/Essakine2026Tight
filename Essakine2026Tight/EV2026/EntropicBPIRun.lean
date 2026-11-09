@@ -34,7 +34,7 @@ the previous episodes. -/
 lemma ae_action_eq_greedy
     (h : (entropicBPI H r β δ ε s₁).IsRun env (fun _ _ ↦ ()) X Y out P) :
     ∀ᵐ ω ∂P, ∀ t, X t ω = greedy r β δ (histAt X Y t ω) :=
-  IsAlgEnvSeq.action_detAlgorithm_ae_all_eq h.isAlgEnvSeq
+  IsAlgEnvSeq.action_ae_all_eq_deterministic h.isAlgEnvSeq
 
 /-- If Entropic-BPI stops, the stopping condition holds for the history at the stopping time. -/
 lemma stopCond_histAt_stoppingTime {ω : Ω}
@@ -63,8 +63,7 @@ lemma ae_output_eq_greedy
   have hout : HasCondDistrib out ((entropicBPI H r β δ ε s₁).stoppedHist (fun _ _ ↦ ()) X Y)
       (Kernel.deterministic (fun h ↦ greedy r β δ h.2) (measurable_greedy_snd r β δ)) P :=
     h.hasCondDistrib_output
-  have hae := ae_eq_of_hasCondDistrib_deterministic (measurable_greedy_snd r β δ)
-    hout.aemeasurable_fst hout.aemeasurable_snd hout
+  have hae := hout.ae_eq_of_deterministic
   filter_upwards [hae] with ω hω
   exact hω
 

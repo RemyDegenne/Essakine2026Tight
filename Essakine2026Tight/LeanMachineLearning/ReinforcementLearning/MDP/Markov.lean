@@ -47,16 +47,16 @@ noncomputable def actionRewardKernel : Kernel 𝓢 (𝓐 × 𝓡) := Kernel.dete
 instance : IsMarkovKernel (actionRewardKernel M hπ) := by
   unfold actionRewardKernel; infer_instance
 
-lemma p0_policyAlg : (policyAlg (m𝓡 := m𝓡) π hπ).p0 = Kernel.deterministic π hπ :=
+lemma policyZero_policyAlg : (policyAlg (m𝓡 := m𝓡) π hπ).policyZero = Kernel.deterministic π hπ :=
   Kernel.ext fun _ ↦ rfl
 
-lemma ν0_env (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] : (M.env μ₀).ν0 = M.R :=
+lemma feedbackZero_env (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] : (M.env μ₀).feedbackZero = M.R :=
   Kernel.ext fun _ ↦ rfl
 
 lemma stepKernel_policyAlg_env_zero (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀]
     (h : Hist 𝓢 𝓐 𝓡 0) :
     stepKernel (policyAlg π hπ) (M.env μ₀) 0 h = μ₀ ⊗ₘ actionRewardKernel M hπ := by
-  rw [stepKernel_zero, p0_policyAlg, ν0_env]
+  rw [stepKernel_zero, policyZero_policyAlg, feedbackZero_env]
   rfl
 
 lemma stepKernel_policyAlg_env_succ (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] (n : ℕ)
@@ -287,8 +287,8 @@ lemma hasCondDistrib_obs_one_trajMeasure :
 /-- The state of the second round given the first round, under the auxiliary measure. -/
 lemma hasCondDistrib_snd_fst_shiftMeasure :
     HasCondDistrib (fun p ↦ p.1.2) (fun p ↦ p.1.1) M.roundKernel (shiftMeasure M hπ μ₀) := by
-  refine HasCondDistrib.comp_hasLaw (hasLaw_fst_shiftMeasure M hπ μ₀) measurable_fst
-    measurable_snd ?_
+  refine HasCondDistrib.comp_hasLaw (X := Prod.fst) (Y := Prod.snd) ?_
+    (hasLaw_fst_shiftMeasure M hπ μ₀)
   refine ⟨by fun_prop, ?_⟩
   rw [show (fun q : Round 𝓢 𝓐 𝓡 × 𝓢 ↦ (q.1, q.2)) = id from rfl, Measure.map_id,
     Measure.map_map measurable_fst measurable_firstRoundState]
@@ -322,7 +322,7 @@ lemma hasCondDistrib_consRound_one :
       ((M.roundKernel ⊗ₖ
         Kernel.prodMkLeft (Round 𝓢 𝓐 𝓡) (Kernel.id ×ₖ actionRewardKernel M hπ)).snd)
       (shiftMeasure M hπ μ₀) :=
-    ((hasCondDistrib_snd_fst_shiftMeasure M hπ μ₀).prod
+    ((hasCondDistrib_snd_fst_shiftMeasure M hπ μ₀).compProd
       (hasCondDistrib_snd_zero_shiftMeasure M hπ μ₀)).snd
   convert hpair using 1
   rw [Kernel.snd_compProd_prodMkLeft, ← Kernel.compProd_prodMkLeft_eq_comp]

@@ -13,8 +13,6 @@ public import Mathlib.Probability.Kernel.Composition.Lemmas
 
 * `ProbabilityTheory.hasCondDistrib_snd_compProd`: under `μ ⊗ₘ κ`, the second coordinate has
   conditional law `κ` given the first.
-* `ProbabilityTheory.HasCondDistrib.comp_hasLaw`: a conditional law under the law of `V` is a
-  conditional law of the composed variables.
 * `ProbabilityTheory.HasCondDistrib.compProd_left`: if `Y` has conditional law `η` given `X`
   under every `κ a`, then under `μ ⊗ₘ κ` the variable `Y ∘ snd` has conditional law `η` given
   `(fst, X ∘ snd)`.
@@ -37,19 +35,6 @@ lemma hasCondDistrib_snd_compProd (μ : Measure α) [SFinite μ] (κ : Kernel α
   map_eq := by
     rw [show (fun p : α × β ↦ (p.1, p.2)) = id from rfl, Measure.map_id,
       show (μ ⊗ₘ κ).map Prod.fst = (μ ⊗ₘ κ).fst from rfl, Measure.fst_compProd]
-
-/-- A conditional law under the law of `V` is a conditional law of the composed variables. -/
-lemma HasCondDistrib.comp_hasLaw {P : Measure Ω} {μ : Measure α} {V : Ω → α} {X : α → β}
-    {Y : α → γ} {κ : Kernel β γ} (hV : HasLaw V μ P) (hX : Measurable X) (hY : Measurable Y)
-    (h : HasCondDistrib Y X κ μ) :
-    HasCondDistrib (fun ω ↦ Y (V ω)) (fun ω ↦ X (V ω)) κ P where
-  aemeasurable := (hX.prodMk hY).comp_aemeasurable hV.aemeasurable
-  map_eq := by
-    have h1 : P.map (fun ω ↦ (X (V ω), Y (V ω))) = (P.map V).map (fun a ↦ (X a, Y a)) :=
-      (AEMeasurable.map_map_of_aemeasurable (hX.prodMk hY).aemeasurable hV.aemeasurable).symm
-    have h2 : P.map (fun ω ↦ X (V ω)) = (P.map V).map X :=
-      (AEMeasurable.map_map_of_aemeasurable hX.aemeasurable hV.aemeasurable).symm
-    rw [h1, h2, hV.map_eq, h.map_eq]
 
 /-- If `Y` has conditional law `η` given `X` under every `κ a`, then under `μ ⊗ₘ κ` the variable
 `Y ∘ snd` has conditional law `η` given `(fst, X ∘ snd)`. -/

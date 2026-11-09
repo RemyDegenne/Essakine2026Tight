@@ -91,7 +91,7 @@ lemma measure_exists_mem_le_of_forall_measure_inter_le {E : ℕ → Set Ω} (hE 
         exact Set.mem_iUnion.2 ⟨n, hn⟩
     _ ≤ ∑' n, μ (E n ∩ {ω | (fun k : Fin n ↦ W k ω) ∈ firstEntrance B n}) := measure_iUnion_le _
     _ ≤ ∑' n, μ' {ω | (fun k : Fin n ↦ ξ k ω) ∈ firstEntrance B n} :=
-        ENNReal.tsum_le_tsum fun n ↦ hdom n _
+        tsum_le_tsum fun n ↦ hdom n _
     _ = μ' (⋃ n, {ω | (fun k : Fin n ↦ ξ k ω) ∈ firstEntrance B n}) :=
         (measure_iUnion (pairwise_disjoint_setOf_mem_firstEntrance ξ B) hmeas).symm
     _ ≤ μ' {ω | ∃ n, (fun k : Fin n ↦ ξ k ω) ∈ B n} := by

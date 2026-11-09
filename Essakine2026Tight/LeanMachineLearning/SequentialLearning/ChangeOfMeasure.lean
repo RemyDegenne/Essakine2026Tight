@@ -253,8 +253,8 @@ two stationary environments with feedback kernels `ν` and `ν'`, with almost su
 stopping times, the divergence between the laws of the pairs (stopped history, output) is
 `∑ a, E[N_a(τ)] KL(ν a ‖ ν' a)`. -/
 lemma IsRun.klDiv_map_stoppedHist_out_eq_sum_pullCount
-    (h : A.IsRun (stationaryEnv ν) O X Y out P)
-    (h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P')
+    (h : A.IsRun (Environment.bandit ν) O X Y out P)
+    (h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P')
     (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', A.stoppingTime O' X' Y' ω ≠ ⊤) :
     klDiv (P.map fun ω ↦ (A.stoppedHist O X Y ω, out ω))
@@ -269,8 +269,9 @@ lemma IsRun.klDiv_map_stoppedHist_out_eq_sum_pullCount
 binary divergence between the probabilities that the (stopped history, output) pair belongs to
 `C` and the algorithm stops after at most `M` rounds is at most `∑ a, E[N_a(τ)] KL(ν a ‖ ν' a)`,
 when the stopping time is almost surely finite under the first environment. -/
-lemma IsRun.klBer_measureReal_inter_le_sum_pullCount (h : A.IsRun (stationaryEnv ν) O X Y out P)
-    (h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P')
+lemma IsRun.klBer_measureReal_inter_le_sum_pullCount
+    (h : A.IsRun (Environment.bandit ν) O X Y out P)
+    (h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P')
     (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤) (hC : MeasurableSet C) (M : ℕ) :
     klBer (P.real ((fun ω ↦ (A.stoppedHist O X Y ω, out ω)) ⁻¹' C ∩
           {ω | A.stoppingTime O X Y ω ≤ (M : WithTop ℕ)}))
@@ -294,8 +295,8 @@ with feedback kernels `ν` and `ν'`, with a stopping time which is almost surel
 binary divergence between the probabilities of `C` under the two runs is at most
 `∑ a, E[N_a(τ)] KL(ν a ‖ ν' a)`, where `N_a(τ) = pullCount X a τ` is the number of rounds before
 stopping at which the action `a` was played. -/
-theorem IsRun.klBer_measureReal_le_sum_pullCount (h : A.IsRun (stationaryEnv ν) O X Y out P)
-    (h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P')
+theorem IsRun.klBer_measureReal_le_sum_pullCount (h : A.IsRun (Environment.bandit ν) O X Y out P)
+    (h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P')
     (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤) (hC : MeasurableSet C) :
     klBer (P.real ((fun ω ↦ (A.stoppedHist O X Y ω, out ω)) ⁻¹' C))
         (P'.real ((fun ω ↦ (A.stoppedHist O' X' Y' ω, out' ω)) ⁻¹' C)) ≤
@@ -352,8 +353,9 @@ theorem IsRun.klBer_measureReal_le_sum_pullCount (h : A.IsRun (stationaryEnv ν)
 /-- **Change of measure at a stopping time**, with Bernoulli measures: the form of
 `IsRun.klBer_measureReal_le_sum_pullCount` in which the binary divergence is the divergence
 between the laws of the indicators of the two events. -/
-theorem IsRun.klDiv_bernoulliMeasure_le_sum_pullCount (h : A.IsRun (stationaryEnv ν) O X Y out P)
-    (h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P')
+theorem IsRun.klDiv_bernoulliMeasure_le_sum_pullCount
+    (h : A.IsRun (Environment.bandit ν) O X Y out P)
+    (h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P')
     (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤) (hC : MeasurableSet C) :
     klDiv (bernoulliMeasure true false
           ⟨P.real ((fun ω ↦ (A.stoppedHist O X Y ω, out ω)) ⁻¹' C), measureReal_nonneg,
@@ -370,7 +372,8 @@ theorem IsRun.klDiv_bernoulliMeasure_le_sum_pullCount (h : A.IsRun (stationaryEn
 the second run is in `(0, 1)` and the right-hand side is finite, the real binary divergence
 `klBerReal` is bounded by the real right-hand side. -/
 theorem IsRun.klBerReal_measureReal_le_toReal_sum_pullCount
-    (h : A.IsRun (stationaryEnv ν) O X Y out P) (h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P')
+    (h : A.IsRun (Environment.bandit ν) O X Y out P)
+    (h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P')
     (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤) (hC : MeasurableSet C)
     (h0 : 0 < P'.real ((fun ω ↦ (A.stoppedHist O' X' Y' ω, out' ω)) ⁻¹' C))
     (h1 : P'.real ((fun ω ↦ (A.stoppedHist O' X' Y' ω, out' ω)) ⁻¹' C) < 1)
@@ -386,15 +389,15 @@ theorem IsRun.klBerReal_measureReal_le_toReal_sum_pullCount
 /-- **Change of measure at a stopping time**, for an event of the output: for a run of `A` in the
 stationary environment with feedback kernel `ν` whose stopping time is almost surely finite, and
 any other feedback kernel `ν'`, the binary divergence between the probability that the output
-belongs to `s` and the probability of `s` under the law `A.outputMeasure (stationaryEnv ν')` of
+belongs to `s` and the probability of `s` under the law `A.outputMeasure (Environment.bandit ν')` of
 the output in the second environment is at most `∑ a, E[N_a(τ)] KL(ν a ‖ ν' a)`. -/
 theorem IsRun.klBer_measureReal_outputMeasure_le_sum_pullCount
-    (h : A.IsRun (stationaryEnv ν) O X Y out P) (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤)
+    (h : A.IsRun (Environment.bandit ν) O X Y out P) (hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤)
     {s : Set 𝓓} (hs : MeasurableSet s) :
-    klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (stationaryEnv ν')).real s) ≤
+    klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (Environment.bandit ν')).real s) ≤
       ∑ a, (∫⁻ ω, (pullCount X a (ENat.toNat (A.stoppingTime O X Y ω)) ω : ℝ≥0∞) ∂P) *
         klDiv (ν a) (ν' a) := by
-  have hrun := A.isRun_runMeasure (stationaryEnv ν')
+  have hrun := A.isRun_runMeasure (Environment.bandit ν')
   have hle := h.klBer_measureReal_le_sum_pullCount hrun hτ (MeasurableSet.univ.prod hs)
   simp only [Set.mk_preimage_prod, Set.preimage_univ, Set.univ_inter] at hle
   rwa [← A.map_snd_runMeasure, map_measureReal_apply measurable_snd hs]

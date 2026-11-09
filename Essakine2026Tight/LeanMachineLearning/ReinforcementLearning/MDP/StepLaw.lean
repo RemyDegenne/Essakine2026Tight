@@ -88,7 +88,7 @@ lemma hasLaw_action_zero_stepLaw (s : S) (h : ℕ) :
   have := isProbabilityMeasure_stepLaw M hπ (s, h)
   have h' := IT.hasCondDistrib_action_zero (policyAlg (augPolicy π) (measurable_augPolicy hπ))
     (M.augmented.env (Measure.dirac (s, h)))
-  rw [p0_policyAlg, ← stepLaw_eq_trajMeasure M hπ] at h'
+  rw [policyZero_policyAlg, ← stepLaw_eq_trajMeasure M hπ] at h'
   have hae : (fun _ ↦ ((s, h) : S × ℕ)) =ᵐ[stepLaw M π (s, h)] IT.obs 0 :=
     (ae_obs_zero_stepLaw M hπ (s, h)).mono fun x hx ↦ hx.symm
   have h'' := hasCondDistrib_const_iff.1 (h'.congr hae (Filter.EventuallyEq.refl _ _))
@@ -109,7 +109,7 @@ lemma hasLaw_feedback_zero_stepLaw (s : S) (h : ℕ) :
     filter_upwards [ae_obs_zero_stepLaw M hπ (s, h), ae_action_zero_stepLaw M hπ s h] with x h0 h1
     rw [h0, h1]
   have h'' := hasCondDistrib_const_iff.1 (h'.congr hae (Filter.EventuallyEq.refl _ _))
-  rwa [ν0_env] at h''
+  rwa [feedbackZero_env] at h''
 
 lemma hasCondDistrib_obs_one_feedback_zero_stepLaw (s : S) (h : ℕ) :
     HasCondDistrib (IT.obs 1) (IT.feedback 0)
@@ -176,7 +176,7 @@ lemma hasLaw_feedback_zero_fst_obs_one_stepLaw (s : S) (h : ℕ) :
         Measure.map_map measurable_fst measurable_prodMk_right]
       exact Measure.map_id
     rwa [hk] at this
-  have := (hasLaw_feedback_zero_stepLaw M hπ s h).prod_of_hasCondDistrib ho
+  have := (hasLaw_feedback_zero_stepLaw M hπ s h).prodMk_of_hasCondDistrib ho
   rwa [Measure.compProd_const] at this
 
 /-- **One-step Markov property**: under `stepLaw M π (s, h)`, the reward of the first round,
@@ -208,7 +208,7 @@ lemma hasLaw_stepLaw_succ (s : S) (h : ℕ) :
     rw [Kernel.comap_apply, Kernel.prodMkLeft_apply, Kernel.prodMkLeft_apply, stepLawKernel_apply,
       policyKernel_augmented_apply M hπ]
   rw [hK] at hC
-  exact (hasLaw_feedback_zero_fst_obs_one_stepLaw M hπ s h).prod_of_hasCondDistrib hC
+  exact (hasLaw_feedback_zero_fst_obs_one_stepLaw M hπ s h).prodMk_of_hasCondDistrib hC
 
 /-- Almost sure properties of (first reward, next state, shifted trajectory). -/
 lemma ae_stepLaw_succ_of_ae {s : S} {h : ℕ} {P : ℝ → S → (ℕ → Round (S × ℕ) A ℝ) → Prop}
@@ -610,6 +610,7 @@ variable [Finite S] [Countable A] [Nonempty A]
 
 omit hπ
 
+omit [IsFiniteMeasure P] in
 /-- **Law of an episode given the past**: in an interaction with the episode environment of `M`
 from `s₁`, the state sequence of the episode `t` has conditional law `statesKernel M H s₁` given
 the history of the first `t` episodes and the policy of the episode `t`. -/
@@ -617,9 +618,9 @@ lemma hasCondDistrib_feedback_history_action_statesEnv (s₁ : S)
     (h : IsAlgEnvSeq O X Y alg (statesEnv M H s₁) P) (t : ℕ) :
     HasCondDistrib (Y t) (fun ω ↦ ((history O X Y t ω, O t ω), X t ω))
       ((statesKernel M H s₁).prodMkLeft _) P := by
-  have h' : IsAlgEnvSeq O X Y alg (stationaryEnv (statesKernel M H s₁)) P := h
-  have := IsObliviousEnv.hasCondDistrib_feedback_history_action h' t
-  rwa [feedbackCondAction_stationaryEnv] at this
+  have h' : IsAlgEnvSeq O X Y alg (Environment.bandit (statesKernel M H s₁)) P := h
+  have := h'.hasCondDistrib_feedback t
+  rwa [feedback_bandit] at this
 
 /-- In an interaction with the episode environment of `M` from `s₁`, the state sequence of the
 episode `t` has conditional law `statesKernel M H s₁` given the policy of the episode `t`. -/

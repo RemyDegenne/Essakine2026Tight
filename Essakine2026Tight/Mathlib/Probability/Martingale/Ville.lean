@@ -66,7 +66,7 @@ lemma Supermartingale.mul_measureReal_exists_le_le (hM : Supermartingale M ℱ �
   have hgeA : ∀ ω ∈ A, c ≤ stoppedValue M τ ω := by
     intro ω hω
     obtain ⟨n, hnN, hn⟩ := hω
-    exact stoppedValue_hittingBtwn_mem ⟨n, ⟨Nat.zero_le n, hnN⟩, hn⟩
+    exact stoppedValue_hittingBtwn_mem (s := Set.Ici c) ⟨n, ⟨Nat.zero_le n, hnN⟩, Set.mem_Ici.2 hn⟩
   calc c * μ.real A ≤ ∫ ω in A, stoppedValue M τ ω ∂μ :=
         setIntegral_ge_of_const_le_real hAmeas (measure_ne_top μ A) hgeA hint.integrableOn
     _ ≤ ∫ ω, stoppedValue M τ ω ∂μ :=
@@ -145,9 +145,10 @@ lemma condExp_exp_sub_le_one (hm : m ≤ mΩ) (hX : ∀ ω, X ω = 0 ∨ X ω = 
     (memLp_of_bounded (μ := μ) (.of_forall hKbdd) hKm.aestronglyMeasurable 1).integrable le_rfl
   have hfun : (fun ω ↦ Real.exp (P ω / 2 - X ω)) = G - (fun ω ↦ k * G ω) * X := by
     funext ω
-    rcases hX ω with h | h <;>
-      · simp [hG, hk, h, Real.exp_sub, Real.exp_neg, Pi.sub_apply, Pi.mul_apply]
-        try ring
+    rcases hX ω with h | h
+    · simp [hG, hk, h, Real.exp_neg, Pi.sub_apply, Pi.mul_apply]
+    · simp [hG, hk, h, Real.exp_sub, Real.exp_neg, Pi.sub_apply, Pi.mul_apply]
+      ring
   have hcexp : μ[fun ω ↦ Real.exp (P ω / 2 - X ω) | m]
       =ᵐ[μ] fun ω ↦ G ω - k * G ω * P ω := by
     rw [hfun]

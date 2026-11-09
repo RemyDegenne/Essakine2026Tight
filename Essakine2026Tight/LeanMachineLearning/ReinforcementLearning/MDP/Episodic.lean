@@ -51,7 +51,7 @@ In the online interaction each round is an episode: the learner plays an `H`-ste
 observes the states `Traj S H = Fin (H + 1) → S` of the episode (the rewards being known). With a
 fixed initial state `s₁`, the law of the state sequence of the episode played with the policy
 `π` is `statesLaw M H s₁ π`, the kernel from `H`-step policies to state sequences is
-`statesKernel M H s₁`, and `statesEnv M H s₁ = stationaryEnv (statesKernel M H s₁)` is the
+`statesKernel M H s₁`, and `statesEnv M H s₁ = Environment.bandit (statesKernel M H s₁)` is the
 environment (no observation, action = policy, feedback = state sequence). A best-policy
 identification algorithm is an identification algorithm `BPIAlg S A H` in this environment,
 with output an `H`-step policy. This part needs a finite state space and a countable action space
@@ -450,7 +450,7 @@ instance (s₁ : S) : IsMarkovKernel (statesKernel M H s₁) :=
 learner observes the states of the episode only (the rewards being known): at each round, the
 learner plays an `H`-step policy and observes the states. -/
 noncomputable def statesEnv (s₁ : S) : Environment Unit (Policy S A H) (Traj S H) :=
-  stationaryEnv (statesKernel M H s₁)
+  Environment.bandit (statesKernel M H s₁)
 
 end EpisodeEnv
 

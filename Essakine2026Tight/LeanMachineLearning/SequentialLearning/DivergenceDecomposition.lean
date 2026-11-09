@@ -15,10 +15,11 @@ public import Essakine2026Tight.Mathlib.InformationTheory.KLStoppedPrefix
 
 LML's `LeanMachineLearning.SequentialLearning.DivergenceDecomposition` proves the chain rule and
 the divergence decomposition for the history of a *fixed* number of rounds
-(`IsAlgEnvSeq.klDiv_map_history_stepKernel`, `IsAlgEnvSeq.klDiv_map_history_compProd`,
-`IsAlgEnvSeq.klDiv_map_history`) and for the whole trajectory
-(`IsAlgEnvSeq.klDiv_map_trajectory_stepKernel`, `IsAlgEnvSeq.klDiv_map_trajectory_compProd`,
-`IsAlgEnvSeq.klDiv_map_trajectory`). This file states the corresponding results for the
+(`IsAlgEnvSeq.klDiv_map_history_stepKernel`, `IsAlgEnvSeq.klDiv_map_history_compProd_bandit`,
+`IsAlgEnvSeq.klDiv_map_history_bandit`) and for the whole trajectory
+(`IsAlgEnvSeq.klDiv_map_trajectory_stepKernel`,
+`IsAlgEnvSeq.klDiv_map_trajectory_compProd_bandit`, `IsAlgEnvSeq.klDiv_map_trajectory_bandit`).
+This file states the corresponding results for the
 history stopped at a stopping time — special cases, for the process of rounds, of the chain
 rule at a stopping time for a general process with conditional laws
 (`Essakine2026Tight.Mathlib.InformationTheory.KLStoppedPrefix`) — and specializes the
@@ -185,8 +186,8 @@ reward kernels `κ` and `κ'`, and a stopping rule `S` with stopping time `τ`, 
 between the laws of the histories stopped at `min τ M` is the sum over the rounds `t < M` of the
 conditional divergences of the reward kernels given the played action, on the event `{t < τ}`. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_compProd
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S) (M : ℕ) :
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S) (M : ℕ) :
     klDiv (P.map (hittingProcess (sigmaHistory O X Y) S 0 M))
         (P'.map (hittingProcess (sigmaHistory O' X' Y') S 0 M)) =
       ∑ t ∈ range M,
@@ -197,8 +198,8 @@ lemma IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_compProd
   rw [h.klDiv_map_hittingProcess_sigmaHistory_stepKernel h' hS M]
   refine sum_congr rfl fun t _ ↦ ?_
   have h_obs := (h.hasCondDistrib_obs_restrict_lt_hittingAfter_sigmaHistory hS t).map_eq
-  rw [obs_stationaryEnv] at h_obs
-  rw [stepKernel_stationaryEnv, stepKernel_stationaryEnv,
+  rw [obs_bandit] at h_obs
+  rw [stepKernel_bandit, stepKernel_bandit,
     klDiv_compProd_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, ← h_obs,
     ← (h.hasCondDistrib_action_restrict_lt_hittingAfter_sigmaHistory hS t).hasLaw_comp.map_eq]
 
@@ -207,8 +208,8 @@ form: the divergence between the laws of the histories stopped at `min τ M` is 
 along the first trajectory, of the divergences of the reward kernels at the actions played before
 `min τ M`. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory [MeasurableSpace.CountablyGenerated 𝓨]
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S) (M : ℕ) :
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S) (M : ℕ) :
     klDiv (P.map (hittingProcess (sigmaHistory O X Y) S 0 M))
         (P'.map (hittingProcess (sigmaHistory O' X' Y') S 0 M)) =
       ∫⁻ ω, ∑ t ∈ range (ENat.toNat (min (hittingAfter (sigmaHistory O X Y) S 0 ω) M)),
@@ -234,8 +235,8 @@ under both laws, the divergence between the laws of the stopped histories is the
 rounds `t` of the conditional divergences of the reward kernels given the played action, on the
 event `{t < τ}`. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_compProd
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S)
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S)
     (hτ : ∀ᵐ ω ∂P, hittingAfter (sigmaHistory O X Y) S 0 ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', hittingAfter (sigmaHistory O' X' Y') S 0 ω ≠ ⊤) :
     klDiv (P.map (hittingValue (sigmaHistory O X Y) S 0))
@@ -248,8 +249,8 @@ lemma IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_compProd
   rw [h.klDiv_map_hittingValue_sigmaHistory_stepKernel h' hS hτ hτ']
   refine tsum_congr fun t ↦ ?_
   have h_obs := (h.hasCondDistrib_obs_restrict_lt_hittingAfter_sigmaHistory hS t).map_eq
-  rw [obs_stationaryEnv] at h_obs
-  rw [stepKernel_stationaryEnv, stepKernel_stationaryEnv,
+  rw [obs_bandit] at h_obs
+  rw [stepKernel_bandit, stepKernel_bandit,
     klDiv_compProd_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, ← h_obs,
     ← (h.hasCondDistrib_action_restrict_lt_hittingAfter_sigmaHistory hS t).hasLaw_comp.map_eq]
 
@@ -258,8 +259,8 @@ integral form: the divergence between the laws of the stopped histories is the e
 along the first trajectory, of the divergences of the reward kernels at the actions played before
 stopping. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory [MeasurableSpace.CountablyGenerated 𝓨]
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S)
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S)
     (hτ : ∀ᵐ ω ∂P, hittingAfter (sigmaHistory O X Y) S 0 ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', hittingAfter (sigmaHistory O' X' Y') S 0 ω ≠ ⊤) :
     klDiv (P.map (hittingValue (sigmaHistory O X Y) S 0))
@@ -362,21 +363,21 @@ divergence between the laws of the histories of the first `M` rounds under two s
 environments is `∑ a, E[N_a(M)] KL(κ a ‖ κ' a)`, where `N_a(M) = pullCount X a M` is the number
 of rounds before `M` at which `a` was played. -/
 lemma IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (M : ℕ) :
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (M : ℕ) :
     klDiv (P.map (history O X Y M)) (P'.map (history O' X' Y' M)) =
       ∑ a, (∫⁻ ω, (pullCount X a M ω : ℝ≥0∞) ∂P) * klDiv (κ a) (κ' a) := by
   have hsum : ∑ t ∈ range M, ∫⁻ ω, klDiv (κ (X t ω)) (κ' (X t ω)) ∂P =
       ∫⁻ ω, ∑ t ∈ range M, klDiv (κ (X t ω)) (κ' (X t ω)) ∂P :=
     (lintegral_finsetSum _ fun t _ ↦
       (measurable_klDiv_kernel κ κ').comp (h.measurable_action t)).symm
-  rw [h.klDiv_map_history h' M, hsum,
+  rw [h.klDiv_map_history_bandit h' M, hsum,
     lintegral_sum_klDiv_eq_sum_pullCount h.measurable_action (f := fun _ ↦ M) measurable_const]
 
 /-- **Divergence decomposition at a bounded stopping time**, reindexed by the actions. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_eq_sum_pullCount
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S) (M : ℕ) :
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S) (M : ℕ) :
     klDiv (P.map (hittingProcess (sigmaHistory O X Y) S 0 M))
         (P'.map (hittingProcess (sigmaHistory O' X' Y') S 0 M)) =
       ∑ a, (∫⁻ ω, (pullCount X a
@@ -394,8 +395,8 @@ lemma IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_eq_sum_pullCount
 actions: the divergence between the laws of the stopped histories is
 `∑ a, E[N_a(τ)] KL(κ a ‖ κ' a)`. -/
 lemma IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_eq_sum_pullCount
-    (h : IsAlgEnvSeq O X Y alg (stationaryEnv κ) P)
-    (h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P') (hS : MeasurableSet S)
+    (h : IsAlgEnvSeq O X Y alg (Environment.bandit κ) P)
+    (h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P') (hS : MeasurableSet S)
     (hτ : ∀ᵐ ω ∂P, hittingAfter (sigmaHistory O X Y) S 0 ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', hittingAfter (sigmaHistory O' X' Y') S 0 ω ≠ ⊤) :
     klDiv (P.map (hittingValue (sigmaHistory O X Y) S 0))

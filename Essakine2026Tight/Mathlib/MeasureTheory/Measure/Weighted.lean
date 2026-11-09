@@ -32,7 +32,7 @@ noncomputable def weightedMeasure (p : ι → ℝ) : Measure ι :=
 
 lemma weightedMeasure_apply (p : ι → ℝ) {s : Set ι} (hs : MeasurableSet s) :
     weightedMeasure p s = ∑ i, ENNReal.ofReal (p i) * s.indicator 1 i := by
-  simp [weightedMeasure, Finset.sum_apply, Measure.dirac_apply' _ hs]
+  simp [weightedMeasure, Measure.dirac_apply' _ hs]
 
 lemma measurable_weightedMeasure : Measurable (weightedMeasure (ι := ι)) := by
   refine Measure.measurable_of_measurable_coe _ fun s hs ↦ ?_

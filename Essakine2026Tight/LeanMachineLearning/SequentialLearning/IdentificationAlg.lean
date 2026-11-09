@@ -38,6 +38,7 @@ section transport
 variable {alg : Algorithm 𝓞 𝓐 𝓨} {env : Environment 𝓞 𝓐 𝓨}
   {O : ℕ → Ω' → 𝓞} {X : ℕ → Ω' → 𝓐} {Y : ℕ → Ω' → 𝓨}
 
+omit [IsProbabilityMeasure P] [IsProbabilityMeasure P'] in
 /-- An algorithm-environment sequence is transported along a measurable map `g` carrying `P`
 to `P'`. -/
 lemma IsAlgEnvSeq.comp_hasLaw (h : IsAlgEnvSeq O X Y alg env P') (hg : HasLaw g P' P)
@@ -50,6 +51,7 @@ lemma IsAlgEnvSeq.comp_hasLaw (h : IsAlgEnvSeq O X Y alg env P') (hg : HasLaw g 
   hasCondDistrib_action n := (h.hasCondDistrib_action n).comp_of_hasLaw hg
   hasCondDistrib_feedback n := (h.hasCondDistrib_feedback n).comp_of_hasLaw hg
 
+omit [IsProbabilityMeasure P] [IsProbabilityMeasure P'] in
 /-- A run of an identification algorithm is transported along a measurable map `g` carrying `P`
 to `P'`. -/
 lemma IdentAlg.IsRun.comp_hasLaw {A : IdentAlg 𝓞 𝓐 𝓨 𝓓} {out : Ω' → 𝓓}

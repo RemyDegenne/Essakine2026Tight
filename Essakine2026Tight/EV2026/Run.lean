@@ -158,7 +158,7 @@ def eventCnt (M : EpisodicMDP S A) (s₁ : S) (δ : ℝ) : Set Ω :=
 /-- The good event `𝓔^+` (`β > 0`) or `𝓔^-` (`β < 0`): the KL event, the Bernstein event for the
 optimal exponential values `Z*` (with the range `e^{β k}` at the step with `k` steps after it
 for `β > 0`, `1 - e^{β k}` for `β < 0`) and the counts event. -/
-def goodEvent (M : EpisodicMDP S A) (s₁ : S) (β δ : ℝ) : Set Ω :=
+noncomputable def goodEvent (M : EpisodicMDP S A) (s₁ : S) (β δ : ℝ) : Set Ω :=
   eventKL X Y M δ ∩ eventBern X Y M δ (optExpValue M H β)
       (fun h ↦ if 0 < β then Real.exp (β * (H - 1 - h : ℕ)) else 1 - Real.exp (β * (H - 1 - h : ℕ)))
     ∩ eventCnt X Y M s₁ δ

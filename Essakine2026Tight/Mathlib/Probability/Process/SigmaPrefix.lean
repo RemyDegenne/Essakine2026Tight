@@ -6,12 +6,12 @@ Authors: Rémy Degenne
 module
 
 public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Sigma
-public import LeanMachineLearning.ForMathlib.MeasureTheory.Measurable
+public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Basic
 public import Essakine2026Tight.Mathlib.MeasureTheory.MeasurableSpace.PiFinSuccProd
 public import LeanMachineLearning.ForMathlib.Probability.Process.HittingTime
 public import Essakine2026Tight.Mathlib.Probability.CondDistrib
 public import Essakine2026Tight.Mathlib.Probability.Process.HittingTime
-public import Mathlib.Data.ENat.SuccOrder
+public import Mathlib.Order.SuccPred.ENat
 
 /-!
 # Prefixes of a process stopped at a stopping time
@@ -172,12 +172,12 @@ def truncFin (M : ℕ) (x : Σ n : ℕ, Π i : Fin n, X i) : Σ n : ℕ, Π i : 
 
 /-- The truncation of finite sequences is measurable. -/
 lemma measurable_truncFin (M : ℕ) : Measurable (truncFin (X := X) M) := by
-  refine measurable_sigma_of_measurable_comp_mk fun n ↦ ?_
+  refine measurable_sigma fun n ↦ ?_
   by_cases hn : n ≤ M
   · simp only [Function.comp_def, truncFin, hn, dite_true]
-    exact measurable_sigma_mk n
+    exact measurable_sigmaMk n
   · simp only [Function.comp_def, truncFin, hn, dite_false]
-    exact (measurable_sigma_mk M).comp
+    exact (measurable_sigmaMk M).comp
       (Measurable.of_eval fun i ↦ measurable_pi_apply (Fin.castLE (not_le.1 hn).le i))
 
 omit [∀ n, MeasurableSpace (X n)] in
@@ -251,7 +251,7 @@ lemma measurable_finPrefix (n : ℕ) : Measurable (finPrefix Z n) :=
 /-- The prefix of length `n`, as a sequence of variable length, is measurable. -/
 @[fun_prop]
 lemma measurable_sigmaPrefix (n : ℕ) : Measurable (sigmaPrefix Z n) :=
-  (measurable_sigma_mk n).comp (measurable_finPrefix hZ n)
+  (measurable_sigmaMk n).comp (measurable_finPrefix hZ n)
 
 end Measurability
 
@@ -263,7 +263,7 @@ lemma exists_measurableSet_preimage_lt_hittingAfter_sigmaPrefix (hS : Measurable
   refine ⟨⋂ j, ⋂ (hj : j ≤ n),
     {x | (⟨j, fun i ↦ x (Fin.castLE hj i)⟩ : Σ n, Π i : Fin n, X i) ∉ S}, ?_, ?_⟩
   · refine MeasurableSet.iInter fun j ↦ MeasurableSet.iInter fun hj ↦ ?_
-    exact ((measurable_sigma_mk j).comp (Measurable.of_eval fun _ ↦ measurable_pi_apply _))
+    exact ((measurable_sigmaMk j).comp (Measurable.of_eval fun _ ↦ measurable_pi_apply _))
       hS.compl
   · ext ω
     simp only [Set.mem_ofPred_eq, lt_hittingAfter_sigmaPrefix_iff, Set.mem_preimage,
@@ -483,7 +483,7 @@ lemma map_stoppedProcess_sigmaPrefix_eq_add (hτ : Measurable τ) (M : ℕ) :
   conv_lhs => rw [← Measure.restrict_add_restrict_compl (μ := P) hle, Measure.map_add _ _ hm,
     compl_setOf_le_natCast]
   congr 1
-  rw [Measure.map_map (measurable_sigma_mk M) (measurable_finPrefix hZ M)]
+  rw [Measure.map_map (measurable_sigmaMk M) (measurable_finPrefix hZ M)]
   refine Measure.map_congr ((ae_restrict_iff' (hle.compl.congr ?_)).2
     (Filter.Eventually.of_forall fun ω hω ↦ ?_))
   · exact compl_setOf_le_natCast τ M
@@ -506,7 +506,7 @@ lemma map_stoppedProcess_sigmaPrefix_succ_eq_add (hτ : Measurable τ) (M : ℕ)
       (Filter.Eventually.of_forall fun ω hω ↦ ?_))
     rw [stoppedProcess_eq_of_ge (i := M) hω,
       stoppedProcess_eq_of_ge (i := M + 1) (hω.trans (WithTop.coe_le_coe.2 (Nat.le_add_right M 1)))]
-  · rw [Measure.map_map (measurable_sigma_mk (M + 1)) (measurable_finPrefix hZ (M + 1))]
+  · rw [Measure.map_map (measurable_sigmaMk (M + 1)) (measurable_finPrefix hZ (M + 1))]
     refine Measure.map_congr ((ae_restrict_iff' (hle.compl.congr (compl_setOf_le_natCast τ M))).2
       (Filter.Eventually.of_forall fun ω hω ↦ ?_))
     refine stoppedProcess_eq_of_le (i := M + 1) ?_
@@ -539,7 +539,7 @@ lemma map_restrict_le_stoppedProcess_sigmaPrefix_apply_compl (hτ : Measurable �
       ({x : Σ n : ℕ, Π i : Fin n, X i | x.1 < M} ∪ Sigma.mk M '' B)ᶜ = 0 := by
   refine Measure.map_restrict_apply_of_forall_notMem (measurable_stoppedProcess_sigmaPrefix hZ hτ M)
     ((measurableSet_sigma_fst_lt M).union
-      ((measurableEmbedding_sigma_mk M).measurableSet_image.2 hB)).compl fun ω hω h ↦ h ?_
+      ((measurableEmbedding_sigmaMk M).measurableSet_image.2 hB)).compl fun ω hω h ↦ h ?_
   have hτω : τ ω ≠ ⊤ := ne_top_of_le_ne_top (WithTop.natCast_ne_top M) hω
   obtain ⟨k, hk⟩ : ∃ k : ℕ, τ ω = k := by
     obtain ⟨k, hk⟩ := WithTop.ne_top_iff_exists.1 hτω
@@ -563,11 +563,11 @@ lemma map_restrict_lt_map_finPrefix_map_sigmaMk_apply {B : Set (Π i : Fin M, X 
     (hB : MeasurableSet B) (hBτ : finPrefix Z M ⁻¹' B = {ω | τ ω ≤ M}) :
     (((P.restrict {ω | (M : WithTop ℕ) < τ ω}).map (finPrefix Z M)).map (Sigma.mk M))
       ({x : Σ n : ℕ, Π i : Fin n, X i | x.1 < M} ∪ Sigma.mk M '' B) = 0 := by
-  rw [Measure.map_map (measurable_sigma_mk M) (measurable_finPrefix hZ M)]
+  rw [Measure.map_map (measurable_sigmaMk M) (measurable_finPrefix hZ M)]
   refine Measure.map_restrict_apply_of_forall_notMem
-    ((measurable_sigma_mk M).comp (measurable_finPrefix hZ M))
+    ((measurable_sigmaMk M).comp (measurable_finPrefix hZ M))
     ((measurableSet_sigma_fst_lt M).union
-      ((measurableEmbedding_sigma_mk M).measurableSet_image.2 hB)) fun ω hω h ↦ ?_
+      ((measurableEmbedding_sigmaMk M).measurableSet_image.2 hB)) fun ω hω h ↦ ?_
   simp only [Function.comp_apply, Set.mem_union, Set.mem_ofPred_eq, lt_self_iff_false,
     sigma_mk_injective.mem_set_image, false_or] at h
   rw [← Set.mem_preimage, hBτ] at h

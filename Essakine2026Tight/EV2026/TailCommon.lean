@@ -411,11 +411,12 @@ lemma one_sub_le_measureReal_stoppingTime_le
     (h : (entropicBPI H r β δ ε s₁).IsRun env (fun _ _ ↦ ()) X Y out P) (hδ : 0 ≤ δ)
     (hE : P Eᶜ ≤ ENNReal.ofReal δ)
     (hτ : ∀ ω ∈ E, (∀ t, X t ω = greedyAt X Y r β δ t ω) →
-      ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞) ≤ ENNReal.ofReal U) :
+      ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω) ≤
+        ENNReal.ofReal U) :
     1 - δ ≤ P.real {ω |
-      ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞)
+      ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω)
         ≤ ENNReal.ofReal U} := by
-  set F := {ω | ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞)
+  set F := {ω | ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω)
     ≤ ENNReal.ofReal U} with hF
   have hsub : Fᶜ ≤ᵐ[P] Eᶜ := by
     filter_upwards [ae_action_eq_greedy h] with ω hX
@@ -458,12 +459,12 @@ lemma measureReal_bad_le
 
 /-- A stopping time bounded by a real number is finite. -/
 lemma stoppingTime_ne_top_of_le {ω' : Ω}
-    (hτ : ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω' : ℝ≥0∞)
+    (hτ : ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω')
       ≤ ENNReal.ofReal U) :
     (entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω' ≠ ⊤ := by
   intro htop
-  rw [htop, ENat.toENNReal_top, top_le_iff] at hτ
-  exact ENNReal.ofReal_ne_top hτ
+  rw [htop] at hτ
+  exact ENNReal.ofReal_ne_top (top_le_iff.1 (ENat.toENNReal_top.symm.trans_le hτ))
 
 end Run
 

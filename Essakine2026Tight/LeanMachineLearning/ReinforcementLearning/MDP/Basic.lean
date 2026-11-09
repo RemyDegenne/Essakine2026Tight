@@ -107,7 +107,7 @@ lemma measurable_policyAlg_next {π : 𝓢 → 𝓐} (hπ : Measurable π) (n : 
 /-- The stationary deterministic policy `π` as an algorithm: it plays `π s` in the current
 state `s`. -/
 noncomputable def policyAlg (π : 𝓢 → 𝓐) (hπ : Measurable π) : Algorithm 𝓢 𝓐 𝓡 :=
-  detAlgorithm (fun _ p ↦ π p.2) (measurable_policyAlg_next hπ)
+  Algorithm.deterministic (fun _ p ↦ π p.2) (measurable_policyAlg_next hπ)
 
 /-- The law of the trajectory of the policy `π` started at the state `s`: `E^π_s`. -/
 noncomputable def policyMeasure (M : MDP 𝓢 𝓐 𝓡) (π : 𝓢 → 𝓐) (hπ : Measurable π) (s : 𝓢) :
