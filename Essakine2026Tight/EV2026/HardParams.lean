@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Constants
-public import Essakine2026Tight.Mathlib.InformationTheory.KLBer
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.KLBer
 
 /-!
 # Parameters of the hard instances of the lower bound

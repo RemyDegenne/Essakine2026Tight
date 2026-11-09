@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Run
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Visits
+public import Essakine2026Tight.ForLMLExplore.ReinforcementLearning.Episodic.Visits
 
 /-!
 # Visit counts and empirical transitions of a run
@@ -99,7 +99,7 @@ lemma transCount_eq_card (h : Fin H) (s : S) (a : A) (s' : S) (t : ℕ) (ω : Ω
     · have hlt' : (t : ℕ∞) < stepsUntil B (s, a) (k + 1) ω := by
         rw [← ENat.natCast_toNat hne]
         exact_mod_cast hlt
-      have := pullCount_lt_of_le_stepsUntil (s, a) ω hex hlt'
+      have := pullCount_lt_of_lt_stepsUntil (s, a) ω hex hlt'
       omega
   · intro i hi
     simp only [mem_filter, mem_range] at hi

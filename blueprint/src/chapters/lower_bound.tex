@@ -685,7 +685,7 @@ $\E_0[\tau] < \infty$. Then
 \uses{thm:change_of_measure, lem:hard_kl_episode, def:episode_env, lem:kl_output_pair, def:hard_triple}
 In LML terms (deviation~8), the episode environments $\mathrm{statesEnv}(\mathcal M_0, s_w)$ and
 $\mathrm{statesEnv}(\mathcal M_u, s_w)$ (Definition~\ref{def:episode_env}) are the stationary
-environments $\mathrm{stationaryEnv}(\nu_{\mathcal M_0})$ and $\mathrm{stationaryEnv}(\nu_{\mathcal M_u})$
+environments $\mathrm{bandit}(\nu_{\mathcal M_0})$ and $\mathrm{bandit}(\nu_{\mathcal M_u})$
 with the finite action set $\mathcal P := \{\text{policies}\}$ and feedback kernels
 $\pi \mapsto \nu_{\mathcal M_0}(\pi)$, $\pi \mapsto \nu_{\mathcal M_u}(\pi)$ (the laws of the state
 sequences, Lemma~\ref{lem:hard_kl_episode}): a ``bandit'' whose arms are the policies and whose
@@ -711,9 +711,9 @@ all terms are finite ($N_\pi(\tau) \le \tau$).
 (step \texttt{hcm}), in the form with the pull counts of the policies,
 $\klbin(\Prob_0(E_u), \Prob_u(E_u)) \le \sum_\pi \E_0[N_\pi(\tau)]\,\indic\{u(\pi) = u\}\,\klbin(p_-, p_+)$,
 under the hypothesis that $\tau$ is $\Prob_0$-a.s.\ finite (which follows from $\E_0[\tau] < \infty$).
-\texttt{statesEnv M H s₁ := stationaryEnv (statesKernel M H s₁)} by
+\texttt{statesEnv M H s₁ := Environment.bandit (statesKernel M H s₁)} by
 definition, so Theorem~\ref{thm:change_of_measure}
-(\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean})
+(\texttt{Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean})
 applies verbatim with the action type \texttt{Policy S A H} (a \texttt{Fintype}) and the
 feedback type \texttt{Traj S H}. The pull counts $N_\pi(\tau)$ are LML's counts of the rounds
 with action $\pi$ before the stopping time; the sum over $\mathcal P$ is a \texttt{Finset.sum}

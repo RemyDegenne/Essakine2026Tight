@@ -5,31 +5,31 @@
 version: "v0.4"
 
 project:
-  name: "entropy-mdp"
+  name: "Essakine2026Tight"
   description: >-
-    A Lean 4 / Mathlib formalization of "Tight Sample Complexity Bounds for Entropic Best
-    Policy Identification" (Amer Essakine, Claire Vernade, COLT 2026, arXiv:2605.13717):
-    best-policy identification in finite-horizon tabular MDPs under the entropic risk measure,
-    in the online (forward) model. The paper's two results are the lower bound
-    Ω((e^{|β| G_max} - 1)² e^{-|β| G_max} S A H log(1/δ) / (e^{|β| ε} - 1)²) on the expected
-    number of episodes of every (ε, δ)-PAC algorithm (Theorem 3) and the matching upper bound
-    for the algorithm Entropic-BPI (KL-based bonuses in the exponential space and an entropic
+    A Lean 4 formalization, on top of LMLExplore (and so of LML, Tau Ceti and Mathlib), of "Tight
+    Sample Complexity Bounds for Entropic Best Policy Identification" (Amer Essakine, Claire
+    Vernade, COLT 2026, arXiv:2605.13717): best-policy identification in finite-horizon tabular MDPs
+    under the entropic risk measure, in the online (forward) model. The paper's two results are the
+    lower bound Ω((e^{|β| G_max} - 1)² e^{-|β| G_max} S A H log(1/δ) / (e^{|β| ε} - 1)²) on the
+    expected number of episodes of every (ε, δ)-PAC algorithm (Theorem 3) and the matching upper
+    bound for the algorithm Entropic-BPI (KL-based bonuses in the exponential space and an entropic
     stopping rule; Theorem 4). The MDP model is built on the LML (Lean Machine Learning)
     algorithm–environment framework and its MDPs (finite-horizon MDPs embedded in a layered
-    stationary MDP, episodes as rounds, identification algorithms with stopping and output
-    rules); the objects (entropic values, empirical models, exploration bonuses, concentration
-    events, the change of measure at a stopping time) are introduced in library generality, to
-    be contributed to LML and Mathlib. The development is blueprint-driven and proceeds in two
-    phases: phase 1 states the headline results (this file lists them; their statements are
-    `sorry`-ed challenge statements for leanprover/comparator), phase 2 proves them.
+    stationary MDP, episodes as rounds, identification algorithms with stopping and output rules);
+    the objects (entropic values, empirical models, exploration bonuses, concentration events, the
+    change of measure at a stopping time) are introduced in library generality, to be contributed to
+    LMLExplore (`Essakine2026Tight/ForLMLExplore/`). The development is blueprint-driven and
+    proceeds in two phases: phase 1 states the headline results (this file lists them; their
+    statements are `sorry`-ed challenge statements for leanprover/comparator), phase 2 proves them.
   authors:
     - "Rémy Degenne"
   responsible_maintainers:
     - "Rémy Degenne"
   license: "Apache-2.0"
   # extra keys (tolerated by the schema), kept for convenience:
-  repository: "https://github.com/RemyDegenne/entropy-mdp"
-  blueprint: "https://remydegenne.github.io/entropy-mdp/blueprint/"
+  repository: "https://github.com/RemyDegenne/Essakine2026Tight"
+  blueprint: "https://remydegenne.github.io/Essakine2026Tight/blueprint/"
 
 # This repository is the substantive formalization, not a packaging or comparison layer.
 repository:
@@ -40,7 +40,7 @@ sources:
     authors:
       - "Amer Essakine"
       - "Claire Vernade"
-    id: "COLT 2026, arXiv:2605.13717"
+    id: "arXiv:2605.13717v1 (COLT 2026)"
     type: "conference-paper"
     location: "Theorems 3 and 4 (the appendix's detailed version); see status.scope"
     relationship: "formalizes"
@@ -56,6 +56,9 @@ sources:
       false Lemma 29, the "in particular" simplification of Theorem 4, the non-full tree) and
       fills the steps the paper leaves to references; the blueprint is a derived artifact of
       this project, not an independent source. The formalizer is not an author of the paper.
+      The errors found in the paper, with their corrections, are in `notes/paper-errata.md`
+      (`E1`–`E25`); the other findings of the formalization in
+      `notes/formalization-findings.md`.
 
 related_formalizations: []   # no earlier or parallel formalization of this paper is known
 
@@ -73,7 +76,8 @@ status:
   scope: >-
     Phase 1 (statements, 2026-09-16). The headline results of the paper are stated in Lean, each
     as a `sorry`-ed theorem, over definitions written in library generality
-    (`Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/`: finite-horizon MDPs on
+    (`Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/` and
+    `Essakine2026Tight/ForLMLExplore/ReinforcementLearning/Episodic/`: finite-horizon MDPs on
     top of LML's `MDP`, entropic values, empirical models; `Essakine2026Tight/EV2026/`: the
     exploration rates, the Entropic-BPI algorithm, the run quantities and events, the
     constants):
@@ -117,7 +121,7 @@ status:
     Phase 2 (proofs) started on 2026-09-16 and follows the blueprint chapter by chapter. Done:
     chapter "Elementary inequalities" (`chap:pre_analysis`: square-root and exponential bounds,
     the normalized variance bound for exponential transforms, the logarithmic sum bound, the
-    corrected self-bounding inequality), 7 files under `Essakine2026Tight/Mathlib/`, every
+    corrected self-bounding inequality), 7 files under `Essakine2026Tight/ForLMLExplore/`, every
     statement and proof `\leanok`; Mathlib's `variance_le_sub_mul_sub` provides the
     Bhatia–Davis inequality. The plan for the remaining chapters is `notes/phase2-plan.md`.
 
@@ -136,7 +140,7 @@ status:
     signs of `β` (`EV2026/Analysis{Common,Pos,Neg}.lean`: concentration, optimism, the auxiliary
     values, the certificate, soundness of stopping, the certificate recursion), and the
     time-uniform KL concentration of the empirical distribution
-    (`Mathlib/InformationTheory/KLTimeUniform.lean`, by the Laplace mixture), and the
+    (`ForLMLExplore/InformationTheory/KLTimeUniform.lean`, by the Laplace mixture), and the
     probabilities of the concentration events and of the good event in every run
     (`EV2026/Events.lean`), the tail of the analysis for both signs of `β`
     (`EV2026/Tail{Common,Pos,Neg}.lean`: unrolled certificate, normalized certificate bound,
@@ -146,13 +150,13 @@ status:
     the library, and depend only on the axioms `propext`, `Classical.choice`, `Quot.sound`.
     `lake build Essakine2026Tight --wfail` and `lake exe runLinter Essakine2026Tight` pass, every
     blueprint statement used by the headline theorems is `\leanok` with its proof, and
-    `lake exe checkdecls blueprint/lean_decls` passes. The statements and the definitions in
-    their closure are unchanged since phase 1; the comparator challenges were regenerated (only
-    their import lists, namespace stubs and one `open` changed), and
-    `scripts/comparator-verify.sh --insecure` passes for all three (the solution proves exactly
-    the challenged statements with the standard axioms, replayed through the Lean kernel). Findings of phase 2 (hypotheses
-    that are not needed, slack in the constants, implicit assumptions of the paper's proofs) are
-    listed in `notes/paper-errata.md`; library material to upstream in
+    `lake exe checkdecls blueprint/lean_decls` passes. The statements and the definitions in their
+    closure are unchanged since phase 1; the comparator challenges were regenerated (only their
+    import lists, namespace stubs and one `open` changed), and `scripts/comparator-verify.sh
+    --insecure` passes for all three (the solution proves exactly the challenged statements with the
+    standard axioms, replayed through the Lean kernel). Findings of phase 2 (hypotheses that are not
+    needed, slack in the constants, implicit assumptions of the paper's proofs) are listed in
+    `notes/formalization-findings.md`; library material to upstream in
     `notes/upstreaming-candidates.md`.
 
     Generalization of the MDP library (2026-09-17). The finite-horizon MDP library was rewritten
@@ -171,5 +175,48 @@ status:
     proved (no `sorry`, standard axioms), `lake build --wfail`, the linter and the blueprint
     `\lean` tags pass; the comparator challenges were regenerated and `lake build Comparator`
     passes, the full comparator run remains to be redone.
+
+    Move to LMLExplore (2026-11-09). The project builds on LMLExplore (Lean v4.36.0-rc2, with
+    Mathlib, LML and Tau Ceti at LMLExplore's pins) and follows the layout of lml-paper-template:
+    the library-shaped files are under `Essakine2026Tight/ForLMLExplore/`, at LMLExplore's paths,
+    with their namespaces unchanged. The headline statements and the definitions in their closure
+    are unchanged up to LML's renames (`stationaryEnv` is `Environment.bandit`, `detAlgorithm` is
+    `Algorithm.deterministic`, and `IdentAlg.stoppingTime` takes values in `WithTop ℕ`, so that
+    its coercion to `ℝ≥0∞` is written `ENat.toENNReal`). The comparator challenges are
+    regenerated by lml-paper-template's `scripts/make-challenges.py`, importing LML and Mathlib
+    instead of vendoring LML; `lake build Comparator` passes, the full comparator run remains to
+    be redone.
   sorry_count: 0
   sorry_in_definitions: 0
+
+alignment:
+  namespace: "Essakine2026Tight"
+  note: >-
+    The full source-to-Lean map is the blueprint: each environment of blueprint/src/chapters/*.tex
+    carries a \lean{} tag. Only the headline statements are repeated here, with their entries in
+    notes/paper-errata.md where the paper had to be corrected. Their Literature Links relations
+    (the `relation` key) are not set yet.
+  statements:
+    - source: "thm:lower_bound — Theorem 3, the lower bound"
+      lean: "Essakine2026Tight.exists_hardMDP_lowerBound_le_lintegral_stoppingTime"
+      module: "Essakine2026Tight.EV2026.LowerBound"
+      status: "proved"
+      erratum: "E1"
+      note: >-
+        Condition A for the effective horizon and with a margin (E1, E2); the constant 1/5000
+        instead of 1/1650 (E20).
+    - source: "thm:upper_bound_pac — Theorem 4, the PAC property of Entropic-BPI"
+      lean: "Essakine2026Tight.isEntropicPAC_entropicBPI"
+      module: "Essakine2026Tight.EV2026.UpperBound"
+      status: "proved"
+      erratum: "E4"
+      note: >-
+        Entropic-BPI with the corrected bonus (E4), clips (E5), greedy policy (E6) and stopping
+        condition (E7).
+    - source: "thm:upper_bound_complexity — Theorem 4, the sample complexity of Entropic-BPI"
+      lean: "Essakine2026Tight.probReal_stoppingTime_entropicBPI_le_ge"
+      module: "Essakine2026Tight.EV2026.UpperBound"
+      status: "proved"
+      erratum: "E9"
+      note: >-
+        The two-term bound of the corrected Lemma 29 (E8, E9), for the corrected Entropic-BPI.

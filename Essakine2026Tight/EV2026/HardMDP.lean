@@ -7,10 +7,10 @@ module
 
 public import Essakine2026Tight.EV2026.HardTree
 public import Essakine2026Tight.EV2026.HardParams
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.StateSeq
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Values
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.StateSeq
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Values
 public import Mathlib.Probability.Distributions.Bernoulli
-public import Essakine2026Tight.Mathlib.InformationTheory.Pinsker
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.Pinsker
 
 /-!
 # The hard instances of the lower bound

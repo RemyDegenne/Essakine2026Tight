@@ -8,9 +8,9 @@ module
 public import Essakine2026Tight.EV2026.Backups
 public import Essakine2026Tight.EV2026.Run
 public import Essakine2026Tight.EV2026.RateBounds
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Values
-public import Essakine2026Tight.Mathlib.InformationTheory.KLBernstein
-public import Essakine2026Tight.Mathlib.MeasureTheory.Measure.WeightedProbability
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Values
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.KLBernstein
+public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.WeightedProbability
 
 /-!
 # Analysis of Entropic-BPI: sign-independent lemmas

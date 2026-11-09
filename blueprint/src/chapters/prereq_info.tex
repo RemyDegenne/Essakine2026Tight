@@ -46,7 +46,7 @@ generated target (\texttt{klDiv\_compProd\_right\_eq\_lintegral},
 \texttt{klDiv\_add\_add\_of\_measure\_eq\_zero}, \texttt{klDiv\_eq\_iSup\_restrict}), and the
 divergence decomposition for a fixed number of rounds
 (\texttt{SequentialLearning/DivergenceDecomposition.lean}:
-\texttt{IsAlgEnvSeq.klDiv\_map\_history}, Lemma~\ref{lem:kl_history_le}). Stopping rules,
+\texttt{IsAlgEnvSeq.klDiv\_map\_history\_bandit}, Lemma~\ref{lem:kl_history_le}). Stopping rules,
 stopping times and stopped histories of algorithm-environment sequences are in
 \texttt{SequentialLearning/StoppedHistory.lean} (\texttt{sigmaHistory},
 \texttt{stoppedHistMeasure}) and identification algorithms in
@@ -66,17 +66,17 @@ itself (Theorem~\ref{thm:change_of_measure}) in the one-sided form needed by the
 (the stopping time is only assumed almost surely finite under the \emph{first} environment).
 
 \textbf{Lean files.} The binary divergence and its inequalities are in
-\texttt{Essakine2026Tight/Mathlib/InformationTheory/\{KLBer, Pinsker\}.lean} (with
-\texttt{Mathlib/Probability/Distributions/Bernoulli.lean}); the chain rule at a stopping time for a
-general process is \texttt{Mathlib/InformationTheory/KLStoppedPrefix.lean} (on
+\texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/\{KLBer, Pinsker\}.lean} (with
+\texttt{ForLMLExplore/Probability/Distributions/Bernoulli.lean}); the chain rule at a stopping time for a
+general process is \texttt{ForLMLExplore/InformationTheory/KLStoppedPrefix.lean} (on
 \texttt{Mathlib/Probability/Process/\{SigmaPrefix, HittingTime\}.lean},
-\texttt{Mathlib/Probability/CondDistrib.lean},
-\texttt{Mathlib/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean}), all copied from the sister
+\texttt{ForLMLExplore/Probability/CondDistrib.lean},
+\texttt{ForLMLExplore/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean}), all copied from the sister
 project; its specialization to algorithm-environment sequences and the reindexing by actions are
-\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/\{StoppedHistory,
+\texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/\{StoppedHistory,
 DivergenceDecomposition\}.lean}; runs of identification algorithms are
-\texttt{…/SequentialLearning/IdentificationAlg.lean} and the change of measure
-\texttt{…/SequentialLearning/ChangeOfMeasure.lean}.
+\texttt{…/ForLMLExplore/Identification/IdentificationAlg.lean} and the change of measure
+\texttt{…/ForLMLExplore/Identification/ChangeOfMeasure.lean}.
 
 \section{The binary relative entropy}
 \label{sec:pinfo_klbin}
@@ -96,7 +96,7 @@ $\klbin(x, y) = x\log x + (1-x)\log(1-x) - x\log y - (1-x)\log(1-y)$ with $0\log
 \end{definition}
 
 \textbf{Lean remark.} The project uses the two functions of the sister project
-(\texttt{Essakine2026Tight/Mathlib/InformationTheory/KLBer.lean}): the real-valued
+(\texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/KLBer.lean}): the real-valued
 \texttt{InformationTheory.klBerReal (p q : ℝ) : ℝ := p * log (p / q) + (1 - p) * log ((1 - p) / (1 - q))}
 (the function called \texttt{klBin} in LMLPapers, same formula), which agrees with $\klbin$ for
 $p \in [0,1]$ and $q \in (0,1)$ (Lean's \texttt{Real.log 0 = 0} gives the convention $0\log 0 = 0$
@@ -143,7 +143,7 @@ text is \texttt{Ber(1, 0, p)} or \texttt{Ber(true, false, p)}); the finite case 
 \texttt{klDiv\_bernoulliMeasure\_eq\_klBerReal} and the non-absolutely-continuous cases come from
 \texttt{bernoulliMeasure\_absolutelyContinuous\_iff} and \texttt{klDiv\_of\_not\_ac}. The
 Radon--Nikodym derivative is \texttt{ProbabilityTheory.rnDeriv\_bernoulliMeasure}
-(\texttt{Essakine2026Tight/Mathlib/Probability/Distributions/Bernoulli.lean}).
+(\texttt{Essakine2026Tight/ForLMLExplore/Probability/Distributions/Bernoulli.lean}).
 
 \begin{lemma}[Data processing to an event]\label{lem:klbin_le_kl}
 \lean{InformationTheory.klBer_measureReal_le_klDiv}\leanok
@@ -166,7 +166,7 @@ The left-hand side is $\klbin(\mu(E), \nu(E))$ by Lemma~\ref{lem:klbin_bernoulli
 
 \textbf{Lean remark.} \texttt{InformationTheory.klBer\_measureReal\_le\_klDiv}:
 \texttt{klBer (μ.real E) (ν.real E) ≤ klDiv μ ν} for probability measures and a measurable
-\texttt{E} (file \texttt{Essakine2026Tight/Mathlib/InformationTheory/Pinsker.lean}). The map is
+\texttt{E} (file \texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/Pinsker.lean}). The map is
 the \texttt{Prop}-valued \texttt{(· ∈ E)} rather than \texttt{decide (· ∈ E)}, with image measure
 \texttt{Ber(True, False, ⟨μ.real E, …⟩)} (\texttt{map\_mem\_eq\_bernoulliMeasure}); this is the first
 half of the proof of Pinsker's inequality \texttt{InformationTheory.sq\_sub\_le\_klDiv}, kept in
@@ -292,10 +292,10 @@ more general than the text above had it ($D = \infty$ allowed).
 \textbf{Standing setting.} Let $\As$ be a finite set (the actions; every subset of a finite
 type is measurable) and $\mathcal Y$ a countably generated measurable space (the feedback;
 finite types, $\R$ and countable products of such spaces qualify). Let $\nu, \nu' : \As \to
-\Delta(\mathcal Y)$ be two Markov kernels and $\mathrm{env} := \mathrm{stationaryEnv}(\nu)$,
-$\mathrm{env}' := \mathrm{stationaryEnv}(\nu')$ the two stationary environments without
-observations (LML \texttt{Learning.stationaryEnv}: at every round, given the past and the
-action $a$, the feedback has law $\nu(a)$, \texttt{feedback\_stationaryEnv}). Let
+\Delta(\mathcal Y)$ be two Markov kernels and $\mathrm{env} := \mathrm{bandit}(\nu)$,
+$\mathrm{env}' := \mathrm{bandit}(\nu')$ the two stationary environments without
+observations (LML \texttt{Learning.Environment.bandit}: at every round, given the past and the
+action $a$, the feedback has law $\nu(a)$, \texttt{feedback\_bandit}). Let
 $\mathrm{alg}$ be an algorithm with actions in $\As$ and feedback in $\mathcal Y$ (policy
 kernels $\pi_n$ from histories of $n$ rounds to $\As$). We consider two
 \emph{algorithm-environment sequences} (LML \texttt{IsAlgEnvSeq}): $(X_t, Y_t)_{t \in \N}$ on
@@ -335,7 +335,7 @@ write $\mathrm{trunc}_M : \mathcal H \to \mathcal H$ for the truncation to the f
 so that $\mathrm{trunc}_M(\hist_\tau) = \hist_{\tau\wedge M}$ on $\{\tau < \infty\}$.
 
 \begin{lemma}[Divergence decomposition for a fixed number of rounds]\label{lem:kl_history_le}
-\lean{Learning.IsAlgEnvSeq.klDiv_map_history, Learning.IsAlgEnvSeq.klDiv_map_history_compProd, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_klDiv_eq_sum_pullCount, Learning.lintegral_sum_klDiv_eq_sum_pullCount}\leanok
+\lean{Learning.IsAlgEnvSeq.klDiv_map_history_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_compProd_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_klDiv_eq_sum_pullCount, Learning.lintegral_sum_klDiv_eq_sum_pullCount}\leanok
 In the standing setting, for every $n \in \N$,
 \[
   \KL\big(\mathrm{law}_\nu(\hist_n)\,\big\|\,\mathrm{law}_{\nu'}(\hist_n)\big)
@@ -355,7 +355,7 @@ of $\hist_{n+1} = (\hist_n, (X_n, Y_n))$ is (up to the measurable equivalence
 $\mathcal H_{n+1} \simeq \mathcal H_n \times (\As\times\mathcal Y)$, which leaves $\KL$ invariant,
 LML \texttt{klDiv\_map\_measurableEquiv}) the composition-product
 $\mathrm{law}_\nu(\hist_n) \otimes (\pi_n \otimes \tilde\nu)$ where $\tilde\nu(h, a) := \nu(a)$
-(LML \texttt{IsAlgEnvSeq.hasCondDistrib\_step}, \texttt{stepKernel\_stationaryEnv}), and
+(LML \texttt{IsAlgEnvSeq.hasCondDistrib\_step}, \texttt{stepKernel\_bandit}), and
 similarly with primes and the \emph{same} policy kernel $\pi_n$. The chain rule
 \texttt{klDiv\_compProd\_eq\_add} gives
 \[
@@ -374,14 +374,14 @@ $\sum_{t<n}\E_\nu[\KL(\nu(X_t)\|\nu'(X_t))] = \sum_a \KL(\nu_a\|\nu'_a)\,\E_\nu[
 \end{proof}
 
 \textbf{Lean remark.} The first equality is exactly LML's
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history}: for \texttt{h : IsAlgEnvSeq O X Y alg
-(stationaryEnv κ) P} and \texttt{h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P'} and
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history\_bandit}: for \texttt{h : IsAlgEnvSeq O X Y alg
+(Environment.bandit κ) P} and \texttt{h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P'} and
 \texttt{[MeasurableSpace.CountablyGenerated 𝓨]}, \texttt{klDiv (P.map (history O X Y M))
 (P'.map (history O' X' Y' M)) = ∑ t ∈ range M, ∫⁻ ω, klDiv (κ (X t ω)) (κ' (X t ω)) ∂P}
-(its composition-product form \texttt{klDiv\_map\_history\_compProd} needs no countable
+(its composition-product form \texttt{klDiv\_map\_history\_compProd\_bandit} needs no countable
 generation). The reindexing by actions is
 \texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history\_eq\_sum\_pullCount}
-(\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/DivergenceDecomposition.lean}),
+(\texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean}),
 with conclusion \texttt{∑ a, (∫⁻ ω, (pullCount X a M ω : ℝ≥0∞) ∂P) * klDiv (κ a) (κ' a)}, under
 \texttt{[Fintype 𝓐] [DecidableEq 𝓐] [MeasurableSingletonClass 𝓐]}; the pointwise identity
 $\sum_{t<n}\KL(\nu(X_t)\|\nu'(X_t)) = \sum_a N_a(n)\KL(\nu_a\|\nu'_a)$ is
@@ -423,7 +423,7 @@ $\KL(\mu|_{s_n}\|\nu|_{s_n}) = \infty$.
 \texttt{klDiv\_add\_add\_of\_measure\_eq\_zero} and \texttt{klDiv\_eq\_iSup\_restrict}.
 
 \begin{lemma}[One step of the algorithm against two environments]\label{lem:pinfo_kl_step}
-\lean{Learning.klDiv_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, InformationTheory.klDiv_compProd_right_eq_lintegral, Learning.klDiv_compProd_compProd_prodMkLeft, Learning.klDiv_compProd_compProd_prodMkLeft_eq_sum}\leanok
+\lean{InformationTheory.klDiv_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, InformationTheory.klDiv_compProd_right_eq_lintegral, Learning.klDiv_compProd_compProd_prodMkLeft, Learning.klDiv_compProd_compProd_prodMkLeft_eq_sum}\leanok
 Let $P$ be a finite measure on a measurable space $\mathcal H_0$, $\pi$ a Markov kernel from
 $\mathcal H_0$ to $\As$ and $\tilde\nu, \tilde\nu'$ the kernels $(h, a) \mapsto \nu(a)$,
 $(h, a) \mapsto \nu'(a)$ from $\mathcal H_0 \times \As$ to $\mathcal Y$ (Mathlib
@@ -455,8 +455,8 @@ the finite set $\As$ (\texttt{lintegral\_fintype}).
 \end{proof}
 
 \textbf{Lean remark.} The first two equalities are LML's
-\texttt{Learning.klDiv\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}
-(\texttt{SequentialLearning/DivergenceDecomposition.lean}) and
+\texttt{InformationTheory.klDiv\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}
+(\texttt{ForMathlib/InformationTheory/KullbackLeibler/CompProd.lean}) and
 \texttt{klDiv\_compProd\_right\_eq\_lintegral}; the version with an observation kernel is
 \texttt{klDiv\_compProd\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}. Their
 composition is the project's \texttt{Learning.klDiv\_compProd\_compProd\_prodMkLeft} (for
@@ -542,9 +542,9 @@ two spaces through the laws of the paths. The splitting of the law of $Z_{M+1}$ 
 \texttt{IsStoppingTime.exists\_measurableSet\_preimage\_finPrefix}, and the restriction of the
 conditional law of the step to $\{M < \tau\}$ is \texttt{HasCondDistrib.restrict\_lt\_of\_isStoppingTime}.
 These files are copied, unchanged up to imports, in
-\texttt{Essakine2026Tight/Mathlib/\{InformationTheory/KLStoppedPrefix,
+\texttt{Essakine2026Tight/ForLMLExplore/\{InformationTheory/KLStoppedPrefix,
 Probability/Process/SigmaPrefix, Probability/Process/HittingTime\}.lean} and
-\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/\{StoppedHistory,
+\texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/\{StoppedHistory,
 DivergenceDecomposition\}.lean} (the latter without the linear Gaussian part of the sister
 project). The history stopped at time $M$ is \texttt{hittingProcess (sigmaHistory O X Y) S 0 M}
 and the integral form reads
@@ -653,7 +653,7 @@ projection.
 \textbf{Lean remark.} \texttt{Learning.IdentAlg.IsRun.klDiv\_map\_stoppedHist\_out} and
 \texttt{IsRun.klDiv\_map\_out\_le\_stoppedHist}, copied from the sister project
 (\texttt{RunDivergence.lean}) to
-\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean}, for two
+\texttt{Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean}, for two
 runs of \texttt{A : IdentAlg Unit 𝓐 𝓨 𝓓} in arbitrary environments. No finiteness of the stopping
 time is needed: when $\tau = \infty$ the stopped history is an arbitrary element of $\mathcal H$
 (LML's \texttt{stoppedValue} takes the history of $0$ rounds) and the output is still drawn from
@@ -685,10 +685,10 @@ $\mathrm{env}$ (LML \texttt{IsRun.hasLaw\_output}).
 \texttt{Learning.IdentAlg.isRun\_runMeasure}, \texttt{Learning.IdentAlg.map\_snd\_runMeasure}
 (output law \texttt{A.outputMeasure env}), \texttt{Learning.IsAlgEnvSeq.comp\_hasLaw},
 \texttt{Learning.IdentAlg.IsRun.comp\_hasLaw}, copied from the sister project (\texttt{Run.lean})
-to \texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/IdentificationAlg.lean}; the
+to \texttt{Essakine2026Tight/ForLMLExplore/Identification/IdentificationAlg.lean}; the
 conditional-law facts are \texttt{ProbabilityTheory.HasCondDistrib.comp\_of\_hasLaw} and
 \texttt{ProbabilityTheory.hasCondDistrib\_snd\_compProd\_comap}
-(\texttt{Essakine2026Tight/Mathlib/Probability/CondDistrib.lean}). This is how
+(\texttt{Essakine2026Tight/ForLMLExplore/Probability/CondDistrib.lean}). This is how
 Chapter~\ref{chap:lower_bound} obtains the runs in the alternative environments, whose
 existence the headline statement does not provide.
 
@@ -800,8 +800,8 @@ $E'^c \cap \{\tau' < \infty\} \subseteq E'^c$, so Lemma~\ref{lem:pinfo_klbin_con
 $\klbin(x, y) \le \max\{\klbin(x,y_1), \klbin(x, 1 - z)\} \le D$.
 \end{proof}
 
-\textbf{Lean remark.} For two runs \texttt{h : A.IsRun (stationaryEnv ν) O X Y out P} and
-\texttt{h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P'} of \texttt{A : IdentAlg Unit 𝓐 𝓨 𝓓}
+\textbf{Lean remark.} For two runs \texttt{h : A.IsRun (Environment.bandit ν) O X Y out P} and
+\texttt{h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P'} of \texttt{A : IdentAlg Unit 𝓐 𝓨 𝓓}
 (probability measures on arbitrary spaces), with \texttt{[Fintype 𝓐] [DecidableEq 𝓐]
 [MeasurableSingletonClass 𝓐] [MeasurableSpace.CountablyGenerated 𝓨]}, Markov kernels
 \texttt{ν ν' : Kernel 𝓐 𝓨}, \texttt{hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤} and a measurable
@@ -820,11 +820,11 @@ the right-hand side is finite, is \texttt{IsRun.klBerReal\_measureReal\_le\_toRe
 For an event of the output only, the second run can be taken canonical
 (Lemma~\ref{lem:pinfo_canonical_run}):
 \texttt{IsRun.klBer\_measureReal\_outputMeasure\_le\_sum\_pullCount h hτ hs} bounds
-\texttt{klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (stationaryEnv ν')).real s)}, which is the
+\texttt{klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (Environment.bandit ν')).real s)}, which is the
 form Chapter~\ref{chap:lower_bound} needs (the PAC property is a statement about
 \texttt{outputMeasure}, and no run in the alternative environments is given). The two-sided
 identity for the pair is \texttt{IsRun.klDiv\_map\_stoppedHist\_out\_eq\_sum\_pullCount}. File:
-\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean}.
+\texttt{Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean}.
 
 \begin{remark}[The paper's Lemma~17]\label{rem:pinfo_paper_lemma}
 \uses{thm:change_of_measure, def:episode_env}

@@ -116,7 +116,7 @@ environment with one counter; the appendix restatements of Theorems 4 and 3 cons
      lem:cert_dominates_gap_pos.
 
 * **Library placement** (Lean remarks name the files). LML's `MDP` (from the `mdp` branch of
-  LML, copied verbatim to `Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/Basic.lean`):
+  LML, copied verbatim to `Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Basic.lean`):
   `Learning.MDP 𝓢 𝓐 𝓡` with transition kernel `P : Kernel (𝓢 × 𝓐) 𝓢` and reward kernel
   `R : Kernel (𝓢 × 𝓐) 𝓡`, the environment `MDP.env M μ₀ : Environment 𝓢 𝓐 𝓡` (observation =
   current state), stationary policies `MDP.policyAlg π`, their trajectory law
@@ -124,7 +124,7 @@ environment with one counter; the appendix restatements of Theorems 4 and 3 cons
   namespace `Learning.MDP`): finite-state vectors (`Vec.lean`: `vecExp`, `vecVar`, `transVec`),
   finite-horizon MDPs and their layered embedding, values and episodes as rounds
   (`Episodic.lean`), entropic values (`Entropic.lean`), empirical models (`Empirical.lean`).
-  Mathlib-shaped material goes to `Essakine2026Tight/Mathlib/` (`weightedMeasure`, the binary
+  Mathlib-shaped material goes to `Essakine2026Tight/ForLMLExplore/` (`weightedMeasure`, the binary
   divergence `klBin`, Bhatia–Davis, elementary inequalities). The paper's own objects
   (rates, Entropic-BPI, run quantities, events, constants, hard instances, the two theorems)
   are in `Essakine2026Tight/EV2026/`, namespace `Essakine2026Tight`.
@@ -832,7 +832,7 @@ Paper: Lemma 17 (Kaufmann, Cappé, Garivier 2016, Lemma 1). LML-shaped statement
 * thm:change_of_measure — (Lemma 17) same setting, every event `E` of `(\hist_τ, out)`:
   `\klbin(\Prob_ν(E), \Prob_{ν'}(E)) ≤ \sum_a\E_ν[N_a(τ)]\KL(ν_a‖ν'_a)` (lem:klbin_le_kl,
   lem:kl_output_pair, lem:kl_stopped_hist_le); the paper's `\sup_E` form is the same statement.
-  Lean: the `Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean` file.
+  Lean: the `Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean` file.
 
 ## prereq_analysis.tex — `\chapter{Elementary inequalities}\label{chap:pre_analysis}`
 

@@ -347,7 +347,7 @@ is at most `upperBound S A H β ε δ G_max(M)`; in particular it is finite. -/
 lemma stoppingTime_le_upperBound_of_neg (hM : M.HasRewardFn r)
     (hr : ∀ h s a, r h s a ∈ Set.Icc 0 1) (hβ : β < 0) (hδ : 0 < δ) (hδ1 : δ ≤ 1) {ε : ℝ}
     (hε : 0 < ε) (hω : ω ∈ goodEvent X Y M s₁ β δ) (hX : ∀ t, X t ω = greedyAt X Y r β δ t ω) :
-    ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞)
+    ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω)
       ≤ ENNReal.ofReal
         (upperBound (Fintype.card S) (Fintype.card A) H β ε δ (maxReturn M H s₁)) := by
   refine ENat.toENNReal_le_ofReal_of_forall_natCast_le fun T hT ↦ ?_
@@ -390,8 +390,10 @@ lemma one_sub_le_measureReal_stoppingTime_le_of_neg (hM : M.HasRewardFn r)
     (hr : ∀ h s a, r h s a ∈ Set.Icc 0 1) (hβ : β < 0) (hδ : 0 < δ) (hδ1 : δ ≤ 1) {ε : ℝ}
     (hε : 0 < ε)
     (h : (entropicBPI H r β δ ε s₁).IsRun (statesEnv M H s₁) (fun _ _ ↦ ()) X Y out P) :
-    1 - δ ≤ P.real {ω | ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞)
-      ≤ ENNReal.ofReal (upperBound (Fintype.card S) (Fintype.card A) H β ε δ (maxReturn M H s₁))} :=
+    1 - δ ≤ P.real {ω |
+      ENat.toENNReal ((entropicBPI H r β δ ε s₁).stoppingTime (fun _ _ ↦ ()) X Y ω)
+        ≤ ENNReal.ofReal
+          (upperBound (Fintype.card S) (Fintype.card A) H β ε δ (maxReturn M H s₁))} :=
   one_sub_le_measureReal_stoppingTime_le h hδ.le
     (measure_compl_goodEvent_le h.isAlgEnvSeq hM hr β hδ hδ1)
     (fun _ hω hX ↦ stoppingTime_le_upperBound_of_neg hM hr hβ hδ hδ1 hε hω hX)

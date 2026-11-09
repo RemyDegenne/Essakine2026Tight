@@ -6,8 +6,8 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Algorithm
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.EmpiricalCounts
-public import Essakine2026Tight.Mathlib.Probability.Moments.Variance
+public import Essakine2026Tight.ForLMLExplore.ReinforcementLearning.Episodic.EmpiricalCounts
+public import Essakine2026Tight.ForLMLExplore.Probability.Moments.Variance
 
 /-!
 # Ranges of the quantities computed by Entropic-BPI

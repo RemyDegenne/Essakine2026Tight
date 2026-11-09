@@ -5,10 +5,10 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Entropic
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Entropic
 public import Essakine2026Tight.EV2026.Constants
 public import Essakine2026Tight.EV2026.HardMDP
-public import Essakine2026Tight.LeanMachineLearning.SequentialLearning.ChangeOfMeasure
+public import Essakine2026Tight.ForLMLExplore.Identification.ChangeOfMeasure
 
 /-!
 # Theorem 3: lower bound on the sample complexity of entropic best-policy identification
@@ -88,11 +88,13 @@ lemma lowerBound_le_of_card {nS nA H U : ℕ} {β ε δ G : ℝ} (hβ : β ≠ 0
           have : 0 ≤ c ^ 2 * U * Real.log (1 / δ) := by positivity
           nlinarith
 
-/-- **Theorem 3** (Essakine, Vernade 2026). For finite state and action spaces with `S ≥ 6`,
-`A ≥ 2`, a horizon `H ≥ 3 d` with `d = ⌈log_A((S - 3)(A - 1) + 1)⌉` (Assumption 1), `β ≠ 0`,
-`δ ∈ (0, 1/16]` and `ε > 0` satisfying Condition A for the effective horizon
-`H' = H - ⌊H/3⌋ - d`, there are a reward function `r₀` with
-values in `[0, 1]`, an MDP `M₀` with reward function `r₀` and an initial state `s₁` such that
+/-- **Lower bound on the expected number of episodes** [EV26, Theorem 3], with Condition A for
+the effective horizon and with a margin (errata E1, E2) and the constant `1/5000` (erratum E20).
+For finite state and action spaces with `S ≥ 6`, `A ≥ 2`, a horizon `H ≥ 3 d` with
+`d = ⌈log_A((S - 3)(A - 1) + 1)⌉` (Assumption 1), `β ≠ 0`, `δ ∈ (0, 1/16]` and `ε > 0`
+satisfying Condition A for the effective horizon `H' = H - ⌊H/3⌋ - d`, there are a reward
+function `r₀` with values in `[0, 1]`, an MDP `M₀` with reward function `r₀` and an initial
+state `s₁` such that
 every algorithm which is `(ε, δ)`-PAC for entropic best-policy identification with reward
 function `r₀` satisfies, in every run on `M₀`,
 `E[τ] ≥ (1/5000) (e^{|β| G_max(M₀)} - 1)² e^{-|β| G_max(M₀)} e^{2 min(β, 0) ε} S A H log(1/δ) /
@@ -113,7 +115,7 @@ theorem exists_hardMDP_lowerBound_le_lintegral_stoppingTime
           𝒜.IsRun (statesEnv M₀ H s₁) (fun _ _ ↦ ()) X Y out P →
           ENNReal.ofReal (lowerBound (Fintype.card S) (Fintype.card A) H β ε δ
               (maxReturn M₀ H s₁)) ≤
-            ∫⁻ ω, (𝒜.stoppingTime (fun _ _ ↦ ()) X Y ω : ℝ≥0∞) ∂P := by
+            ∫⁻ ω, ENat.toENNReal (𝒜.stoppingTime (fun _ _ ↦ ()) X Y ω) ∂P := by
   classical
   have : Nonempty S := Fintype.card_pos_iff.1 (by omega)
   have hd := two_le_treeDepth hS hA
@@ -125,15 +127,15 @@ theorem exists_hardMDP_lowerBound_le_lintegral_stoppingTime
   intro 𝒜 hPAC Ω _ P _ X Y out hrun
   set M₀ : EpisodicMDP S A := hardMDP H β ε none with hM₀
   set s₀ : S := stateAt S 0 with hs₀
-  set τ := 𝒜.stoppingTime (fun _ _ ↦ ()) X Y with hτ_def
-  set T := ∫⁻ ω, (τ ω : ℝ≥0∞) ∂P with hT_def
+  set τ : Ω → ℕ∞ := 𝒜.stoppingTime (fun _ _ ↦ ()) X Y with hτ_def
+  set T := ∫⁻ ω, ENat.toENNReal (τ ω) ∂P with hT_def
   set U := hardTriples (Fintype.card S) (Fintype.card A) H with hU_def
   set pm := hardPMinus β (effHorizon (Fintype.card S) (Fintype.card A) H)
   set pp := hardPPlus β (effHorizon (Fintype.card S) (Fintype.card A) H) ε
   -- Step 0: the case of an infinite expectation
   rcases eq_or_ne T ⊤ with hT | hT
   · rw [hT]; exact le_top
-  have hmeasτ : Measurable fun ω ↦ (τ ω : ℝ≥0∞) :=
+  have hmeasτ : Measurable fun ω ↦ ENat.toENNReal (τ ω) :=
     (measurable_of_countable (fun n : WithTop ℕ ↦ ENat.toENNReal n)).comp
       (measurable_hittingAfter_sigmaHistory (hrun.isAlgEnvSeq.measurable_obs)
         (hrun.isAlgEnvSeq.measurable_action) (hrun.isAlgEnvSeq.measurable_feedback)

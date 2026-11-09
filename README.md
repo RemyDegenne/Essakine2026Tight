@@ -1,20 +1,52 @@
-# Formalization of "Tight Sample Complexity Bounds for Entropic Best Policy Identification" (Essakine, Vernade, COLT 2026)
+# Essakine2026Tight
 
-A Lean 4 formalization, built on Mathlib and the [Lean Machine Learning](https://github.com/LeanMachineLearning/LML) library (LML), of the two results of the paper ([arXiv:2605.13717](https://arxiv.org/abs/2605.13717)): the lower bound $\Omega\big(\frac{(e^{|\beta| G_{\max}} - 1)^2}{e^{|\beta| G_{\max}}} \frac{SAH}{(e^{|\beta|\varepsilon} - 1)^2}\log\frac1\delta\big)$ on the expected number of episodes of every $(\varepsilon, \delta)$-PAC algorithm for best-policy identification under the entropic risk measure in finite-horizon MDPs (Theorem 3), and the matching upper bound for the algorithm Entropic-BPI (Theorem 4).
+A Lean 4 formalization of *Tight Sample Complexity Bounds for Entropic Best Policy Identification*
+(Amer Essakine and Claire Vernade, COLT 2026,
+[arXiv:2605.13717](https://arxiv.org/abs/2605.13717)), on top of
+[LMLExplore](https://github.com/LeanMachineLearning/LMLExplore), and so of
+[LML](https://github.com/LeanMachineLearning/LML), [Tau Ceti](https://github.com/TauCetiProject/TauCeti)
+and [Mathlib](https://github.com/leanprover-community/mathlib4). It follows the layout of
+[lml-paper-template](https://github.com/LeanMachineLearning/lml-paper-template).
 
-The development is blueprint-driven: `blueprint/src/` contains a detailed proof document (a [leanblueprint](https://github.com/PatrickMassot/leanblueprint)) that decomposes the paper into lemmas whose proofs go from what Mathlib/LML already provide to the paper's results, and records where the formalization departs from the paper. Writing it uncovered several errors in the paper (a false bound on the binary divergence and a misplaced Condition A in the lower bound, a bonus with the wrong rate, off-by-one clips, a false self-bounding lemma, ...); they are listed with their fixes in `notes/paper-errata.md`, and the formalized statements are the corrected ones. Part II of the blueprint collects the prerequisites that are meant to be contributed upstream (finite-horizon MDP theory, concentration inequalities, the change of measure at a stopping time, elementary inequalities).
+It formalizes the two results of the paper on best-policy identification under the entropic risk
+measure in finite-horizon tabular MDPs: the lower bound
+$\Omega\big(\frac{(e^{|\beta| G_{\max}} - 1)^2}{e^{|\beta| G_{\max}}} \frac{SAH}{(e^{|\beta|\varepsilon} - 1)^2}\log\frac1\delta\big)$
+on the expected number of episodes of every $(\varepsilon, \delta)$-PAC algorithm (Theorem 3), and
+the PAC property and the matching sample complexity of the algorithm Entropic-BPI (Theorem 4).
+Writing the blueprint uncovered several errors in the paper (a false bound on the binary
+divergence and a misplaced Condition A in the lower bound, a bonus with the wrong rate, off-by-one
+clips, a false self-bounding lemma, ...): the formalized statements are the corrected ones, see
+the errata. Every headline result is proved, with no `sorry`.
 
-* Paper source: `source/`
-* Blueprint: `blueprint/src/` (build with `leanblueprint pdf` / `leanblueprint web` from the repository root)
-* Lean library: `Essakine2026Tight/`
-* Blueprint outline, design decisions, upstreaming candidates and the errors found in the paper (`notes/paper-errata.md`): `notes/`
+- Website: https://RemyDegenne.github.io/Essakine2026Tight/, with the blueprint, the referee site and the
+  literature links (which declarations formalize which results of the paper). CI builds it on each
+  push to `main`. `scripts/formalize.sh` also commits the literature links, as
+  `literature/annotations.jsonl`, when the paper is formalized and after the final bump.
+- The paper: `source/`. Errors found in it, with their corrections: `notes/paper-errata.md`.
+- The paper's results: `Essakine2026Tight/EV2026/`, listed with their status in
+  `formalization.yaml`; comparator challenges in `comparator/`.
+- Library-shaped material: `Essakine2026Tight/ForLMLExplore/`, which Tau Ceti workers port to
+  LMLExplore; `PAPER_ROADMAP.md` says where each item goes. It holds the finite-horizon MDP theory
+  (`MarkovDecisionProcess/`), the empirical models and the concentration at the visits of a
+  state-action pair (`ReinforcementLearning/Episodic/`), the change of measure for identification
+  algorithms (`Identification/`), stopped histories and the divergence decomposition
+  (`SequentialLearning/`), and Mathlib-shaped files at their Mathlib paths.
+- The blueprint outline, the design decisions, the upstreaming candidates and the other findings
+  of the formalization: `notes/`.
 
-## Status and layout
+## Building
 
-The formalization proceeds in two phases. **Phase 1 (done)** states the headline results of the paper in Lean — Theorem 3 and the two conclusions of Theorem 4 — as `sorry`-ed theorems over definitions written in library generality; they are listed in `formalization.yaml` and each has a self-contained [comparator](https://github.com/leanprover/comparator) challenge file in `comparator/` (see `comparator/README.md`). **Phase 2 (done)** proves them, following the blueprint chapter by chapter (see the `status` section of `formalization.yaml` and `notes/phase2-plan.md`): Theorem 3 (the lower bound) and both conclusions of Theorem 4 (PAC property and sample complexity of Entropic-BPI) are proved, with no `sorry` and only the standard axioms. Errors and findings about the paper are collected in `notes/paper-errata.md`.
+```bash
+scripts/build.sh
+```
 
-* `Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/`: material for LML, on top of LML's MDPs (`Basic.lean`, copied from the `mdp` branch of LML: `MDP`, its environment, stationary policies and their trajectory laws) — vectors on a finite state space (`Vec.lean`), finite-horizon MDPs on arbitrary measurable state and action spaces with `ℕ`-indexed steps, policies `π : ℕ → S → A` (unbundled from their measurability, as stochastic processes in Mathlib) and the time-augmented stationary MDP giving their trajectory laws, episodes as rounds of the interaction and best-policy identification algorithms (`Episodic.lean`), entropic values and the PAC property (`Entropic.lean`), the Markov property of trajectory laws in LML generality (`Markov.lean`, `StepLaw.lean`), values and the optimal Bellman recursion (`Values.lean`), occupancy measures, state-sequence laws, unrolling of backward recursive inequalities and the entropic variances (`Occupancy.lean`, `StateSeq.lean`, `Unroll.lean`, `UnrollBounds.lean`, `EntropicVariance.lean`), the sampling structure at the visits of a state-action pair (`Visits.lean`, `VisitConcentration.lean`), empirical models (`Empirical.lean`, `EmpiricalCounts.lean`). The paper's finiteness hypotheses enter only in the statements that need them (see `notes/lean-design.md`).
-* `Essakine2026Tight/Mathlib/`: material for Mathlib — elementary inequalities, weighted measures on a finite type, conditional distributions, the binary divergence and Pinsker's inequality, divergences of stopped processes, the method of types and Sanov's bound, Ville's inequality and the Bernoulli maximal inequality, self-normalized Bernstein inequalities, KL–Bernstein and variance transport, the time-uniform KL concentration of empirical distributions.
-* `Essakine2026Tight/LeanMachineLearning/SequentialLearning/`: material for LML — stopped histories, the divergence decomposition and the change of measure for identification algorithms.
-* `Essakine2026Tight/EV2026/`: the paper — the exploration rates (`Rates.lean`, `RateBounds.lean`), the Entropic-BPI algorithm and the auxiliary quantities of its analysis (`Algorithm.lean`, `Backups.lean`, `EntropicBPIRun.lean`), the run quantities and the concentration events (`Run.lean`, `VisitCounts.lean`, `Events.lean`), the analysis on the good event and its tail (`Analysis*.lean`, `Tail*.lean`), the hard instances of the lower bound (`HardTree.lean`, `HardParams.lean`, `HardMDP.lean`), the constants of the theorems (`Constants.lean`), and the headline results (`LowerBound.lean`, `UpperBound.lean`).
-* `comparator/`: challenge files and configs, generated by `scripts/make-challenges.py`; `scripts/comparator-verify.sh` runs comparator.
+The script fetches Mathlib's and Tau Ceti's prebuilt files, then runs `lake build`; its arguments go
+to `lake build`.
+
+## Working on it
+
+The workflow is the `formalize-paper` skill of the `lml` Claude Code plugin
+([lml-claude](https://github.com/LeanMachineLearning/lml-claude)). The paper is formalized; what is
+left is to contribute its library-shaped part. `scripts/formalize.sh`, in a terminal or tmux, tags
+`PAPER_ROADMAP.md`, sends the reusable parts to LMLExplore, and once they are merged moves the paper
+to the current LMLExplore.
