@@ -254,8 +254,8 @@ lemma measurable_sigmaPrefix (n : ℕ) : Measurable (sigmaPrefix Z n) :=
 
 end Measurability
 
-/-- The event `{n < τ}`, for the stopping time `τ` of a stopping rule, is determined by the
-prefix of length `n`. -/
+/-- The event `{n < τ}`, for the stopping time `τ` of a stopping rule, is determined by
+the prefix of length `n`. -/
 lemma exists_measurableSet_preimage_lt_hittingAfter_sigmaPrefix (hS : MeasurableSet S) (n : ℕ) :
     ∃ B : Set (Π i : Fin n, X i), MeasurableSet B ∧
       {ω | (n : WithTop ℕ) < hittingAfter (sigmaPrefix Z) S 0 ω} = finPrefix Z n ⁻¹' B := by
@@ -302,8 +302,8 @@ lemma measurable_finPrefix_prefixFiltration {hZ : ∀ n, Measurable (Z n)} (n : 
     Measurable[prefixFiltration Z hZ n] (finPrefix Z n) :=
   measurable_iff_comap_le.2 le_rfl
 
-/-- For a stopping time `τ` of the prefix filtration, the event `{τ ≤ n}` is determined by the
-prefix of length `n`. -/
+/-- For a stopping time `τ` of the prefix filtration, the event `{τ ≤ n}` is determined by
+the prefix of length `n`. -/
 lemma _root_.MeasureTheory.IsStoppingTime.exists_measurableSet_preimage_finPrefix
     {hZ : ∀ n, Measurable (Z n)} (hτ : IsStoppingTime (prefixFiltration Z hZ) τ) (n : ℕ) :
     ∃ B : Set (Π i : Fin n, X i), MeasurableSet B ∧ finPrefix Z n ⁻¹' B = {ω | τ ω ≤ n} :=
@@ -322,8 +322,8 @@ lemma isStoppingTime_hittingAfter_sigmaPrefix (hZ : ∀ n, Measurable (Z n))
 
 /-- Conversely, every stopping time `τ` of the prefix filtration is the stopping time of a
 stopping rule: the rule "stop after `n` steps if the prefix of length `n` belongs to `B n`",
-where `{τ ≤ n}` is the preimage of `B n` by the prefix of length `n`. Stopping times of the
-prefix filtration and stopping rules are thus two descriptions of the same objects. -/
+where `{τ ≤ n}` is the preimage of `B n` by the prefix of length `n`. Stopping times of
+the prefix filtration and stopping rules are thus two descriptions of the same objects. -/
 lemma _root_.MeasureTheory.IsStoppingTime.exists_eq_hittingAfter_sigmaPrefix
     {hZ : ∀ n, Measurable (Z n)} (hτ : IsStoppingTime (prefixFiltration Z hZ) τ) :
     ∃ S : Set (Σ n : ℕ, Π i : Fin n, X i), MeasurableSet S ∧
@@ -489,8 +489,8 @@ lemma map_stoppedProcess_sigmaPrefix_eq_add (hτ : Measurable τ) (M : ℕ) :
   · exact stoppedProcess_eq_of_le (i := M) hω.le
 
 /-- The law of the prefix stopped at time `M + 1` splits according to whether `τ ≤ M`: on
-`{τ ≤ M}` it is the law of the prefix stopped at time `M`, on `{M < τ}` it is the law of the
-prefix of length `M + 1`. -/
+`{τ ≤ M}` it is the law of the prefix stopped at time `M`, on `{M < τ}` it is the law of
+the prefix of length `M + 1`. -/
 lemma map_stoppedProcess_sigmaPrefix_succ_eq_add (hτ : Measurable τ) (M : ℕ) :
     P.map (stoppedProcess (sigmaPrefix Z) τ (M + 1)) =
       (P.restrict {ω | τ ω ≤ M}).map (stoppedProcess (sigmaPrefix Z) τ M) +

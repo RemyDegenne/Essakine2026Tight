@@ -189,8 +189,8 @@ section CountablyGenerated
 
 variable [∀ n, MeasurableSpace.CountablyGenerated (X n)]
 
-/-- The sum over the steps `t < M` of the conditional divergences of `κ t` and `κ' t` given the
-prefix of length `t` on `{t < τ}` is the expected sum of the divergences of `κ t` and `κ' t` at
+/-- The sum over the steps `t < M` of the conditional divergences of `κ t` and `κ' t` given
+the prefix of length `t` on `{t < τ}` is the expected sum of the divergences of `κ t` and `κ' t` at
 the prefix of length `t`, over the steps `t < min τ M`. -/
 lemma sum_klDiv_compProd_restrict_lt_eq_lintegral (hZ : ∀ n, Measurable (Z n))
     (hτ : Measurable τ) (M : ℕ) :
@@ -210,8 +210,8 @@ lemma sum_klDiv_compProd_restrict_lt_eq_lintegral (hZ : ∀ n, Measurable (Z n))
   simp_rw [Set.indicator_apply, Set.mem_ofPred_eq]
   exact sum_ite_lt_eq_sum_range_toNat_min _ _ M
 
-/-- The series over the steps `t` of the conditional divergences of `κ t` and `κ' t` given the
-prefix of length `t` on `{t < τ}`, for an almost surely finite `τ`, is the expected sum of the
+/-- The series over the steps `t` of the conditional divergences of `κ t` and `κ' t` given
+the prefix of length `t` on `{t < τ}`, for an almost surely finite `τ`, is the expected sum of the
 divergences of `κ t` and `κ' t` at the prefix of length `t`, over the steps `t < τ`. -/
 lemma tsum_klDiv_compProd_restrict_lt_eq_lintegral (hZ : ∀ n, Measurable (Z n))
     (hτ : Measurable τ) (hτ_top : ∀ᵐ ω ∂P, τ ω ≠ ⊤) :
@@ -280,8 +280,8 @@ variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {P : Measure Ω} {P' : Measu
   {S : Set (Σ n : ℕ, Π i : Fin n, X i)}
 
 /-- **Chain rule at a bounded stopping time** for two processes on two spaces, composition-product
-form. For two processes `Z`, `Z'` whose steps have conditional laws `κ n`, `κ' n` given the
-prefix of length `n`, and a stopping rule `S`, the divergence between the laws of the prefixes
+form. For two processes `Z`, `Z'` whose steps have conditional laws `κ n`, `κ' n` given
+the prefix of length `n`, and a stopping rule `S`, the divergence between the laws of the prefixes
 stopped at time `M` is the sum over the steps `t < M` of the conditional divergences of `κ t`
 and `κ' t` given the prefix of length `t`, on the event `{t < τ}` (the step is taken). -/
 lemma klDiv_map_hittingProcess_sigmaPrefix_compProd (hZ : ∀ n, Measurable (Z n))

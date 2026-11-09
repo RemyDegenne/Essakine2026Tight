@@ -1,24 +1,32 @@
 #!/usr/bin/env python3
 r"""Generate the comparator challenge files and configs for the headline results.
 
-For each declaration listed in `comparator/targets.txt` this
+For each declaration listed in `comparator/targets.txt` this runs challenge-gen
+(https://github.com/LeanTrustBuilders/challenge-gen) with `--import` for each of LMLExplore, LML,
+Tau Ceti and Mathlib that the project uses, which writes
 
-1. takes the standalone extraction produced by `referee extract` (the project's definitions
-   the statement rests on, copied verbatim, with the theorem proof replaced by `sorry`),
-2. replaces its `LeanMachineLearning.*` imports by Mathlib imports and inserts the LML
-   declarations the statements rest on, copied verbatim from LML in
-   `comparator/vendor/LML.lean.part`, so that the import closure bottoms out in Mathlib,
-3. writes `comparator/Challenge_<name>.lean` and `comparator/<name>.json`.
+1. the statement with `sorry`, and the project's definitions it rests on, copied verbatim from
+   their sources; the file imports the modules of those libraries it needs, whose definitions are
+   not copied;
+2. comparator's config for it, listing the theorems to check: the headline theorem, the lemmas
+   the definitions use (left `sorry` in the challenge, proved by the solution), and the theorems
+   Lean makes of the proofs inside definitions (`foo._proof_1`).
+
+It writes them as `comparator/Challenge_<name>.lean` and `comparator/<name>.json`, the config
+naming the challenge module `Challenge_<name>` and the solution module `Solution`. When
+challenge-gen says comparator cannot check a statement (it reaches a private declaration, or an
+auxiliary theorem Lean would share between two modules in one file), it writes no config, and
+this script stops with its reason.
 
 Usage (from the repository root, after `lake build`):
 
-    scripts/make-challenges.py [--referee PATH] [--keep-extracted DIR]
+    scripts/make-challenges.py [--challenge-gen PATH] [--out DIR]
 
-The referee binary is looked up in `$REFEREE_BIN`, then `~/.cache/entropy-mdp/referee/*/referee`.
-Check the result with `lake build Comparator` (every challenge must compile) and
-`scripts/comparator-verify.sh` (comparator itself).
+challenge-gen is taken from `--challenge-gen` or `$CHALLENGE_GEN_BIN`, or else cloned and built
+at its tag `v<toolchain>` (`lean-toolchain`'s version) into `~/.cache/<library>/challenge-gen`.
+`--out DIR` writes there instead of `comparator/`. Check the result with `lake build Comparator`
+(every challenge must compile) and `scripts/comparator-verify.sh` (comparator itself).
 """
-import glob
 import json
 import os
 import re
@@ -27,120 +35,86 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VENDOR_IMPORTS = [
-    "Mathlib.MeasureTheory.MeasurableSpace.Embedding",
-    "Mathlib.Order.Restriction",
-    "Mathlib.Probability.HasCondDistrib",
-    "Mathlib.Probability.HasLaw",
-    "Mathlib.Probability.Kernel.Composition.MeasureCompProd",
-    "Mathlib.Probability.Kernel.IonescuTulcea.Maps",
-    "Mathlib.Probability.Kernel.IonescuTulcea.Traj",
-    "Mathlib.Probability.Process.HittingTime",
-]
-PERMITTED_AXIOMS = ["propext", "Classical.choice", "Quot.sound"]
+LIB = re.search(r'^name = "([^"]+)"', open(os.path.join(ROOT, "lakefile.toml")).read(), re.M).group(1)
+CACHE = os.path.expanduser(f"~/.cache/{LIB}")
+CHALLENGE_GEN_REPO = "https://github.com/LeanTrustBuilders/challenge-gen"
+#: The libraries a challenge imports instead of copying their definitions, when the project uses
+#: them.
+IMPORTED = ["LMLExplore", "LeanMachineLearning", "TauCeti", "Mathlib"]
 
 
-DECL_RE = re.compile(r"^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable)\s+)*(?:lemma|theorem)\s+([^\s{(:\[]+)")
-
-
-def sorried_theorems(text):
-    """Fully qualified names of the lemmas/theorems declared in the challenge text (all of
-    which referee leaves as `sorry`), following `namespace`/`end` nesting."""
-    stack = []
-    out = []
-    for line in text.split("\n"):
-        m = re.match(r"^namespace\s+(\S+)", line)
-        if m:
-            stack.append(m.group(1))
-            continue
-        m = re.match(r"^end\s+(\S+)", line)
-        if m and stack and stack[-1] == m.group(1):
-            stack.pop()
-            continue
-        m = DECL_RE.match(line)
-        if m:
-            out.append(".".join(stack + [m.group(1)]))
-    return out
-
-
-def find_referee(arg):
-    if arg:
-        return arg
-    if os.environ.get("REFEREE_BIN"):
-        return os.environ["REFEREE_BIN"]
-    cands = glob.glob(os.path.expanduser("~/.cache/entropy-mdp/referee/*/referee"))
-    if not cands:
-        sys.exit("referee binary not found; pass --referee PATH or set REFEREE_BIN")
-    return sorted(cands)[-1]
+def build_challenge_gen():
+    """challenge-gen at the tag of the project's toolchain, cloned and built into the cache."""
+    version = open(os.path.join(ROOT, "lean-toolchain")).read().strip().split(":v")[-1]
+    tag = f"v{version}"
+    src = os.path.join(CACHE, "challenge-gen")
+    if not os.path.isdir(src):
+        os.makedirs(CACHE, exist_ok=True)
+        subprocess.run(["git", "clone", "--quiet", CHALLENGE_GEN_REPO, src], check=True)
+    # The tag moves with each release for a toolchain: fetch it again.
+    subprocess.run(["git", "-C", src, "fetch", "--quiet", "--force", "--tags", "origin"], check=True)
+    if subprocess.run(["git", "-C", src, "checkout", "--quiet", tag]).returncode != 0:
+        sys.exit(f"challenge-gen has no release {tag} for this project's toolchain: see "
+                 f"{CHALLENGE_GEN_REPO}/tags")
+    subprocess.run(["lake", "build", "challenge-gen"], cwd=src, check=True)
+    return os.path.join(src, ".lake", "build", "bin", "challenge-gen")
 
 
 def main():
     args = sys.argv[1:]
-    referee = None
-    keep = None
+    binary = os.environ.get("CHALLENGE_GEN_BIN")
+    out_dir = os.path.join(ROOT, "comparator")
     while args:
         a = args.pop(0)
-        if a == "--referee":
-            referee = args.pop(0)
-        elif a == "--keep-extracted":
-            keep = args.pop(0)
+        if a == "--challenge-gen" and args:
+            binary = args.pop(0)
+        elif a == "--out" and args:
+            out_dir = os.path.abspath(args.pop(0))
         else:
             sys.exit(__doc__)
-    referee = find_referee(referee)
+    binary = binary or build_challenge_gen()
     targets = [t.strip() for t in open(os.path.join(ROOT, "comparator", "targets.txt")) if t.strip()]
-    vendor = open(os.path.join(ROOT, "comparator", "vendor", "LML.lean.part")).read().rstrip("\n")
 
-    work = keep or tempfile.mkdtemp(prefix="entropy-mdp-referee-")
-    data = os.path.join(work, "data.json")
-    out = os.path.join(work, "out")
-    subprocess.run(["lake", "env", referee, "collect", "--root", "Essakine2026Tight", "--data", data],
-                   cwd=ROOT, check=True)
-    subprocess.run(["lake", "env", referee, "extract", "--root", "Essakine2026Tight", "--data", data,
-                    "--output", out], cwd=ROOT, check=True)
+    work = tempfile.mkdtemp(prefix="challenge-gen-")
+    decls = os.path.join(work, "targets.txt")
+    open(decls, "w").write("".join(f"{LIB}.{t}\n" for t in targets))
+    generated = os.path.join(work, "out")
+    # The libraries whose definitions the challenges import rather than copy: those of IMPORTED
+    # that the library uses. challenge-gen refuses a prefix with no module in the environment (a
+    # paper on LML that does not import LMLExplore yet), and the run is retried without it.
+    imported = list(IMPORTED)
+    while True:
+        cmd = ["lake", "env", binary, "--root", LIB]
+        for prefix in imported:
+            cmd += ["--import", prefix]
+        run = subprocess.run(cmd + ["--decls-file", decls, "--out", generated],
+                             cwd=ROOT, capture_output=True, text=True)
+        missing = re.search(r"no module under (\S+), given to --import", run.stderr + run.stdout)
+        if run.returncode != 0 and missing and missing.group(1) in imported:
+            imported.remove(missing.group(1))
+            continue
+        break
+    sys.stderr.write(run.stderr)
+    if run.returncode != 0:
+        sys.exit(f"challenge-gen failed:\n{run.stdout}")
+    print(f"the challenges import {', '.join(imported)}")
 
+    os.makedirs(out_dir, exist_ok=True)
+    unchecked = []
     for t in targets:
-        src = os.path.join(out, "html-multi", "extracted", f"Essakine2026Tight___{t}.lean")
-        lines = open(src).read().split("\n")
-        imports = [l for l in lines if l.startswith("import ")]
-        body_start = len(imports)
-        while body_start < len(lines) and (lines[body_start].startswith("import ") or lines[body_start] == ""):
-            body_start += 1
-        body = lines[body_start:]
-        mathlib_imports = [l[len("import "):] for l in imports if l.startswith("import Mathlib")]
-        lml_imports = [l for l in imports if l.startswith("import LeanMachineLearning")]
-        other = [l for l in imports if not (l.startswith("import Mathlib") or l.startswith("import LeanMachineLearning"))]
-        if other:
-            sys.exit(f"{t}: unexpected imports {other}")
-        all_imports = []
-        for m in VENDOR_IMPORTS + mathlib_imports:
-            if m not in all_imports:
-                all_imports.append(m)
-        text = "\n".join(body)
-        text = text.replace(
-            "Auto-generated by Referee. -/",
-            "Auto-generated by Referee (`scripts/make-challenges.py`), with the LML declarations the\n"
-            "statement rests on vendored in below, so that this file is self-contained over Mathlib\n"
-            "(its transitive imports resolve to Mathlib and Lean core only). -/")
-        # insert the vendored block before the first project section
-        idx = text.index("\n-- ═══ ")
-        text = text[:idx] + "\n" + vendor + "\n" + text[idx:]
-        header = "\n".join(f"import {m}" for m in all_imports) + "\n\n"
-        dst = os.path.join(ROOT, "comparator", f"Challenge_{t}.lean")
-        open(dst, "w").write(header + text.rstrip("\n") + "\n")
-        # Every lemma/theorem in the challenge has its proof replaced by `sorry` (referee does this
-        # for the target and for the project lemmas the definitions rest on). Comparator compares
-        # the *values* of the theorems in the statement's closure, so each sorry'd lemma must be
-        # listed as a target too: comparator then verifies that the solution proves it instead of
-        # requiring an identical proof term.
-        names = [f"Essakine2026Tight.{t}"] + [n for n in sorried_theorems(text) if n != f"Essakine2026Tight.{t}"]
-        cfg = {
-            "challenge_module": f"Challenge_{t}",
-            "solution_module": "Solution",
-            "theorem_names": names,
-            "permitted_axioms": PERMITTED_AXIOMS,
-        }
-        open(os.path.join(ROOT, "comparator", f"{t}.json"), "w").write(json.dumps(cfg, indent=4) + "\n")
-        print(f"wrote Challenge_{t}.lean ({len(lml_imports)} LML imports replaced)")
+        # challenge-gen names a file after its declaration, dots written `___`.
+        stem = os.path.join(generated, f"{LIB}.{t}".replace(".", "___"))
+        text = open(stem + ".lean").read()
+        open(os.path.join(out_dir, f"Challenge_{t}.lean"), "w").write(text)
+        if not os.path.exists(stem + ".json"):
+            unchecked.append(t)
+            continue
+        cfg = json.load(open(stem + ".json"))
+        cfg["challenge_module"] = f"Challenge_{t}"
+        open(os.path.join(out_dir, f"{t}.json"), "w").write(json.dumps(cfg, indent=4) + "\n")
+        print(f"wrote Challenge_{t}.lean and {t}.json ({len(cfg['theorem_names'])} theorems to check)")
+    if unchecked:
+        sys.exit(f"comparator cannot check {', '.join(unchecked)}: see challenge-gen's message above")
 
 
 if __name__ == "__main__":

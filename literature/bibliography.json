@@ -1,0 +1,32 @@
+{
+  "EV26": {
+    "uri": "https://arxiv.org/abs/2605.13717",
+    "identifiers": {
+      "arxiv": "2605.13717"
+    },
+    "citation": {
+      "id": "EV26",
+      "type": "paper-conference",
+      "title": "Tight Sample Complexity Bounds for Entropic Best Policy Identification",
+      "author": [
+        {
+          "family": "Essakine",
+          "given": "Amer"
+        },
+        {
+          "family": "Vernade",
+          "given": "Claire"
+        }
+      ],
+      "container-title": "Proceedings of the 39th Conference on Learning Theory (COLT)",
+      "issued": {
+        "date-parts": [
+          [
+            2026
+          ]
+        ]
+      }
+    },
+    "version": "v1"
+  }
+}
