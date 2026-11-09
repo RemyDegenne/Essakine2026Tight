@@ -5,7 +5,7 @@
 version: "v0.4"
 
 project:
-  name: "entropy-mdp"
+  name: "Essakine2026Tight"
   description: >-
     A Lean 4 formalization, on top of LMLExplore (and so of LML, Tau Ceti and Mathlib), of "Tight
     Sample Complexity Bounds for Entropic Best Policy Identification" (Amer Essakine, Claire
@@ -28,8 +28,8 @@ project:
     - "Rémy Degenne"
   license: "Apache-2.0"
   # extra keys (tolerated by the schema), kept for convenience:
-  repository: "https://github.com/RemyDegenne/entropy-mdp"
-  blueprint: "https://remydegenne.github.io/entropy-mdp/blueprint/"
+  repository: "https://github.com/RemyDegenne/Essakine2026Tight"
+  blueprint: "https://remydegenne.github.io/Essakine2026Tight/blueprint/"
 
 # This repository is the substantive formalization, not a packaging or comparison layer.
 repository:

@@ -1,4 +1,4 @@
-# entropy-mdp
+# Essakine2026Tight
 
 A Lean 4 formalization of *Tight Sample Complexity Bounds for Entropic Best Policy Identification*
 (Amer Essakine and Claire Vernade, COLT 2026,
@@ -18,7 +18,7 @@ divergence and a misplaced Condition A in the lower bound, a bonus with the wron
 clips, a false self-bounding lemma, ...): the formalized statements are the corrected ones, see
 the errata. Every headline result is proved, with no `sorry`.
 
-- Website: https://RemyDegenne.github.io/entropy-mdp/, with the blueprint, the referee site and the
+- Website: https://RemyDegenne.github.io/Essakine2026Tight/, with the blueprint, the referee site and the
   literature links (which declarations formalize which results of the paper). CI builds it on each
   push to `main`. `scripts/formalize.sh` also commits the literature links, as
   `literature/annotations.jsonl`, when the paper is formalized and after the final bump.

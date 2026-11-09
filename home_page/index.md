@@ -11,4 +11,4 @@ on top of [LMLExplore](https://github.com/LeanMachineLearning/LMLExplore).
 * [Dependency graph]({{ site.url }}/blueprint/dep_graph_document.html)
 * [Referee site]({{ site.url }}/referee/)
 * [Literature links]({{ site.url }}/literature/): which declarations formalize which results of the paper
-* [Errata](https://github.com/RemyDegenne/entropy-mdp/blob/main/notes/paper-errata.md): errors found in the paper, with their corrections
+* [Errata](https://github.com/RemyDegenne/Essakine2026Tight/blob/main/notes/paper-errata.md): errors found in the paper, with their corrections
