@@ -354,8 +354,8 @@ $(e^{\beta\eps} - 1)/e^{\beta\eps}$, $1 - e^{\beta\eps}$ are less than $1$; henc
 
 \textbf{Lean remark.} \texttt{entropicBPI H r β δ ε s₁ : BPIAlg S A H} (the horizon is an
 explicit argument, the reward function \texttt{r : ℕ → S → A → ℝ} being defined on all steps) with
-\texttt{alg := detAlgorithm (fun \_ p ↦ greedy r β δ p.1) (fun \_ ↦ measurable\_of\_countable \_)}
-(LML \texttt{detAlgorithm}: the next action is a measurable function of the pair (history,
+\texttt{alg := Algorithm.deterministic (fun \_ p ↦ greedy r β δ p.1) (fun \_ ↦ measurable\_of\_countable \_)}
+(LML \texttt{Algorithm.deterministic}: the next action is a measurable function of the pair (history,
 observation); the observation is \texttt{()}), \texttt{stopSet := \{h : Σ n, Hist Unit (Policy S A H) (Traj S H) n | stopCond r β δ ε s₁ h.2\}}
 (measurable since the history type is countable: \texttt{(Set.to\_countable \_).measurableSet}),
 and \texttt{output := Kernel.deterministic (fun h ↦ greedy r β δ h.2) (measurable\_of\_countable \_)}.
@@ -405,10 +405,9 @@ history of the first $\tau$ episodes, so $\hat\pi = \mathrm{greedy}(\hist_\tau) 
 
 \textbf{Lean remark.} File \texttt{EV2026/EntropicBPIRun.lean}; the statements hold for runs in
 any environment, not only in the episode environment of an MDP. (i) is LML's
-\texttt{IsDeterministicAlg.action\_ae\_all\_eq} (or
-\texttt{action\_detAlgorithm\_ae\_all\_eq}) for \texttt{detAlgorithm}: \texttt{∀ᵐ ω ∂P, ∀ t, X t ω = greedy r β δ (histAt X Y t ω)};
+\texttt{IsAlgEnvSeq.action\_ae\_all\_eq\_deterministic} for \texttt{Algorithm.deterministic}: \texttt{∀ᵐ ω ∂P, ∀ t, X t ω = greedy r β δ (histAt X Y t ω)};
 its proof is \texttt{hasCondDistrib\_action} with the deterministic policy kernel and
-\texttt{ae\_eq\_of\_hasCondDistrib\_deterministic}. (ii) is the characterization of
+\texttt{HasCondDistrib.ae\_eq\_of\_deterministic}. (ii) is the characterization of
 \texttt{hittingAfter} (Mathlib: \texttt{hittingAfter\_mem\_set\_of\_ne\_top},
 \texttt{hittingAfter\_le\_iff}, and LML's \texttt{IdentAlg.stoppedHist\_mem\_stopSet\_of\_ne\_top});
 the value \texttt{τ ω : ℕ∞} is compared with \texttt{t} through \texttt{ENat} coercions. (iii)

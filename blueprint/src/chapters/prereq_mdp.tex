@@ -51,8 +51,8 @@ for $h \ge H + 1$ (the return of $H + 1 - h = 0$ rounds).
 
 \textbf{What Mathlib/LML provides.} LML's \texttt{MDP.policyMeasure} and its Ionescu-Tulcea
 structure (\texttt{trajMeasure}, \texttt{IsAlgEnvSeq}, \texttt{hasCondDistrib\_feedback},
-\texttt{hasCondDistrib\_action}), the stationary environment \texttt{stationaryEnv} with
-\texttt{feedback\_stationaryEnv}, and, for bandits, the law of the reward of the $k$-th pull
+\texttt{hasCondDistrib\_action}), the stationary environment \texttt{Environment.bandit} with
+\texttt{feedback\_bandit}, and, for bandits, the law of the reward of the $k$-th pull
 of an arm (\texttt{Online/Bandit/RewardByCountMeasure.lean}: \texttt{hasLaw\_rewardByCount},
 \texttt{iIndepFun\_rewardByCount}). Mathlib: \texttt{ProbabilityTheory.variance},
 \texttt{variance\_def'}, \texttt{MeasureTheory.integral\_finset\_sum},

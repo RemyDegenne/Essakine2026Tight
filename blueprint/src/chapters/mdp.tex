@@ -5,7 +5,7 @@ This chapter fixes the objects of the paper (Section~2 of \cite{essakine2026tigh
 with the exponential Bellman equation of its Section~4) in the form in which they are
 formalized on top of the LML framework of sequential algorithms and environments
 (\texttt{Learning.Algorithm}, \texttt{Learning.Environment}, \texttt{Learning.IsAlgEnvSeq},
-\texttt{Learning.stationaryEnv}) and of LML's MDPs (\texttt{Learning.MDP}). Its definitions are
+\texttt{Learning.Environment.bandit}) and of LML's MDPs (\texttt{Learning.MDP}). Its definitions are
 library material (namespace \texttt{Learning.MDP}, files \texttt{Basic.lean},
 \texttt{Entropic.lean} of \texttt{Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Episodic/}).
 
@@ -674,7 +674,7 @@ sequence in which one round is one episode.
 \lean{Learning.MDP.Episodic.statesLaw, Learning.MDP.Episodic.statesKernel, Learning.MDP.Episodic.statesEnv}\leanok
 \uses{def:step_law, def:episode_return, def:policy}
 Fix an initial state $s_1$. The \emph{episode environment} of $\mathcal M$ from $s_1$ is the
-stationary LML environment (\texttt{stationaryEnv}) without observations, whose actions are the
+stationary LML environment (\texttt{Environment.bandit}) without observations, whose actions are the
 policies $\pi \in \As^{\{1, \dots, H\} \times \Ss}$ and whose feedback to the action $\pi$ is the
 state sequence $(S_1, \dots, S_{H+1})$ of an episode of $\pi$ from $s_1$, drawn from the
 \emph{states kernel} $\nu_{\mathcal M}(\pi) :=$ the law of $(S_1, \dots, S_{H+1})$ under
@@ -687,7 +687,7 @@ for the action played at step $h$ of the episode $t + 1$.
 \textbf{Lean remark.} \texttt{statesLaw M H s₁ π := (stepLaw M π (s₁, 0)).map (episodeStates H)}
 for a policy \texttt{π : ℕ → S → A}, \texttt{statesKernel M H s₁ : Kernel (Policy S A H) (Traj S H)},
 \texttt{π ↦ statesLaw M H s₁ π.extend} (measurable on the countable discrete type of
-$H$-step policies), and \texttt{statesEnv M H s₁ := stationaryEnv (statesKernel M H s₁) : Environment Unit (Policy S A H) (Traj S H)}.
+$H$-step policies), and \texttt{statesEnv M H s₁ := Environment.bandit (statesKernel M H s₁) : Environment Unit (Policy S A H) (Traj S H)}.
 The observation type is \texttt{Unit}. The rewards are not part of the feedback: an
 algorithm for this environment is a learner who knows $r$; this is the reason why the PAC
 property below is stated for the class $\mathcal M_r$.
@@ -708,8 +708,8 @@ Lemma~\ref{lem:pmdp_episode_env_step}.
 \uses{def:episode_env}
 \leanok
 This is the defining property of an algorithm-environment sequence for a stationary environment
-(LML \texttt{IsObliviousEnv.hasCondDistrib\_feedback\_history\_action} together with
-\texttt{feedbackCondAction\_stationaryEnv}: the feedback kernel of \texttt{stationaryEnv ν} at every
+(LML \texttt{IsAlgEnvSeq.hasCondDistrib\_feedback} together with
+\texttt{feedback\_bandit}: the feedback kernel of \texttt{Environment.bandit ν} at every
 round is $\nu$ applied to the action).
 \end{proof}
 

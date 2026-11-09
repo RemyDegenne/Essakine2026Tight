@@ -46,7 +46,7 @@ generated target (\texttt{klDiv\_compProd\_right\_eq\_lintegral},
 \texttt{klDiv\_add\_add\_of\_measure\_eq\_zero}, \texttt{klDiv\_eq\_iSup\_restrict}), and the
 divergence decomposition for a fixed number of rounds
 (\texttt{SequentialLearning/DivergenceDecomposition.lean}:
-\texttt{IsAlgEnvSeq.klDiv\_map\_history}, Lemma~\ref{lem:kl_history_le}). Stopping rules,
+\texttt{IsAlgEnvSeq.klDiv\_map\_history\_bandit}, Lemma~\ref{lem:kl_history_le}). Stopping rules,
 stopping times and stopped histories of algorithm-environment sequences are in
 \texttt{SequentialLearning/StoppedHistory.lean} (\texttt{sigmaHistory},
 \texttt{stoppedHistMeasure}) and identification algorithms in
@@ -292,10 +292,10 @@ more general than the text above had it ($D = \infty$ allowed).
 \textbf{Standing setting.} Let $\As$ be a finite set (the actions; every subset of a finite
 type is measurable) and $\mathcal Y$ a countably generated measurable space (the feedback;
 finite types, $\R$ and countable products of such spaces qualify). Let $\nu, \nu' : \As \to
-\Delta(\mathcal Y)$ be two Markov kernels and $\mathrm{env} := \mathrm{stationaryEnv}(\nu)$,
-$\mathrm{env}' := \mathrm{stationaryEnv}(\nu')$ the two stationary environments without
-observations (LML \texttt{Learning.stationaryEnv}: at every round, given the past and the
-action $a$, the feedback has law $\nu(a)$, \texttt{feedback\_stationaryEnv}). Let
+\Delta(\mathcal Y)$ be two Markov kernels and $\mathrm{env} := \mathrm{bandit}(\nu)$,
+$\mathrm{env}' := \mathrm{bandit}(\nu')$ the two stationary environments without
+observations (LML \texttt{Learning.Environment.bandit}: at every round, given the past and the
+action $a$, the feedback has law $\nu(a)$, \texttt{feedback\_bandit}). Let
 $\mathrm{alg}$ be an algorithm with actions in $\As$ and feedback in $\mathcal Y$ (policy
 kernels $\pi_n$ from histories of $n$ rounds to $\As$). We consider two
 \emph{algorithm-environment sequences} (LML \texttt{IsAlgEnvSeq}): $(X_t, Y_t)_{t \in \N}$ on
@@ -335,7 +335,7 @@ write $\mathrm{trunc}_M : \mathcal H \to \mathcal H$ for the truncation to the f
 so that $\mathrm{trunc}_M(\hist_\tau) = \hist_{\tau\wedge M}$ on $\{\tau < \infty\}$.
 
 \begin{lemma}[Divergence decomposition for a fixed number of rounds]\label{lem:kl_history_le}
-\lean{Learning.IsAlgEnvSeq.klDiv_map_history, Learning.IsAlgEnvSeq.klDiv_map_history_compProd, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_klDiv_eq_sum_pullCount, Learning.lintegral_sum_klDiv_eq_sum_pullCount}\leanok
+\lean{Learning.IsAlgEnvSeq.klDiv_map_history_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_compProd_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_klDiv_eq_sum_pullCount, Learning.lintegral_sum_klDiv_eq_sum_pullCount}\leanok
 In the standing setting, for every $n \in \N$,
 \[
   \KL\big(\mathrm{law}_\nu(\hist_n)\,\big\|\,\mathrm{law}_{\nu'}(\hist_n)\big)
@@ -355,7 +355,7 @@ of $\hist_{n+1} = (\hist_n, (X_n, Y_n))$ is (up to the measurable equivalence
 $\mathcal H_{n+1} \simeq \mathcal H_n \times (\As\times\mathcal Y)$, which leaves $\KL$ invariant,
 LML \texttt{klDiv\_map\_measurableEquiv}) the composition-product
 $\mathrm{law}_\nu(\hist_n) \otimes (\pi_n \otimes \tilde\nu)$ where $\tilde\nu(h, a) := \nu(a)$
-(LML \texttt{IsAlgEnvSeq.hasCondDistrib\_step}, \texttt{stepKernel\_stationaryEnv}), and
+(LML \texttt{IsAlgEnvSeq.hasCondDistrib\_step}, \texttt{stepKernel\_bandit}), and
 similarly with primes and the \emph{same} policy kernel $\pi_n$. The chain rule
 \texttt{klDiv\_compProd\_eq\_add} gives
 \[
@@ -374,11 +374,11 @@ $\sum_{t<n}\E_\nu[\KL(\nu(X_t)\|\nu'(X_t))] = \sum_a \KL(\nu_a\|\nu'_a)\,\E_\nu[
 \end{proof}
 
 \textbf{Lean remark.} The first equality is exactly LML's
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history}: for \texttt{h : IsAlgEnvSeq O X Y alg
-(stationaryEnv κ) P} and \texttt{h' : IsAlgEnvSeq O' X' Y' alg (stationaryEnv κ') P'} and
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history\_bandit}: for \texttt{h : IsAlgEnvSeq O X Y alg
+(Environment.bandit κ) P} and \texttt{h' : IsAlgEnvSeq O' X' Y' alg (Environment.bandit κ') P'} and
 \texttt{[MeasurableSpace.CountablyGenerated 𝓨]}, \texttt{klDiv (P.map (history O X Y M))
 (P'.map (history O' X' Y' M)) = ∑ t ∈ range M, ∫⁻ ω, klDiv (κ (X t ω)) (κ' (X t ω)) ∂P}
-(its composition-product form \texttt{klDiv\_map\_history\_compProd} needs no countable
+(its composition-product form \texttt{klDiv\_map\_history\_compProd\_bandit} needs no countable
 generation). The reindexing by actions is
 \texttt{Learning.IsAlgEnvSeq.klDiv\_map\_history\_eq\_sum\_pullCount}
 (\texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean}),
@@ -423,7 +423,7 @@ $\KL(\mu|_{s_n}\|\nu|_{s_n}) = \infty$.
 \texttt{klDiv\_add\_add\_of\_measure\_eq\_zero} and \texttt{klDiv\_eq\_iSup\_restrict}.
 
 \begin{lemma}[One step of the algorithm against two environments]\label{lem:pinfo_kl_step}
-\lean{Learning.klDiv_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, InformationTheory.klDiv_compProd_right_eq_lintegral, Learning.klDiv_compProd_compProd_prodMkLeft, Learning.klDiv_compProd_compProd_prodMkLeft_eq_sum}\leanok
+\lean{InformationTheory.klDiv_compProd_compProd_prodMkLeft_eq_klDiv_comp_compProd, InformationTheory.klDiv_compProd_right_eq_lintegral, Learning.klDiv_compProd_compProd_prodMkLeft, Learning.klDiv_compProd_compProd_prodMkLeft_eq_sum}\leanok
 Let $P$ be a finite measure on a measurable space $\mathcal H_0$, $\pi$ a Markov kernel from
 $\mathcal H_0$ to $\As$ and $\tilde\nu, \tilde\nu'$ the kernels $(h, a) \mapsto \nu(a)$,
 $(h, a) \mapsto \nu'(a)$ from $\mathcal H_0 \times \As$ to $\mathcal Y$ (Mathlib
@@ -455,8 +455,8 @@ the finite set $\As$ (\texttt{lintegral\_fintype}).
 \end{proof}
 
 \textbf{Lean remark.} The first two equalities are LML's
-\texttt{Learning.klDiv\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}
-(\texttt{SequentialLearning/DivergenceDecomposition.lean}) and
+\texttt{InformationTheory.klDiv\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}
+(\texttt{ForMathlib/InformationTheory/KullbackLeibler/CompProd.lean}) and
 \texttt{klDiv\_compProd\_right\_eq\_lintegral}; the version with an observation kernel is
 \texttt{klDiv\_compProd\_compProd\_compProd\_prodMkLeft\_eq\_klDiv\_comp\_compProd}. Their
 composition is the project's \texttt{Learning.klDiv\_compProd\_compProd\_prodMkLeft} (for
@@ -800,8 +800,8 @@ $E'^c \cap \{\tau' < \infty\} \subseteq E'^c$, so Lemma~\ref{lem:pinfo_klbin_con
 $\klbin(x, y) \le \max\{\klbin(x,y_1), \klbin(x, 1 - z)\} \le D$.
 \end{proof}
 
-\textbf{Lean remark.} For two runs \texttt{h : A.IsRun (stationaryEnv ν) O X Y out P} and
-\texttt{h' : A.IsRun (stationaryEnv ν') O' X' Y' out' P'} of \texttt{A : IdentAlg Unit 𝓐 𝓨 𝓓}
+\textbf{Lean remark.} For two runs \texttt{h : A.IsRun (Environment.bandit ν) O X Y out P} and
+\texttt{h' : A.IsRun (Environment.bandit ν') O' X' Y' out' P'} of \texttt{A : IdentAlg Unit 𝓐 𝓨 𝓓}
 (probability measures on arbitrary spaces), with \texttt{[Fintype 𝓐] [DecidableEq 𝓐]
 [MeasurableSingletonClass 𝓐] [MeasurableSpace.CountablyGenerated 𝓨]}, Markov kernels
 \texttt{ν ν' : Kernel 𝓐 𝓨}, \texttt{hτ : ∀ᵐ ω ∂P, A.stoppingTime O X Y ω ≠ ⊤} and a measurable
@@ -820,7 +820,7 @@ the right-hand side is finite, is \texttt{IsRun.klBerReal\_measureReal\_le\_toRe
 For an event of the output only, the second run can be taken canonical
 (Lemma~\ref{lem:pinfo_canonical_run}):
 \texttt{IsRun.klBer\_measureReal\_outputMeasure\_le\_sum\_pullCount h hτ hs} bounds
-\texttt{klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (stationaryEnv ν')).real s)}, which is the
+\texttt{klBer (P.real (out ⁻¹' s)) ((A.outputMeasure (Environment.bandit ν')).real s)}, which is the
 form Chapter~\ref{chap:lower_bound} needs (the PAC property is a statement about
 \texttt{outputMeasure}, and no run in the alternative environments is given). The two-sided
 identity for the pair is \texttt{IsRun.klDiv\_map\_stoppedHist\_out\_eq\_sum\_pullCount}. File:
