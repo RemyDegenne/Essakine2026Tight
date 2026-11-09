@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Algorithm
-public import Essakine2026Tight.Mathlib.MeasureTheory.Measure.Weighted
+public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.Weighted
 public import Mathlib.InformationTheory.KullbackLeibler.Basic
 
 /-!

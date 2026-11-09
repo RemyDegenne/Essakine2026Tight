@@ -7,10 +7,10 @@ module
 
 public import Essakine2026Tight.EV2026.RateBounds
 public import Essakine2026Tight.EV2026.VisitCounts
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Values
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.VisitConcentration
-public import Essakine2026Tight.Mathlib.InformationTheory.KLTimeUniform
-public import Essakine2026Tight.Mathlib.Probability.Moments.SelfNormalizedBernsteinIID
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Values
+public import Essakine2026Tight.ForLMLExplore.ReinforcementLearning.Episodic.VisitConcentration
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.KLTimeUniform
+public import Essakine2026Tight.ForLMLExplore.Probability.Moments.SelfNormalizedBernsteinIID
 public import Mathlib.Probability.HasLawExists
 
 /-!

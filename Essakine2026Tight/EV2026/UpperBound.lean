@@ -9,7 +9,7 @@ public import Essakine2026Tight.EV2026.Algorithm
 public import Essakine2026Tight.EV2026.Constants
 public import Essakine2026Tight.EV2026.TailNeg
 public import Essakine2026Tight.EV2026.TailPos
-public import Essakine2026Tight.LeanMachineLearning.SequentialLearning.IdentificationAlg
+public import Essakine2026Tight.ForLMLExplore.Identification.IdentificationAlg
 
 /-!
 # Theorem 4: sample complexity of Entropic-BPI

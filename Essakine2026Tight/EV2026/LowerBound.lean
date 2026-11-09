@@ -5,10 +5,10 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Entropic
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Entropic
 public import Essakine2026Tight.EV2026.Constants
 public import Essakine2026Tight.EV2026.HardMDP
-public import Essakine2026Tight.LeanMachineLearning.SequentialLearning.ChangeOfMeasure
+public import Essakine2026Tight.ForLMLExplore.Identification.ChangeOfMeasure
 
 /-!
 # Theorem 3: lower bound on the sample complexity of entropic best-policy identification

@@ -713,7 +713,7 @@ $\klbin(\Prob_0(E_u), \Prob_u(E_u)) \le \sum_\pi \E_0[N_\pi(\tau)]\,\indic\{u(\p
 under the hypothesis that $\tau$ is $\Prob_0$-a.s.\ finite (which follows from $\E_0[\tau] < \infty$).
 \texttt{statesEnv M H s₁ := stationaryEnv (statesKernel M H s₁)} by
 definition, so Theorem~\ref{thm:change_of_measure}
-(\texttt{Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean})
+(\texttt{Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean})
 applies verbatim with the action type \texttt{Policy S A H} (a \texttt{Fintype}) and the
 feedback type \texttt{Traj S H}. The pull counts $N_\pi(\tau)$ are LML's counts of the rounds
 with action $\pi$ before the stopping time; the sum over $\mathcal P$ is a \texttt{Finset.sum}

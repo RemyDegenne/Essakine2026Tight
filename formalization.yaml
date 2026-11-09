@@ -73,7 +73,8 @@ status:
   scope: >-
     Phase 1 (statements, 2026-09-16). The headline results of the paper are stated in Lean, each
     as a `sorry`-ed theorem, over definitions written in library generality
-    (`Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/`: finite-horizon MDPs on
+    (`Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/` and
+    `Essakine2026Tight/ForLMLExplore/ReinforcementLearning/Episodic/`: finite-horizon MDPs on
     top of LML's `MDP`, entropic values, empirical models; `Essakine2026Tight/EV2026/`: the
     exploration rates, the Entropic-BPI algorithm, the run quantities and events, the
     constants):
@@ -117,7 +118,7 @@ status:
     Phase 2 (proofs) started on 2026-09-16 and follows the blueprint chapter by chapter. Done:
     chapter "Elementary inequalities" (`chap:pre_analysis`: square-root and exponential bounds,
     the normalized variance bound for exponential transforms, the logarithmic sum bound, the
-    corrected self-bounding inequality), 7 files under `Essakine2026Tight/Mathlib/`, every
+    corrected self-bounding inequality), 7 files under `Essakine2026Tight/ForLMLExplore/`, every
     statement and proof `\leanok`; Mathlib's `variance_le_sub_mul_sub` provides the
     Bhatia–Davis inequality. The plan for the remaining chapters is `notes/phase2-plan.md`.
 
@@ -136,7 +137,7 @@ status:
     signs of `β` (`EV2026/Analysis{Common,Pos,Neg}.lean`: concentration, optimism, the auxiliary
     values, the certificate, soundness of stopping, the certificate recursion), and the
     time-uniform KL concentration of the empirical distribution
-    (`Mathlib/InformationTheory/KLTimeUniform.lean`, by the Laplace mixture), and the
+    (`ForLMLExplore/InformationTheory/KLTimeUniform.lean`, by the Laplace mixture), and the
     probabilities of the concentration events and of the good event in every run
     (`EV2026/Events.lean`), the tail of the analysis for both signs of `β`
     (`EV2026/Tail{Common,Pos,Neg}.lean`: unrolled certificate, normalized certificate bound,

@@ -12,10 +12,11 @@ variances, and the sampling structure at the visits of a state-action pair in a 
 arbitrary algorithm (what the concentration events of Chapter~\ref{chap:empirical} consume).
 Everything is stated for an arbitrary finite-horizon MDP and policy, in library generality
 (namespace \texttt{Learning.MDP.Episodic}, files \texttt{StepLaw.lean}, \texttt{Occupancy.lean},
-\texttt{StateSeq.lean}, \texttt{Unroll.lean}, \texttt{EntropicVariance.lean} and \texttt{Visits.lean} of
-\texttt{Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/}; the pure probability
-lemmas are in \texttt{Essakine2026Tight/Mathlib/Probability/HasCondDistribIntegral.lean} and
-\texttt{Essakine2026Tight/Mathlib/MeasureTheory/Integral/CauchySchwarz.lean}, and the statements
+\texttt{StateSeq.lean}, \texttt{Unroll.lean}, \texttt{EntropicVariance.lean} of
+\texttt{Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Episodic/} and \texttt{Visits.lean} of
+\texttt{Essakine2026Tight/ForLMLExplore/ReinforcementLearning/Episodic/}; the pure probability
+lemmas are in \texttt{Essakine2026Tight/ForLMLExplore/Probability/HasCondDistribIntegral.lean} and
+\texttt{Essakine2026Tight/ForLMLExplore/MeasureTheory/Integral/CauchySchwarz.lean}, and the statements
 about the run quantities of Entropic-BPI in \texttt{Essakine2026Tight/EV2026/VisitCounts.lean}).
 
 \textbf{Standing notation.} $\mathcal M = (\Ss, \As, H, (p_h)_{h \le H}, (R_h)_{h \le H})$ is
@@ -843,7 +844,7 @@ it iff $w_i = 1$) and the ``reward'' is the next state $s^i_{h+1}$. The bandit f
 exact i.i.d.\ law of the rewards by count by extending the probability space with an
 independent i.i.d.\ stream (\texttt{P.prod (streamMeasure ν)}) that fills in the pulls that never
 happen; the dominated form (i), stated on $\{T_n < \infty\}$ without any extension, is all the
-union bound needs and is the statement to contribute to LML (\texttt{MDP/Visits.lean}). The Lean
+union bound needs and is the statement to contribute to LML (\texttt{ForLMLExplore/ReinforcementLearning/Episodic/Visits.lean}). The Lean
 statements are as follows, for a run \texttt{hseq : IsAlgEnvSeq O X Y alg (statesEnv M H s₁) P}, the
 $0$-indexed step \texttt{h : Fin H} and the map
 \texttt{infoBeforeStep O X Y t h ω = (((history O X Y t ω, O t ω), X t ω), (Y t ω i)\_\{i ≤ h\})}

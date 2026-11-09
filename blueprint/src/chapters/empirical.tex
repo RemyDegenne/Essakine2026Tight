@@ -103,11 +103,11 @@ convexity of the combination; $\Var_q(f) = q(f - qf)^2 \ge 0$ by positivity.
 \textbf{Lean remark.} \texttt{empTrans\_nonneg} and \texttt{sum\_empTrans}
 (\texttt{EV2026/Backups.lean}); the sum uses that the transition counts of the model of a history
 sum to the visit counts (\texttt{EmpiricalModel.IsConsistent}, preserved by sums,
-\texttt{MDP/EmpiricalCounts.lean}). The \texttt{vecExp}/\texttt{vecVar} lemmas of \texttt{Vec.lean}
+\texttt{ForLMLExplore/ReinforcementLearning/Episodic/EmpiricalCounts.lean}). The \texttt{vecExp}/\texttt{vecVar} lemmas of \texttt{Vec.lean}
 (Lemma~\ref{lem:exp_value_monotone}, \texttt{vecVar\_nonneg}) then apply to
 \texttt{empTrans hist h s a}. The KL divergence of Definition~\ref{def:event_kl} views this
 vector as a measure through \texttt{weightedMeasure : (S → ℝ) → Measure S}
-(\texttt{Essakine2026Tight/Mathlib/}), $\sum_{s'} q(s') \delta_{s'}$.
+(\texttt{Essakine2026Tight/ForLMLExplore/}), $\sum_{s'} q(s') \delta_{s'}$.
 
 \section{Pseudo-counts}
 \label{sec:empirical_pseudo}
@@ -176,7 +176,7 @@ expectations in (iii) (tower rule), $\E[\indic\{(s^{i}_h, a^{i}_h) = (s, a)\}] =
 for every $i \ge 1$; sum over $i = 1, \dots, t$.
 \end{proof}
 
-\textbf{Lean remark.} In \texttt{EV2026/Events.lean} and \texttt{MDP/VisitConcentration.lean}, with
+\textbf{Lean remark.} In \texttt{EV2026/Events.lean} and \texttt{ForLMLExplore/ReinforcementLearning/Episodic/VisitConcentration.lean}, with
 $0$-indexed episodes. (i) is \texttt{pseudoCount\_succ}
 (\texttt{pseudoCount X M s₁ h s a (t + 1) ω = pseudoCount X M s₁ h s a t ω + occupancy M (X t ω) s₁ h s a}),
 with \texttt{occupancy\_nonneg}, \texttt{occupancy\_le\_one} and \texttt{occupancy\_eq} of
@@ -189,7 +189,7 @@ $\mathcal F_t$) is \texttt{occupancy M (X t ω) s₁ h s a} almost surely. It co
 Lemma~\ref{lem:episode_env_law} (\texttt{hasCondDistrib\_feedback\_history\_action\_statesEnv}),
 \texttt{measureReal\_statesLaw\_stepPair\_eq} (the probability that the state sequence of $\pi$
 visits $(s, a)$ at the step $h$ is $p^\pi_h(s, a)$) and the general
-\texttt{HasCondDistrib.condExp\_comap\_ae\_eq\_integral} (\texttt{Mathlib/Probability/HasCondDistribCondExp.lean}):
+\texttt{HasCondDistrib.condExp\_comap\_ae\_eq\_integral} (\texttt{ForLMLExplore/Probability/HasCondDistribCondExp.lean}):
 if $Y$ has conditional law $\kappa$ given $X$, then $\E[f(X, Y) \mid \sigma(X)] = \int f(X, y)\,\kappa(X, dy)$
 almost surely for every bounded measurable $f$. Unlike Mathlib's
 \texttt{condExp\_prod\_ae\_eq\_integral\_condDistrib}, it needs no standard Borel assumption, the
@@ -407,14 +407,14 @@ together with \texttt{iIndepFun.measure\_prefix\_mem\_eq\_pi}: the prefix $(\xi_
 i.i.d.\ sequence of law $p$ has law $p^{\otimes n}$. (ii) is proved in two steps. The
 first-entrance decomposition is library material,
 \texttt{MeasureTheory.measure\_exists\_mem\_le\_of\_forall\_measure\_inter\_le}
-(\texttt{Mathlib/Probability/Process/FirstEntrance.lean}): for a nonincreasing sequence of events
+(\texttt{ForLMLExplore/Probability/Process/FirstEntrance.lean}): for a nonincreasing sequence of events
 $E_n$, a process $W$ and a measurable process $\xi$ with values in a countable type with
 measurable singletons, if $\Prob(E_n \cap \{(W_1, \dots, W_n) \in C\}) \le \Prob'((\xi_1, \dots, \xi_n) \in C)$
 for all $n$ and $C$, then $\Prob(\exists n : E_n,\ (W_1, \dots, W_n) \in B_n) \le \Prob'(\exists n : (\xi_1, \dots, \xi_n) \in B_n)$;
 the sets $B'_n$ of the proof are \texttt{firstEntrance B n}. Only the $\xi$ side uses disjointness
 and measurability; the run side is a countable union bound, so no measurability of the events of
 the run is needed. The application to the visits is
-\texttt{measure\_exists\_le\_pullCount\_visitNextState\_mem\_le} (\texttt{MDP/VisitConcentration.lean}),
+\texttt{measure\_exists\_le\_pullCount\_visitNextState\_mem\_le} (\texttt{ForLMLExplore/ReinforcementLearning/Episodic/VisitConcentration.lean}),
 with $\{T_n < \infty\}$ written \texttt{∃ t, n ≤ pullCount (stepPair X Y h) (s, a) t ω}, the
 $0$-indexed sample \texttt{ξ k} ($\xi_{k+1}$ above), all $n \ge 0$ ($E_0 = \Omega$; the sets $B_0$
 of the applications are empty) and any i.i.d.\ sequence (\texttt{iIndepFun ξ μ'} and
@@ -588,7 +588,7 @@ in place of Theorem~\ref{thm:sanov_hp}.
 \end{remark}
 
 \textbf{Lean remark.} Lemmas~\ref{lem:emp_laplace_product}--\ref{lem:empirical_kl_time_uniform}
-are library material in \texttt{Essakine2026Tight/Mathlib/InformationTheory/KLTimeUniform.lean}
+are library material in \texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/KLTimeUniform.lean}
 (namespace \texttt{InformationTheory}). They are stated for an arbitrary probability measure
 \texttt{ν : Measure α} on a \texttt{Fintype α} with measurable singletons: the probability vector
 $p$ of the statement is \texttt{ν = weightedMeasure p}, $p(y)$ is \texttt{ν.real \{y\}}, and the
@@ -695,8 +695,8 @@ $v_k := \sigma^2$ (so that $S_n$ is the sum of the statement and $V_n = n \sigma
 and the confidence $\delta'$ gives the claim.
 \end{proof}
 
-\textbf{Lean remark.} \texttt{Mathlib/Probability/Independence/NaturalPast.lean} and
-\texttt{Mathlib/Probability/Moments/SelfNormalizedBernsteinIID.lean}. The filtration $(\mathcal G_n)$
+\textbf{Lean remark.} \texttt{ForLMLExplore/Probability/Independence/NaturalPast.lean} and
+\texttt{ForLMLExplore/Probability/Moments/SelfNormalizedBernsteinIID.lean}. The filtration $(\mathcal G_n)$
 is \texttt{Filtration.naturalPast ξ hξ} ($\bigvee_{i < n} \sigma(\xi_i)$; Mathlib's
 \texttt{Filtration.natural} includes the present), the independence is
 \texttt{indep\_iSup\_of\_disjoint} and the conditional expectations are \texttt{condExp\_indep\_eq}.
@@ -798,7 +798,7 @@ triples gives $\Prob(\Omega \setminus \evCnt) \le \delta/3$.
 \end{proof}
 
 \textbf{Lean remark.} The Bernoulli maximal inequality for the visits is
-\texttt{Learning.MDP.Episodic.measure\_exists\_pullCount\_lt\_le} (\texttt{MDP/VisitConcentration.lean}),
+\texttt{Learning.MDP.Episodic.measure\_exists\_pullCount\_lt\_le} (\texttt{ForLMLExplore/ReinforcementLearning/Episodic/VisitConcentration.lean}),
 for any observation process: Theorem~\ref{thm:bernoulli_concentration}
 (\texttt{measure\_exists\_sum\_lt\_half\_mul\_sum\_sub\_le}) applied to LML's filtration
 \texttt{hseq.filtrationAction} (with $0$-indexed episodes, \texttt{filtrationAction i} is generated

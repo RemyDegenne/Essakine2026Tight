@@ -5,12 +5,12 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Entropic
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Empirical
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Entropic
+public import Essakine2026Tight.ForLMLExplore.ReinforcementLearning.Episodic.Empirical
 public import Essakine2026Tight.EV2026.Rates
 public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 public import LeanMachineLearning.SequentialLearning.Deterministic
-public import Essakine2026Tight.Mathlib.MeasureTheory.MeasurableSpace.Sigma
+public import Essakine2026Tight.ForLMLExplore.MeasureTheory.MeasurableSpace.Sigma
 
 /-!
 # The Entropic-BPI algorithm (Essakine, Vernade 2026, Algorithm 1)

@@ -10,7 +10,7 @@ on them in parallel. Every item refers to the labels of `blueprint/src/chapters/
 
 | Chapter | Labels | Status |
 |---|---|---|
-| `chap:pre_analysis` (elementary inequalities) | 16 lemmas | **done**: 7 files under `Essakine2026Tight/Mathlib/`, all `\leanok` |
+| `chap:pre_analysis` (elementary inequalities) | 16 lemmas | **done**: 7 files under `Essakine2026Tight/ForLMLExplore/`, all `\leanok` |
 | `chap:mdp` (model) | 10 lemmas | **done** (main thread): `MDP/{Markov,StepLaw,Values}.lean` |
 | `chap:pre_concentration` | ~20 lemmas, 3 theorems | **done** (agent B) |
 | `chap:pre_info` (change of measure) | 12 lemmas, 1 theorem | **done** (agent C) |
@@ -42,8 +42,8 @@ its only context, so they are repeated here.
 * **File shape**: copyright header, `module`, `public import …`, module docstring,
   `@[expose] public section`, docstrings on every declaration, `lemma` for everything except
   the big classical theorems named `theorem` in the blueprint. Library-shaped material goes
-  under `Essakine2026Tight/Mathlib/<Mathlib path>` or
-  `Essakine2026Tight/LeanMachineLearning/<LML path>`, mirroring the upstream layout; nothing
+  under `Essakine2026Tight/ForLMLExplore/<Mathlib path>` or
+  `Essakine2026Tight/ForLMLExplore/<LML path>`, mirroring the upstream layout; nothing
   paper-specific there. Prove the general statement and derive the paper's form as a
   specialization. Laws are `HasLaw`/`HasCondDistrib`, not `Measure.map` equations.
 * **Comparator hygiene** (only for *definitions* that end up in the closure of a headline
@@ -83,9 +83,9 @@ Goal: prove every lemma and theorem of `blueprint/src/chapters/prereq_concentrat
 self-normalized Bernstein inequality by the method of mixtures, the KL–Bernstein inequality and
 the variance transport lemmas), in Mathlib generality, no MDP anywhere.
 
-Scope and suggested files (all new, under `Essakine2026Tight/Mathlib/`):
+Scope and suggested files (all new, under `Essakine2026Tight/ForLMLExplore/`):
 * `InformationTheory/MethodOfTypes.lean`: `lem:type_prob_le`, `lem:num_types`, `thm:sanov_hp`.
-  Probability vectors are `weightedMeasure` (`Essakine2026Tight/Mathlib/MeasureTheory/Measure/Weighted.lean`)
+  Probability vectors are `weightedMeasure` (`Essakine2026Tight/ForLMLExplore/MeasureTheory/Measure/Weighted.lean`)
   or, if more convenient, `PMF`/measures on a `Fintype` with `MeasurableSingletonClass`; KL is
   `InformationTheory.klDiv` (valued in `ℝ≥0∞`); the i.i.d. sample is `iIndepFun` with
   `HasLaw`. Choose the formulation that makes `lem:empirical_visits_domination` and
@@ -102,7 +102,7 @@ Scope and suggested files (all new, under `Essakine2026Tight/Mathlib/`):
   `lem:bernstein_mgf_bounded`, `lem:kl_bernstein`, `lem:kl_transport_var`,
   `lem:transport_var`, `lem:var_le_range_mean`.
 Available already: `Real.sqrt_add_le`, `Real.sqrt_mul_le_add`, `Real.sqrt_mul_le_half_add_half`
-(`Essakine2026Tight/Mathlib/Analysis/Real/Sqrt.lean`), `Real.one_add_div_pow_le_exp`,
+(`Essakine2026Tight/ForLMLExplore/Analysis/Real/Sqrt.lean`), `Real.one_add_div_pow_le_exp`,
 `ProbabilityTheory.integral_mem_Icc_of_ae_mem_Icc` (`…/Probability/Moments/Variance.lean`),
 Mathlib's `ProbabilityTheory.variance_le_sub_mul_sub` (Bhatia–Davis).
 Order of work: KL section (finite sums, easiest) → Sanov → Ville/Bernoulli → Bernstein.
@@ -121,10 +121,10 @@ keeping the upstream-mirroring layout:
 * `Maiti2026Power/Mathlib/InformationTheory/{KLBer,Pinsker,KLMap,KLStoppedPrefix}.lean`,
   `Maiti2026Power/Mathlib/Probability/Process/{SigmaPrefix,HittingTime}.lean`,
   `Maiti2026Power/Mathlib/Probability/Distributions/Bernoulli.lean` →
-  `Essakine2026Tight/Mathlib/…` (same relative paths). Take only what the chapter needs.
+  `Essakine2026Tight/ForLMLExplore/…` (same relative paths). Take only what the chapter needs.
 * `Maiti2026Power/LeanMachineLearning/{StoppedHistory,DivergenceDecomposition,RunDivergence}.lean`
-  → `Essakine2026Tight/LeanMachineLearning/SequentialLearning/…`.
-* New: `Essakine2026Tight/LeanMachineLearning/SequentialLearning/ChangeOfMeasure.lean` for
+  → `Essakine2026Tight/ForLMLExplore/SequentialLearning/…`.
+* New: `Essakine2026Tight/ForLMLExplore/Identification/ChangeOfMeasure.lean` for
   `lem:kl_output_pair` (pair version) and `thm:change_of_measure` (one-sided: `τ` a.s. finite
   under the first environment only; truncation to `τ ∧ M` through the identification
   algorithm with `stopSet := A.stopSet ∪ {x | x.1 = M}`, then `lem:pinfo_klbin_lsc` and
@@ -150,25 +150,25 @@ state-action pair.
 
 What exists (read these files first; `chap:mdp` is fully proved, see the `\lean` tags of
 `blueprint/src/chapters/mdp.tex`):
-* `MDP/Markov.lean`: Markov property of the trajectory law of a stationary policy in LML
+* `ForLMLExplore/MarkovDecisionProcess/Markov.lean`: Markov property of the trajectory law of a stationary policy in LML
   generality (`hasCondDistrib_shiftRound_trajMeasure`, `firstRoundState`, `shiftRound`,
   `policyKernel`).
-* `MDP/StepLaw.lean`: for the layered MDP, `hasLaw_stepLaw_castSucc` (law of (reward of round
+* `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean`: for the layered MDP, `hasLaw_stepLaw_castSucc` (law of (reward of round
   0, state of round 1, shifted trajectory) under `stepLaw M π (s, h.castSucc)`),
   `ae_stepLaw_castSucc_of_ae`, `lintegral_stepLaw_castSucc`, `stepLawKernel`, `ae_obs_zero_stepLaw`,
   `ae_action_zero_stepLaw`, terminal layer (`hasLaw_shiftRound_stepLaw_last`,
   `ae_feedback_eq_zero_stepLaw_last`), `ae_feedback_eq_zero_stepLaw`,
   `ae_episodeReturn_eq_add_shiftRound`, the episode-environment laws
   `hasCondDistrib_feedback_history_action_statesEnv`, `hasCondDistrib_feedback_statesEnv`.
-* `MDP/Values.lean`: `lexpValue` (Lebesgue form), `expValue_castSucc` (Bellman, under finite
+* `ForLMLExplore/MarkovDecisionProcess/Episodic/Values.lean`: `lexpValue` (Lebesgue form), `expValue_castSucc` (Bellman, under finite
   exponential moments `hR`), `expValue_last`, `expValue_pos`, ranges (`expValue_mem_Icc`,
   `ae_episodeReturn_mem_Icc`, …), optimal values and `optPolicy`, `integral_eq_vecExp_transVec`,
   `rewardsIn_of_hasRewardFn`, `integrable_exp_mul_of_rewardsIn`, `maxReturn` bounds.
-* `Mathlib/Probability/HasCondDistrib.lean` (`hasCondDistrib_snd_compProd`,
+* `ForLMLExplore/Probability/HasCondDistrib.lean` (`hasCondDistrib_snd_compProd`,
   `HasCondDistrib.comp_hasLaw`, `HasCondDistrib.compProd_left`) and
-  `Mathlib/Probability/CondDistrib.lean` (`HasCondDistrib.restrict_preimage`,
+  `ForLMLExplore/Probability/CondDistrib.lean` (`HasCondDistrib.restrict_preimage`,
   `HasCondDistrib.of_comp_hasLaw`, `HasCondDistrib.comp_of_hasLaw`, …).
-* `Mathlib/Probability/Moments/Variance.lean`: `ProbabilityTheory.variance_exp_div_sq_integral_le`
+* `ForLMLExplore/Probability/Moments/Variance.lean`: `ProbabilityTheory.variance_exp_div_sq_integral_le`
   (Lemma 24) for `lem:variance_ratio_le`.
 * Definitions (frozen: in the closure of the headline statements, never change them): `stepLaw`,
   `episodeReturn`, `episodeStates`, `occupancy`, `statesLaw`, `statesKernel`, `statesEnv`
@@ -177,10 +177,10 @@ What exists (read these files first; `chap:mdp` is fully proved, see the `\lean`
   and the run quantities of `EV2026/Run.lean` (`visitCountAt`, `empTransAt`, …) which the
   counts/visits lemmas are about.
 
-Files: new files under `Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/`
+Files: new files under `Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/`
 (suggested `MarkovIter.lean`, `Occupancy.lean`, `Unroll.lean`, `EntropicVariance.lean`,
 `Visits.lean`), and pure-probability lemmas (Cauchy–Schwarz along a trajectory) under
-`Essakine2026Tight/Mathlib/`. Do not edit `Markov.lean`, `StepLaw.lean`, `Values.lean` or the
+`Essakine2026Tight/ForLMLExplore/`. Do not edit `Markov.lean`, `StepLaw.lean`, `Values.lean` or the
 definitions of the existing files; add lemmas in new files (if an existing lemma needs a
 generalization, write the general version in your file and report it).
 
@@ -214,13 +214,13 @@ What exists: `EV2026/Algorithm.lean` (definitions), `EV2026/Backups.lean` (`bonu
 `optZ_fst_eq_stepUAt_greedy`, `stepUAt_fst_le_optZ`, `optZ_snd_eq_stepUAt_greedy`,
 `optZ_snd_le_stepUAt`, `cert_mem`, `empTrans_nonneg`, `sum_empTrans`), `EV2026/EntropicBPIRun.lean`,
 `EV2026/Run.lean` (run quantities and the events `eventKL`, `eventBern`, `eventCnt`,
-`goodEvent`), `MDP/Values.lean` (Bellman equations, ranges, optimal values, `optPolicy`,
-`optExpValue_castSucc_eq`, value gap), `MDP/Vec.lean` (`vecExp` lemmas, `vecVar_nonneg`,
+`goodEvent`), `ForLMLExplore/MarkovDecisionProcess/Episodic/Values.lean` (Bellman equations, ranges, optimal values, `optPolicy`,
+`optExpValue_castSucc_eq`, value gap), `ForLMLExplore/MarkovDecisionProcess/Vec.lean` (`vecExp` lemmas, `vecVar_nonneg`,
 `vecVar_eq_sum_sq`, `transVec_nonneg`, `sum_transVec`), the concentration library of agent B
-(`Mathlib/InformationTheory/KLBernstein.lean`: `abs_integral_sub_integral_le_of_klDiv_le`,
-`variance_le_two_mul_variance_add_of_klDiv_le`; `Mathlib/Probability/Moments/VarianceTransport.lean`:
+(`ForLMLExplore/InformationTheory/KLBernstein.lean`: `abs_integral_sub_integral_le_of_klDiv_le`,
+`variance_le_two_mul_variance_add_of_klDiv_le`; `ForLMLExplore/Probability/Moments/VarianceTransport.lean`:
 `variance_le_two_mul_variance_add`, `variance_le_mul_integral`;
-`Mathlib/MeasureTheory/Measure/WeightedProbability.lean`), `Mathlib/Analysis/Real/Sqrt.lean`.
+`ForLMLExplore/MeasureTheory/Measure/WeightedProbability.lean`), `ForLMLExplore/Analysis/Real/Sqrt.lean`.
 
 The main thread proves the rate lemmas (`lem:rates_props`, `lem:sc_rates_real`,
 `lem:sc_rate_min_arith`, `lem:pseudo_counts_bound`, `lem:sum_counts_bound`) in
@@ -236,7 +236,7 @@ Bernstein inequality for `Z*`), then derive the run versions on `goodEvent`.
 Launched 2026-09-16 (Opus). Independent of agents D and E.
 
 Goal: prove `lem:empirical_kl_time_uniform` of `blueprint/src/chapters/empirical.tex` as library
-material in `Essakine2026Tight/Mathlib/InformationTheory/KLTimeUniform.lean`, then move the
+material in `Essakine2026Tight/ForLMLExplore/InformationTheory/KLTimeUniform.lean`, then move the
 lemma (with its `\lean` tags) to `prereq_concentration.tex` or tag it in place. Statement: for a
 probability vector `p` on a finite type `𝒳` with `m` elements, an i.i.d. sequence
 `ξ : ℕ → Ω → 𝒳` of law `weightedMeasure p` (`iIndepFun` + `HasLaw`), and `δ' ∈ (0, 1)`,
@@ -253,11 +253,11 @@ reduction to the support is needed), `M₀ = 1`, and by induction on `n`
 `∏_{k<n} q̃ₖ(ξ k) = (m - 1)! ∏ₓ Nₙ(x)! / (n + m - 1)!`, which is exactly the Dirichlet value, so
 the lower bound of the blueprint proof applies verbatim. Update the blueprint proof to this route.
 
-What exists: `Mathlib/Probability/Martingale/Ville.lean`
-(`MeasureTheory.Supermartingale.measure_exists_ge_le`), `Mathlib/InformationTheory/MethodOfTypes.lean`
+What exists: `ForLMLExplore/Probability/Martingale/Ville.lean`
+(`MeasureTheory.Supermartingale.measure_exists_ge_le`), `ForLMLExplore/InformationTheory/MethodOfTypes.lean`
 (`typeCount`, `sum_typeCount`, `empiricalFreq`, `prod_comp_eq_prod_pow_typeCount`,
-`Nat.choose_add_le_add_one_pow`, `card_le_pow_of_sum_eq`), `Mathlib/InformationTheory/KullbackLeibler/Fintype.lean`
-(`klDiv` of `weightedMeasure`s as a finite sum), `Mathlib/MeasureTheory/Measure/WeightedProbability.lean`.
+`Nat.choose_add_le_add_one_pow`, `card_le_pow_of_sum_eq`), `ForLMLExplore/InformationTheory/KullbackLeibler/Fintype.lean`
+(`klDiv` of `weightedMeasure`s as a finite sum), `ForLMLExplore/MeasureTheory/Measure/WeightedProbability.lean`.
 Mathlib: `Real.pow_div_factorial_le_exp`, `Stirling.stirlingSeq'_antitone`,
 `Stirling.stirlingSeq_one`, `Stirling.le_factorial_stirling`.
 
@@ -269,20 +269,20 @@ Launched 2026-09-16 (Opus), after agent D. Depends on agent F only for
 Goal: prove the remaining lemmas of `blueprint/src/chapters/empirical.tex`:
 `lem:pseudo_counts_increments`, `lem:empirical_visits_domination`, `lem:event_bern_prob`,
 `lem:event_cnt_prob`, then `lem:event_kl_prob` and `lem:good_event` once agent F's
-`Essakine2026Tight/Mathlib/InformationTheory/KLTimeUniform.lean` is complete (if it is not,
+`Essakine2026Tight/ForLMLExplore/InformationTheory/KLTimeUniform.lean` is complete (if it is not,
 prove the reduction of `lem:event_kl_prob` to an explicit time-uniform hypothesis and report).
 Files: `EV2026/Events.lean` (or one file per event), and library-shaped parts (the
 first-entrance decomposition of `lem:empirical_visits_domination`(ii)) under
-`Essakine2026Tight/Mathlib/` or `LeanMachineLearning/`.
+`Essakine2026Tight/ForLMLExplore/`.
 
-What exists: agent D's `MDP/Visits.lean` and `EV2026/VisitCounts.lean`
+What exists: agent D's `ForLMLExplore/ReinforcementLearning/Episodic/Visits.lean` and `EV2026/VisitCounts.lean`
 (`visitNextState`, `measure_visitNextState_mem_le_pi`, `measure_exists_visitCountAt_eq_le_pi`,
 `empTransAt_eq`, `transCount_eq_card`, `visitCountAt_eq_pullCount`, `visitCountAt_le`,
-`sum_visitCountAt`), `MDP/Occupancy.lean` (`occupancy_nonneg`, `occupancy_le_one`,
-`sum_occupancy`, `occupancy_eq`), `MDP/StepLaw.lean` (`hasCondDistrib_feedback_statesEnv`) and
+`sum_visitCountAt`), `ForLMLExplore/MarkovDecisionProcess/Episodic/Occupancy.lean` (`occupancy_nonneg`, `occupancy_le_one`,
+`sum_occupancy`, `occupancy_eq`), `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean` (`hasCondDistrib_feedback_statesEnv`) and
 `MDP/MarkovIter.lean` (`hasCondDistrib_feedback_succ_statesEnv`); agent B's
-`Mathlib/Probability/Martingale/Ville.lean` (`measure_exists_sum_lt_half_mul_sum_sub_le`, the
-Bernoulli maximal inequality) and `Mathlib/Probability/Moments/SelfNormalizedBernstein.lean`
+`ForLMLExplore/Probability/Martingale/Ville.lean` (`measure_exists_sum_lt_half_mul_sum_sub_le`, the
+Bernoulli maximal inequality) and `ForLMLExplore/Probability/Moments/SelfNormalizedBernstein.lean`
 (`measure_exists_sqrt_add_lt_abs_selfNormSum_le`, `…_le'`, the explicit Bernstein
 corollary); the main thread's `EV2026/RateBounds.lean` (`alphaCnt_nonneg`, `one_lt_alphaCnt`,
 `alphaStar_eq_rateReal`, `pseudoCount_nonneg`, `pseudoCount_le`); `EV2026/Run.lean` (the events).
@@ -305,16 +305,16 @@ Theorem 4 (`thm:upper_bound_pac`, `thm:upper_bound_complexity` of `sample_comple
 remove the two `sorry` of `EV2026/UpperBound.lean` without changing the statements (they are
 frozen by the comparator challenges).
 
-What exists: agent D's `MDP/Unroll.lean` (`integral_exp_sum_mul_le_of_backward`,
-`le_sum_integral_of_backward`), `Mathlib/MeasureTheory/Integral/CauchySchwarz.lean`
-(`MeasureTheory.integral_sum_mul_sqrt_mul_le`), `MDP/EntropicVariance.lean`
+What exists: agent D's `ForLMLExplore/MarkovDecisionProcess/Episodic/Unroll.lean` (`integral_exp_sum_mul_le_of_backward`,
+`le_sum_integral_of_backward`), `ForLMLExplore/MeasureTheory/Integral/CauchySchwarz.lean`
+(`MeasureTheory.integral_sum_mul_sqrt_mul_le`), `ForLMLExplore/MarkovDecisionProcess/Episodic/EntropicVariance.lean`
 (`sum_integral_exp_mul_vecVar_eq_variance`, `variance_exp_episodeReturn_div_sq_le_maxReturn`),
-`MDP/Occupancy.lean` (`integral_sum_comp_obs_action_stepLaw`); `Mathlib/Analysis/SpecialFunctions/Exp.lean`
-(`Real.one_add_div_pow_le_exp`); `Mathlib/Analysis/SpecialFunctions/Log/SelfBounding.lean`
+`ForLMLExplore/MarkovDecisionProcess/Episodic/Occupancy.lean` (`integral_sum_comp_obs_action_stepLaw`); `ForLMLExplore/Analysis/SpecialFunctions/Exp.lean`
+(`Real.one_add_div_pow_le_exp`); `ForLMLExplore/Analysis/SpecialFunctions/Log/SelfBounding.lean`
 (`le_of_le_sqrt_mul_add'`, Lemma 29 with `D ≥ 1`); the main thread's `EV2026/RateBounds.lean`
 (`sum_occupancy_mul_klRateMinAt_le`, `sum_occupancy_mul_starRateMinAt_le`, `alphaKL_mono`);
 `EV2026/EntropicBPIRun.lean` (`ae_action_eq_greedy`, `stopCond_histAt_stoppingTime`,
 `not_stopCond_histAt_of_lt_stoppingTime`, `ae_output_eq_greedy`); for the PAC transfer,
 `IdentAlg.runMeasure`, `IdentAlg.isRun_runMeasure`, `IdentAlg.IsRun.hasLaw_output`
-(`LeanMachineLearning/SequentialLearning/IdentificationAlg.lean`; there is no
+(`ForLMLExplore/Identification/IdentificationAlg.lean`; there is no
 `IsPAC.of_forall_isRun` yet).

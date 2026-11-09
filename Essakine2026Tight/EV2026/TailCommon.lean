@@ -8,9 +8,9 @@ module
 public import Essakine2026Tight.EV2026.AnalysisCommon
 public import Essakine2026Tight.EV2026.Constants
 public import Essakine2026Tight.EV2026.EntropicBPIRun
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.UnrollBounds
-public import Essakine2026Tight.Mathlib.Basic.Real.ENatENNReal
-public import Essakine2026Tight.Mathlib.Analysis.SpecialFunctions.Log.SelfBounding
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.UnrollBounds
+public import Essakine2026Tight.ForLMLExplore.Basic.Real.ENatENNReal
+public import Essakine2026Tight.ForLMLExplore.Analysis.SpecialFunctions.Log.SelfBounding
 
 /-!
 # Tail of the analysis of Entropic-BPI: sign-independent lemmas
@@ -25,7 +25,7 @@ public import Essakine2026Tight.Mathlib.Analysis.SpecialFunctions.Log.SelfBoundi
   `T ≤ upperBound S A H β ε δ G`. The proof is the Cauchy–Schwarz inequality over the episodes and
   the self-bounding inequality `Real.le_of_le_sqrt_mul_add'` (the paper's Lemma 29).
 * Step 4, from the bound for every `T ≤ τ` to `τ ≤ U` in `ℝ≥0∞` (including the case `τ = ∞`), is
-  `ENat.toENNReal_le_ofReal_of_forall_natCast_le` (`Mathlib/Basic/Real/ENatENNReal.lean`).
+  `ENat.toENNReal_le_ofReal_of_forall_natCast_le` (`ForLMLExplore/Basic/Real/ENatENNReal.lean`).
 * `one_sub_le_measureReal_stoppingTime_le`, `measureReal_bad_le`: the passage from pointwise
   statements on an event of probability at least `1 - δ` (the good event) to the probability
   statements of Lemmas `lem:pac_pos` and `lem:pac_neg`, in a run of Entropic-BPI (the policies
@@ -33,7 +33,7 @@ public import Essakine2026Tight.Mathlib.Analysis.SpecialFunctions.Log.SelfBoundi
 * `starRateMin`, `klRateMin`: the rate terms `min {α*(n_h(s, a))/n_h(s, a), 1}` and
   `min {α(n_h(s, a))/n_h(s, a), 1}` of a history as functions of the step `h : ℕ` (`0` beyond the
   horizon, `extendFin`), the form in which they enter the unrolling lemmas of
-  `MDP/UnrollBounds.lean`.
+  `ForLMLExplore/MarkovDecisionProcess/Episodic/UnrollBounds.lean`.
 -/
 
 @[expose] public section

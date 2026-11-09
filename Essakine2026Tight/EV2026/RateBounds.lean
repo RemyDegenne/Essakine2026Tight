@@ -6,8 +6,8 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Run
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Occupancy
-public import Essakine2026Tight.Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Occupancy
+public import Essakine2026Tight.ForLMLExplore.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!

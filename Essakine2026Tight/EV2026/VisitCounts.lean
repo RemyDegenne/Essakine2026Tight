@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Run
-public import Essakine2026Tight.LeanMachineLearning.ReinforcementLearning.MDP.Visits
+public import Essakine2026Tight.ForLMLExplore.ReinforcementLearning.Episodic.Visits
 
 /-!
 # Visit counts and empirical transitions of a run

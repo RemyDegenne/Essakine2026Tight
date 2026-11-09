@@ -6,8 +6,8 @@ with the exponential Bellman equation of its Section~4) in the form in which the
 formalized on top of the LML framework of sequential algorithms and environments
 (\texttt{Learning.Algorithm}, \texttt{Learning.Environment}, \texttt{Learning.IsAlgEnvSeq},
 \texttt{Learning.stationaryEnv}) and of LML's MDPs (\texttt{Learning.MDP}). Its definitions are
-library material (namespace \texttt{Learning.MDP}, files \texttt{Episodic.lean},
-\texttt{Entropic.lean} of \texttt{Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/}).
+library material (namespace \texttt{Learning.MDP}, files \texttt{Basic.lean},
+\texttt{Entropic.lean} of \texttt{Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Episodic/}).
 
 \textbf{Indexing convention.} The paper's steps are $h = 1, \dots, H$ with the terminal step
 $H + 1$: a state-action pair is visited at the steps $1, \dots, H$ and the state $S_{H+1}$ is
@@ -43,7 +43,7 @@ the state $s$ is a reward drawn from $R(\cdot \mid s, a)$.
 
 \textbf{Lean remark.} This is LML's \texttt{Learning.MDP 𝓢 𝓐 𝓡} (fields \texttt{M.P},
 \texttt{M.R}, Markov kernels on \texttt{𝓢 × 𝓐}), copied from the \texttt{mdp} branch of LML to
-\texttt{Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/Basic.lean}, and its
+\texttt{Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Basic.lean}, and its
 environment \texttt{MDP.env M μ₀ : Environment 𝓢 𝓐 𝓡}. The state and action spaces of this
 blueprint are finite types with the discrete $\sigma$-algebra (\texttt{Fintype},
 \texttt{MeasurableSingletonClass}), so every function on them is measurable and the kernels are
@@ -218,14 +218,14 @@ surely, $\Phi$ is $Q$-almost surely inverted by (first round, state of round $1$
 law of this triple under the trajectory law is $Q$, which is the claim.
 \end{proof}
 
-\textbf{Lean remark.} File \texttt{MDP/Markov.lean}, in LML generality (\texttt{Learning.MDP},
+\textbf{Lean remark.} File \texttt{ForLMLExplore/MarkovDecisionProcess/Markov.lean}, in LML generality (\texttt{Learning.MDP},
 arbitrary state space with \texttt{MeasurableSingletonClass}). The trajectory law of $\pi$ as a
 kernel from the initial state is \texttt{policyKernel M hπ}, built with Mathlib's
 \texttt{Kernel.traj} from the step kernels (\texttt{iicStepKernel}) so that its measurability
 is Mathlib's; the first round and the state of round $1$ are
 \texttt{firstRoundState}, the shift is \texttt{shiftRound}, the auxiliary measure is
 \texttt{shiftMeasure} and the prepending map is \texttt{consRound}. The general
-\texttt{HasCondDistrib} tools used are in \texttt{Mathlib/Probability/HasCondDistrib.lean}
+\texttt{HasCondDistrib} tools used are in \texttt{ForLMLExplore/Probability/HasCondDistrib.lean}
 (\texttt{hasCondDistrib\_snd\_compProd}, \texttt{HasCondDistrib.comp\_hasLaw},
 \texttt{HasCondDistrib.compProd\_left}).
 
@@ -274,7 +274,7 @@ the conditional law, first for $F$ an indicator of a measurable rectangle of the
 space and then by the monotone class theorem.
 \end{proof}
 
-\textbf{Lean remark.} File \texttt{MDP/StepLaw.lean}, derived from
+\textbf{Lean remark.} File \texttt{ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean}, derived from
 Lemma~\ref{lem:policy_markov} for the time-augmented MDP. For a Lean step \texttt{h : ℕ} (the
 paper's $h + 1$), \texttt{hasLaw\_stepLaw\_succ} states that under \texttt{stepLaw M π (s, h)}
 the triple (reward of round $0$, state of round $1$, shifted trajectory) has law

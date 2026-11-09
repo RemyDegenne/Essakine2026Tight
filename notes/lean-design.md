@@ -8,7 +8,7 @@ last section); the comparator challenges were regenerated for the new statements
 * **MDPs come from LML's `mdp` branch.** `Learning.MDP 𝓢 𝓐 𝓡` (transition kernel `P`, reward
   kernel `R`, environment `MDP.env M μ₀` whose observation is the current state, stationary
   policies `policyAlg`, trajectory law `policyMeasure`) is the design of the `mdp` branch of
-  LML, copied into `Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/Basic.lean`
+  LML, copied into `Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Basic.lean`
   with the changes listed in `upstreaming-candidates.md` (lint fixes, `[IsProbabilityMeasure μ₀]`,
   no nested proofs). The finite-horizon MDP `EpisodicMDP S A`
   mirrors it (transition and reward kernels `ℕ → Kernel (S × A) _`, independent given the
@@ -29,7 +29,7 @@ last section); the comparator challenges were regenerated for the new statements
   deterministic algorithm (`detAlgorithm`) with a deterministic output kernel; the
   measurability side conditions are `measurable_of_countable` on the finite/countable history
   types (`Σ n, Hist n` is countable and gets `MeasurableSingletonClass` from
-  `Essakine2026Tight/Mathlib/MeasureTheory/MeasurableSpace/Sigma.lean`).
+  `Essakine2026Tight/ForLMLExplore/MeasureTheory/MeasurableSpace/Sigma.lean`).
 * **PAC as a property of the algorithm.** `IsEntropicPAC 𝒜 r β ε δ s₁` is LML's
   `IdentAlg.IsPAC` (about `outputMeasure`, hence no universe parameter and no quantification
   over probability spaces) for the class `{M // M.HasRewardFn r}`: the reward function is known
@@ -80,7 +80,7 @@ last section); the comparator challenges were regenerated for the new statements
 
 ## Generalization of the MDP library (2026-09-17)
 
-The MDP files of `Essakine2026Tight/LeanMachineLearning/ReinforcementLearning/MDP/` were rewritten
+The MDP files of `Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/` were rewritten
 after phase 2 so that they are library material rather than paper-shaped, and the paper files
 were adapted; the headline statements changed accordingly (the comparator challenges were
 regenerated, and are true to the paper: the horizon `H` is now an explicit argument of
