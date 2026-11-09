@@ -35,10 +35,12 @@ variable {S A : Type*} [Fintype S] [Fintype A] [DecidableEq S] [DecidableEq A] [
   [MeasurableSpace S] [MeasurableSingletonClass S] [MeasurableSpace A] [MeasurableSingletonClass A]
   {H : ℕ}
 
-/-- **Theorem 4, first part** (Essakine, Vernade 2026; PAC property). For every reward function
-`r` with values in `[0, 1]`, `β ≠ 0`, `δ ∈ (0, 1)` and `ε ∈ (0, 2 / (|β| H S)]`, Entropic-BPI
-with parameters `r, β, δ, ε` and initial state `s₁` is `(ε, δ)`-PAC for entropic best-policy
-identification on the class of MDPs with reward function `r`. -/
+/-- **PAC property of Entropic-BPI** [EV26, Theorem 4], its first conclusion, for Entropic-BPI
+with the corrected bonus, clips, greedy policy and stopping condition (errata E4–E7). For every
+reward function `r` with values in `[0, 1]`, `β ≠ 0`, `δ ∈ (0, 1)` and
+`ε ∈ (0, 2 / (|β| H S)]`, Entropic-BPI with parameters `r, β, δ, ε` and initial state `s₁` is
+`(ε, δ)`-PAC for entropic best-policy identification on the class of MDPs with reward
+function `r`. -/
 theorem isEntropicPAC_entropicBPI (r : ℕ → S → A → ℝ) (hr : ∀ h s a, r h s a ∈ Set.Icc 0 1)
     {β δ ε : ℝ} (hβ : β ≠ 0) (hδ : δ ∈ Set.Ioo 0 1)
     (hε : ε ∈ Set.Ioc 0 (2 / (|β| * H * Fintype.card S))) (s₁ : S) :
@@ -50,7 +52,8 @@ theorem isEntropicPAC_entropicBPI (r : ℕ → S → A → ℝ) (hr : ∀ h s a,
   · exact measureReal_bad_le_of_neg M.2 hr hneg hδ.1 hδ.2.le hε.1 hrun
   · exact measureReal_bad_le_of_pos M.2 hr hpos hδ.1 hδ.2.le hε.1 hrun
 
-/-- **Theorem 4, second part** (Essakine, Vernade 2026; sample complexity). For every reward
+/-- **Sample complexity of Entropic-BPI** [EV26, Theorem 4], its second conclusion, with the
+two-term bound of the corrected self-bounding inequality (errata E8, E9). For every reward
 function `r` with values in `[0, 1]`, `β ≠ 0`, `δ ∈ (0, 1)`, `ε ∈ (0, 2 / (|β| H S)]` and every
 MDP `M` with reward function `r`, in every run of Entropic-BPI on `M` from `s₁`, with
 probability at least `1 - δ` its number of episodes `τ` is at most

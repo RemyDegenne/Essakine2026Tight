@@ -88,11 +88,13 @@ lemma lowerBound_le_of_card {nS nA H U : ℕ} {β ε δ G : ℝ} (hβ : β ≠ 0
           have : 0 ≤ c ^ 2 * U * Real.log (1 / δ) := by positivity
           nlinarith
 
-/-- **Theorem 3** (Essakine, Vernade 2026). For finite state and action spaces with `S ≥ 6`,
-`A ≥ 2`, a horizon `H ≥ 3 d` with `d = ⌈log_A((S - 3)(A - 1) + 1)⌉` (Assumption 1), `β ≠ 0`,
-`δ ∈ (0, 1/16]` and `ε > 0` satisfying Condition A for the effective horizon
-`H' = H - ⌊H/3⌋ - d`, there are a reward function `r₀` with
-values in `[0, 1]`, an MDP `M₀` with reward function `r₀` and an initial state `s₁` such that
+/-- **Lower bound on the expected number of episodes** [EV26, Theorem 3], with Condition A for
+the effective horizon and with a margin (errata E1, E2) and the constant `1/5000` (erratum E20).
+For finite state and action spaces with `S ≥ 6`, `A ≥ 2`, a horizon `H ≥ 3 d` with
+`d = ⌈log_A((S - 3)(A - 1) + 1)⌉` (Assumption 1), `β ≠ 0`, `δ ∈ (0, 1/16]` and `ε > 0`
+satisfying Condition A for the effective horizon `H' = H - ⌊H/3⌋ - d`, there are a reward
+function `r₀` with values in `[0, 1]`, an MDP `M₀` with reward function `r₀` and an initial
+state `s₁` such that
 every algorithm which is `(ε, δ)`-PAC for entropic best-policy identification with reward
 function `r₀` satisfies, in every run on `M₀`,
 `E[τ] ≥ (1/5000) (e^{|β| G_max(M₀)} - 1)² e^{-|β| G_max(M₀)} e^{2 min(β, 0) ε} S A H log(1/δ) /
