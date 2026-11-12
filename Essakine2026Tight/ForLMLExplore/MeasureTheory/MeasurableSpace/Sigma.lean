@@ -11,7 +11,8 @@ public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Sigma
 # Measurable singletons in sigma types
 
 A sigma type `Σ i, α i` whose fibers have measurable singletons has measurable singletons: the
-preimage of `{⟨i, a⟩}` under `Sigma.mk j` is `{a}` if `j = i` and empty otherwise.
+singleton `{⟨i, a⟩}` is the image of `{a}` under the measurable embedding `Sigma.mk i` (LML's
+`measurableEmbedding_sigmaMk`).
 -/
 
 @[expose] public section
@@ -21,18 +22,11 @@ open MeasureTheory
 variable {ι : Type*} {α : ι → Type*} [∀ i, MeasurableSpace (α i)]
   [∀ i, MeasurableSingletonClass (α i)]
 
+/-- In a sigma type whose fibers have measurable singletons, singletons are measurable. -/
 lemma measurableSet_singleton_sigma (x : Σ i, α i) : MeasurableSet {x} := by
   obtain ⟨i, a⟩ := x
-  rw [measurableSet_sigma_iff]
-  intro j
-  by_cases hij : j = i
-  · subst hij
-    convert measurableSet_singleton a using 1
-    ext b
-    simp
-  · convert MeasurableSet.empty using 1
-    ext b
-    simp [Sigma.ext_iff, hij]
+  simpa using (measurableEmbedding_sigmaMk i).measurableSet_image.2 (measurableSet_singleton a)
 
+/-- A sigma type whose fibers have measurable singletons has measurable singletons. -/
 instance Sigma.instMeasurableSingletonClass : MeasurableSingletonClass (Σ i, α i) :=
   ⟨measurableSet_singleton_sigma⟩

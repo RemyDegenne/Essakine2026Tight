@@ -7,21 +7,23 @@ module
 
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Markov
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Vec
+public import LMLExplore.MarkovDecisionProcess.Episodic.Basic
 public import LeanMachineLearning.SequentialLearning.StationaryEnv
 public import LeanMachineLearning.SequentialLearning.IdentificationAlg
 
 /-!
-# Finite-horizon (episodic) MDPs
+# Policies, trajectory laws and episodes of finite-horizon MDPs
 
-A finite-horizon MDP `M : EpisodicMDP S A` on measurable state and action spaces is given by its
-transition kernels `M.trans h : Kernel (S × A) S` and its reward kernels
-`M.reward h : Kernel (S × A) ℝ` at every step `h : ℕ`, mirroring the stationary `Learning.MDP`.
-The horizon `H` of the episodes is not part of the model: an MDP with horizon `H` only uses the
-kernels of the steps `h < H`, and every quantity that depends on the horizon takes it as an
-argument. Special cases: `EpisodicMDP.ofDet trans r` (transition kernels and a deterministic
-reward function `r`). The transition probabilities `M.transVec h s a`, the mean reward
-`M.meanReward h s a`, the conditions `M.RewardsIn I` (rewards almost surely in `I`) and
-`M.HasRewardFn r` (the rewards are the deterministic function `r`) are derived.
+A finite-horizon MDP is LMLExplore's `M : EpisodicMDP S A`, with transition kernels
+`M.trans h : Kernel (S × A) S` and reward kernels `M.reward h : Kernel (S × A) ℝ` at every step
+`h : ℕ`, the special case `EpisodicMDP.ofDet trans r` (a deterministic reward function `r`), the
+mean reward `M.meanReward h s a`, the conditions `M.RewardsIn I` (rewards almost surely in `I`)
+and `M.HasRewardFn r` (the rewards are the deterministic function `r`), and the time-augmented
+stationary MDP `M.augmented : MDP (S × ℕ) A ℝ`: from `(s, h)`, the action `a` yields the reward
+`R ∼ M.reward h (s, a)` and the next state `(s', h + 1)` with `s' ∼ M.trans h (s, a)`. The horizon
+`H` of the episodes is not part of the model: an MDP with horizon `H` only uses the kernels of the
+steps `h < H`, and every quantity that depends on the horizon takes it as an argument. This file
+adds the transition probabilities `M.transVec h s a` and the objects below.
 
 ## Policies
 
@@ -34,16 +36,15 @@ beyond the horizon (measurable when the state space is countable and discrete).
 
 ## Trajectory laws through the time-augmented MDP
 
-The finite-horizon MDP is embedded in the stationary MDP `M.augmented : MDP (S × ℕ) A ℝ` on the
-*time-augmented* state space: from `(s, h)`, the action `a` yields the reward
-`R ∼ M.reward h (s, a)` and the next state `(s', h + 1)` with `s' ∼ M.trans h (s, a)`. The law of
-the trajectory of the policy `π` from the augmented state `(s, h)` is `stepLaw M π (s, h)`, the
-trajectory law of the stationary policy `augPolicy π` in `M.augmented` (and `0` if `π` is not
-measurable, as `Measure.map` of a non-measurable function); as a kernel from the state `s` at the
-step `h` it is `stepLawKernel M π h`. The return of `n` steps of a trajectory is
-`episodeReturn n` and the states of an episode of horizon `H` are `episodeStates H`. The
-occupancy measure `occupancyMeasure M π s₁ h` is the law of the state-action pair at the step `h`
-from `s₁`, and `occupancy M π s₁ h s a = P^π(S_h = s, A_h = a)` its mass at a pair.
+The law of the trajectory of the policy `π` from the augmented state `(s, h)` is
+`stepLaw M π (s, h)`, the trajectory law `MDP.policyMeasure` of the stationary policy `augPolicy π`
+in `M.augmented` (and `0` if `π` is not measurable, as `Measure.map` of a non-measurable
+function); as a kernel from the state `s` at the step `h` it is `stepLawKernel M π h`. The return
+of `n` steps of a trajectory is `episodeReturn n` and the states of an episode of horizon `H` are
+`episodeStates H`. The occupancy measure `occupancyMeasure M π s₁ h` is the law of the
+state-action pair at the step `h` from `s₁`, and `occupancy M π s₁ h s a = P^π(S_h = s, A_h = a)`
+its mass at a pair; they are the case of a deterministic policy and a Dirac initial law of
+LMLExplore's `EpisodicMDP.occupancy`.
 
 ## Episodes as rounds
 
@@ -59,9 +60,10 @@ with output an `H`-step policy. This part needs a finite state space and a count
 
 ## Conventions
 
-The steps are `0`-indexed (the paper's step `h` is `h - 1`). The kernels are built with explicit
-measurability lemmas, and the definitions of this file are kept free of nested proofs, so that
-the statements built on them can be compared across environments by `comparator`.
+The steps are `0`-indexed (the paper's step `h` is `h - 1`). The definitions of this file are
+kept free of nested proofs, so that the statements built on them can be compared across
+environments by `comparator`: the environment of `M.augmented` needs a nonempty state space,
+which `stepLaw` takes from its initial state through the named lemma `nonempty_augState`.
 -/
 
 @[expose] public section
@@ -71,18 +73,6 @@ open MeasureTheory ProbabilityTheory Finset Learning Learning.MDP
 namespace Learning.MDP.Episodic
 
 variable {S A : Type*} [MeasurableSpace S] [MeasurableSpace A]
-
-/-- A finite-horizon MDP: the transition kernels `trans h : Kernel (S × A) S` and the reward
-kernels `reward h : Kernel (S × A) ℝ` at each step `h : ℕ`. -/
-structure EpisodicMDP (S A : Type*) [MeasurableSpace S] [MeasurableSpace A] where
-  /-- The transition kernel at step `h`: the law of the next state. -/
-  trans : ℕ → Kernel (S × A) S
-  /-- The transition kernels are Markov kernels. -/
-  [isMarkovKernel_trans : ∀ h, IsMarkovKernel (trans h)]
-  /-- The reward kernel at step `h`: the law of the reward. -/
-  reward : ℕ → Kernel (S × A) ℝ
-  /-- The reward kernels are Markov kernels. -/
-  [isMarkovKernel_reward : ∀ h, IsMarkovKernel (reward h)]
 
 /-! ### Policies -/
 
@@ -150,18 +140,6 @@ namespace EpisodicMDP
 
 variable (M : EpisodicMDP S A)
 
-instance (h : ℕ) : IsMarkovKernel (M.trans h) := M.isMarkovKernel_trans h
-
-instance (h : ℕ) : IsMarkovKernel (M.reward h) := M.isMarkovKernel_reward h
-
-/-- The finite-horizon MDP with transition kernels `trans h` and the deterministic reward
-function `r` (measurable in the state-action pair at every step). -/
-noncomputable def ofDet (trans : ℕ → Kernel (S × A) S) [∀ h, IsMarkovKernel (trans h)]
-    (r : ℕ → S → A → ℝ) (hr : ∀ h, Measurable fun p : S × A ↦ r h p.1 p.2) :
-    EpisodicMDP S A where
-  trans := trans
-  reward h := Kernel.deterministic (fun p ↦ r h p.1 p.2) (hr h)
-
 /-- Every function on a countable discrete state-action space is a measurable reward
 function. -/
 lemma measurable_rewardFn [Countable S] [Countable A] [MeasurableSingletonClass S]
@@ -180,86 +158,13 @@ lemma sum_transVec [Fintype S] [MeasurableSingletonClass S] (h : ℕ) (s : S) (a
     ∑ s', M.transVec h s a s' = 1 :=
   MDP.sum_transVec _ _
 
-/-- The mean reward `r_h(s, a) = E[R]` at step `h`. -/
-noncomputable def meanReward (h : ℕ) (s : S) (a : A) : ℝ := ∫ x, x ∂(M.reward h (s, a))
-
-/-- The rewards of `M` all lie almost surely in the set `I`. -/
-def RewardsIn (I : Set ℝ) : Prop := ∀ h s a, ∀ᵐ x ∂(M.reward h (s, a)), x ∈ I
-
-/-- The rewards of `M` are the deterministic reward function `r`: the reward of `(s, a)` at step
-`h` is `r h s a` almost surely. -/
-def HasRewardFn (r : ℕ → S → A → ℝ) : Prop := ∀ h s a, M.reward h (s, a) = Measure.dirac (r h s a)
-
-lemma hasRewardFn_ofDet (trans : ℕ → Kernel (S × A) S) [∀ h, IsMarkovKernel (trans h)]
-    (r : ℕ → S → A → ℝ) (hr : ∀ h, Measurable fun p : S × A ↦ r h p.1 p.2) :
-    (ofDet trans r hr).HasRewardFn r := by
-  intro h s a
-  simp [ofDet, Kernel.deterministic_apply]
-
-lemma meanReward_eq_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r) (h : ℕ) (s : S)
-    (a : A) : M.meanReward h s a = r h s a := by
-  simp [meanReward, hM h s a]
-
-/-! ### The time-augmented MDP -/
-
-/-- The transition function of the time-augmented MDP: from `(s, h)` with action `a`, the next
-augmented state is `(s', h + 1)` with `s' ∼ M.trans h (s, a)`. -/
-noncomputable def augTransFun (p : (S × ℕ) × A) : Measure (S × ℕ) :=
-  (M.trans p.1.2 (p.1.1, p.2)).map fun s' ↦ (s', p.1.2 + 1)
-
-lemma measurable_augTransFun : Measurable M.augTransFun := by
-  have h : Measurable fun q : (S × A) × ℕ ↦ (M.trans q.2 q.1).map fun s' ↦ (s', q.2 + 1) := by
-    refine measurable_from_prod_countable_left fun h ↦ ?_
-    have hm := ((M.trans h).map fun s' : S ↦ (s', h + 1)).measurable
-    have heq : (⇑((M.trans h).map fun s' : S ↦ (s', h + 1)))
-        = fun q ↦ (M.trans h q).map fun s' ↦ (s', h + 1) :=
-      funext fun q ↦ Kernel.map_apply _ measurable_prodMk_right q
-    rwa [heq] at hm
-  exact h.comp ((measurable_fst.fst.prodMk measurable_snd).prodMk measurable_fst.snd)
-
-/-- The transition kernel of the time-augmented MDP. -/
-noncomputable def augTrans : Kernel ((S × ℕ) × A) (S × ℕ) :=
-  ⟨M.augTransFun, M.measurable_augTransFun⟩
-
-lemma augTrans_apply (p : (S × ℕ) × A) :
-    M.augTrans p = (M.trans p.1.2 (p.1.1, p.2)).map fun s' ↦ (s', p.1.2 + 1) := rfl
-
-lemma isProbabilityMeasure_augTrans (p : (S × ℕ) × A) : IsProbabilityMeasure (M.augTrans p) := by
-  rw [augTrans_apply]; infer_instance
-
-instance : IsMarkovKernel M.augTrans := ⟨M.isProbabilityMeasure_augTrans⟩
-
-/-- The reward function of the time-augmented MDP: `M.reward h (s, a)` at `(s, h)`. -/
-noncomputable def augRewardFun (p : (S × ℕ) × A) : Measure ℝ := M.reward p.1.2 (p.1.1, p.2)
-
-lemma measurable_augRewardFun : Measurable M.augRewardFun := by
-  have h : Measurable fun q : (S × A) × ℕ ↦ M.reward q.2 q.1 :=
-    measurable_from_prod_countable_left fun h ↦ (M.reward h).measurable
-  exact h.comp ((measurable_fst.fst.prodMk measurable_snd).prodMk measurable_fst.snd)
-
-/-- The reward kernel of the time-augmented MDP. -/
-noncomputable def augReward : Kernel ((S × ℕ) × A) ℝ :=
-  ⟨M.augRewardFun, M.measurable_augRewardFun⟩
-
-lemma augReward_apply (p : (S × ℕ) × A) : M.augReward p = M.reward p.1.2 (p.1.1, p.2) := rfl
-
-lemma isProbabilityMeasure_augReward (p : (S × ℕ) × A) :
-    IsProbabilityMeasure (M.augReward p) := by
-  rw [augReward_apply]; infer_instance
-
-instance : IsMarkovKernel M.augReward := ⟨M.isProbabilityMeasure_augReward⟩
-
-/-- The stationary MDP on the time-augmented state space `S × ℕ` which embeds the finite-horizon
-MDP `M`. -/
-noncomputable def augmented : MDP (S × ℕ) A ℝ where
-  P := M.augTrans
-  R := M.augReward
-
-@[simp] lemma augmented_P : M.augmented.P = M.augTrans := rfl
-
-@[simp] lemma augmented_R : M.augmented.R = M.augReward := rfl
-
 end EpisodicMDP
+
+omit [MeasurableSpace S] in
+/-- An augmented state witnesses that the augmented state space is nonempty. The trajectory laws
+below take the instance `Nonempty (S × ℕ)` of the environment of `M.augmented` from this lemma
+rather than from an anonymous constructor, so that they contain no nested proof. -/
+lemma nonempty_augState (p : S × ℕ) : Nonempty (S × ℕ) := ⟨p⟩
 
 /-! ### Trajectory laws -/
 
@@ -270,6 +175,7 @@ state `s` at the step `h`. It is `0` if `π` is not measurable at every step. -/
 noncomputable def stepLaw (M : EpisodicMDP S A) (π : ℕ → S → A) (p₀ : S × ℕ) :
     Measure (ℕ → Round (S × ℕ) A ℝ) :=
   if hπ : ∀ k, Measurable (π k) then
+    haveI := nonempty_augState p₀
     M.augmented.policyMeasure (augPolicy π) (measurable_augPolicy hπ) p₀
   else 0
 
@@ -278,7 +184,8 @@ section StepLaw
 variable (M : EpisodicMDP S A) {π : ℕ → S → A}
 
 lemma stepLaw_of_measurable (hπ : ∀ h, Measurable (π h)) (p₀ : S × ℕ) :
-    stepLaw M π p₀ = M.augmented.policyMeasure (augPolicy π) (measurable_augPolicy hπ) p₀ := by
+    stepLaw M π p₀ = haveI := nonempty_augState p₀
+      M.augmented.policyMeasure (augPolicy π) (measurable_augPolicy hπ) p₀ := by
   rw [stepLaw, dite_eq_left hπ]
 
 lemma stepLaw_of_not_measurable (hπ : ¬ ∀ h, Measurable (π h)) (p₀ : S × ℕ) :
@@ -288,7 +195,7 @@ lemma stepLaw_of_not_measurable (hπ : ¬ ∀ h, Measurable (π h)) (p₀ : S ×
 lemma isProbabilityMeasure_stepLaw (hπ : ∀ h, Measurable (π h)) (p₀ : S × ℕ) :
     IsProbabilityMeasure (stepLaw M π p₀) := by
   rw [stepLaw_of_measurable M hπ]
-  exact isProbabilityMeasure_policyMeasure _ _ _ _
+  infer_instance
 
 lemma stepLaw_univ (hπ : ∀ h, Measurable (π h)) (p₀ : S × ℕ) :
     stepLaw M π p₀ Set.univ = 1 :=
@@ -320,7 +227,8 @@ noncomputable def stepLawKernel (M : EpisodicMDP S A) (π : ℕ → S → A) (h 
 @[simp] lemma stepLawKernel_apply (M : EpisodicMDP S A) (π : ℕ → S → A) (h : ℕ) (s : S) :
     stepLawKernel M π h s = stepLaw M π (s, h) := by
   by_cases hπ : ∀ k, Measurable (π k)
-  · rw [stepLawKernel, dite_eq_left hπ, Kernel.comap_apply, policyKernel_apply,
+  · have := nonempty_augState (s, h)
+    rw [stepLawKernel, dite_eq_left hπ, Kernel.comap_apply, policyKernel_apply,
       stepLaw_of_measurable M hπ]
   · rw [stepLawKernel, dite_eq_right hπ, stepLaw_of_not_measurable M hπ]
     rfl

@@ -189,6 +189,22 @@ status:
 
     Comparator, 2026-11-09: scripts/formalize.sh ran scripts/comparator-verify.sh on the
     regenerated challenges, and comparator verifies all 3 headline results.
+
+    Deduplication against LMLExplore (2026-11-12). The project imports LMLExplore and Tau Ceti
+    and has deleted its local copies of their material, moving every use to the upstream
+    declaration: MDPs, episodic MDPs and their environments (`MDP`, `MDP.env`, `policyAlg`,
+    `policyMeasure`, `EpisodicMDP`, `EpisodicMDP.augmented`, `RewardsIn`, `HasRewardFn`), the
+    occupancy measures and state marginals, the canonical runs of identification algorithms and
+    the change of measure at a stopping time, the binary divergence `klBer` and Pinsker's
+    inequality, Ville's inequality, weighted measures, Freedman's one-step bound and the method of
+    mixtures, the Donsker–Varadhan inequality, and smaller lemmas of Mathlib, LML and Tau Ceti
+    (`notes/lmlexplore-dedup.md` lists every removed or renamed declaration; about 2000 lines
+    fewer). The headline statements are unchanged. Their closure imports LMLExplore's `MDP`,
+    `MDP.env`, `EpisodicMDP` and `EpisodicMDP.augmented` instead of copying local definitions, and
+    `stepLaw` takes the instance `Nonempty (S × ℕ)` of LMLExplore's environment from its initial
+    state through the named lemma `nonempty_augState`. The comparator challenges are regenerated
+    (identical statements, `lake build Comparator` passes); the full comparator run remains to be
+    redone.
   sorry_count: 0
   sorry_in_definitions: 0
 

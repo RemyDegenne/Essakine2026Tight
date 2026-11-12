@@ -67,7 +67,7 @@ candidate for LML). Mathlib also lacks the integral form of \texttt{HasCondDistr
 (Lemma~\ref{lem:pmdp_hascond_integral}).
 
 \begin{lemma}[Integrals against a conditional distribution]\label{lem:pmdp_hascond_integral}
-\lean{ProbabilityTheory.HasCondDistrib.lintegral_prodMk, ProbabilityTheory.HasCondDistrib.integral_prodMk, ProbabilityTheory.hasCondDistrib_of_lintegral_eq, ProbabilityTheory.HasCondDistrib.compProd_left_of_sectR}\leanok
+\lean{ProbabilityTheory.HasCondDistrib.lintegral_comp_prodMk_eq_lintegral_lintegral, ProbabilityTheory.HasCondDistrib.integral_prodMk, ProbabilityTheory.hasCondDistrib_of_lintegral_eq, ProbabilityTheory.HasCondDistrib.compProd_left_of_sectR}\leanok
 Let $X, Y$ be random variables on $(\Omega, \Prob)$ and $\kappa$ a kernel. $Y$ has conditional law
 $\kappa$ given $X$ iff $\E[f(X, Y)] = \E\big[\int f(X, y)\,\kappa(X, dy)\big]$ for every measurable
 $f \ge 0$; the same identity then holds for every $f$ integrable against the joint law. Moreover,
@@ -225,7 +225,7 @@ indicator functions.
 \label{sec:pre_mdp_occupancy}
 
 \begin{definition}[Occupancy measure]\label{def:occupancy}
-\lean{Learning.MDP.Episodic.occupancy}\leanok
+\lean{Learning.MDP.Episodic.occupancy, Learning.MDP.Episodic.occupancyMeasure_eq_occupancy}\leanok
 \uses{def:episodic_mdp, def:policy, def:step_law}
 For $1 \le h \le H$, $s \in \Ss$ and $a \in \As$, the \emph{occupancy measure} of $\pi$ from
 $s_1$ at step $h$ is
@@ -236,7 +236,11 @@ $s_1$ at step $h$ is
 
 \textbf{Lean remark.} \texttt{occupancy M π s₁ h s a := (stepLaw M π (s₁, 0)).real \{ω | (ω h).obs.1 = s ∧ (ω h).action = a\}}
 with the $0$-indexed step \texttt{h : Fin H} (the paper's $h$ is Lean's $h - 1$), a real number
-(\texttt{Measure.real}). The dependence on $s_1$ is kept explicit.
+(\texttt{Measure.real}). The dependence on $s_1$ is kept explicit. The law
+\texttt{occupancyMeasure M π s₁ h} of $(S_h, A_h)$ is LMLExplore's occupancy measure
+\texttt{M.occupancy (detPolicy hπ) (δ s₁) h} of the Markov policy of the deterministic kernels of
+$\pi$ (\texttt{occupancyMeasure\_eq\_occupancy}, through \texttt{isAlgEnvSeq\_markov\_stepLaw} and
+LMLExplore's \texttt{EpisodicMDP.hasLaw\_obs\_fst\_action\_markov}).
 
 \begin{lemma}[Occupancy measures are probability vectors]\label{lem:occupancy_sum_one}
 \lean{Learning.MDP.Episodic.occupancy_nonneg, Learning.MDP.Episodic.occupancy_le_one, Learning.MDP.Episodic.sum_occupancy, Learning.MDP.Episodic.occupancy_eq}\leanok
@@ -260,7 +264,8 @@ which is $\{S_h = s\}$ if $a = \pi_h(s)$ and empty otherwise.
 
 \textbf{Lean remark.} \texttt{sum\_occupancy} is the case $f = 1$ of
 \texttt{integral\_comp\_obs\_action\_stepLaw} (Lemma~\ref{lem:occupancy_expectation}), and
-\texttt{occupancy\_eq} is stated with \texttt{if a = π h s then (stepLaw M π (s₁, 0)).real \{x | (IT.obs h x).1 = s\} else 0}.
+\texttt{occupancy\_eq} is stated with \texttt{if a = π h s then (stateMarginal M.trans (detPolicy hπ) (δ s₁) h).real \{s\} else 0},
+with LMLExplore's state marginals \texttt{stateMarginal}.
 
 \begin{lemma}[Expectations of sums along the trajectory]\label{lem:occupancy_expectation}
 \lean{Learning.MDP.Episodic.integral_comp_obs_action_stepLaw, Learning.MDP.Episodic.integral_sum_comp_obs_action_stepLaw}\leanok
@@ -307,6 +312,10 @@ $\Psi = \indic\{S_h = s\}$ and $f = \indic\{\cdot = s'\}$, so that $(p_h f)(s, \
 By Lemma~\ref{lem:occupancy_sum_one}, $\Prob^\pi(S_h = s)\,p_h(s'\mid s, \pi_h(s)) = \sum_a p^\pi_h(s,a)\,p_h(s' \mid s, a)$
 (the terms with $a \ne \pi_h(s)$ vanish), which gives the claim.
 \end{proof}
+
+\textbf{Lean remark.} The Lean proof reads the recursion off LMLExplore's flow equation
+\texttt{EpisodicMDP.stateMarginal\_trans\_add\_one}, $\mu_{h+1} = p_h \circ d^\pi_h$, through
+\texttt{occupancyMeasure\_eq\_occupancy}.
 
 \textbf{Lean remark.} \texttt{occupancy\_succ} is stated for $0$-indexed steps \texttt{h h' : Fin H}
 with \texttt{h' = h + 1}; the last sum over $s$ is computed with
@@ -417,7 +426,7 @@ exponential weights \texttt{w i s a = exp (β * r i s a)} it is
 \end{remark}
 
 \begin{lemma}[Cauchy--Schwarz along a trajectory]\label{lem:cauchy_schwarz_traj}
-\lean{MeasureTheory.integral_sum_mul_sqrt_mul_le, Real.le_sqrt_mul_sqrt_of_forall_two_mul_le}\leanok
+\lean{MeasureTheory.integral_sum_mul_sqrt_mul_le, Real.sum_mul_le_sqrt_mul_sqrt}\leanok
 Let $(\Omega, \Prob)$ be a measure space and, for $1 \le h \le H$, let
 $W_h : \Omega \to \R$ and $V_h, U_h : \Omega \to [0, \infty)$ be measurable functions such that
 $W_h^2 V_h$ and $U_h$ are integrable (for instance bounded random variables with $W_h \ge 0$). Then

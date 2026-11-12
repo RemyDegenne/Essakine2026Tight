@@ -9,6 +9,7 @@ public import LeanMachineLearning.ForMathlib.InformationTheory.KullbackLeibler.C
 public import LeanMachineLearning.ForMathlib.InformationTheory.KullbackLeibler.DataProcessing
 public import LeanMachineLearning.ForMathlib.InformationTheory.KullbackLeibler.Restrict
 public import Essakine2026Tight.ForLMLExplore.Probability.Process.SigmaPrefix
+public import LMLExplore.Topology.Algebra.InfiniteSum.NatInt
 
 /-!
 # The chain rule for the Kullback–Leibler divergence at a stopping time
@@ -43,14 +44,16 @@ since the prefix stopped at time `M` is the truncation of the stopped prefix
 (`HasLaw.stoppedProcess_sigmaPrefix`). The integral forms follow from the composition-product
 forms by the integrated chain rule `klDiv_compProd_right_eq_lintegral`.
 
-For a stopping rule `S` (a measurable set of finite sequences of variable length), the laws of
-the prefixes stopped by the rule, `hittingValue (sigmaPrefix Z) S 0` and
-`hittingProcess (sigmaPrefix Z) S 0 M`, are functions of the law of the path `fun ω n ↦ Z n ω`.
-The chain rule for two processes `Z`, `Z'` on two spaces stopped by the same rule follows from
-the one above by transport to the path space `Π n, X n`
-(`klDiv_map_hittingProcess_sigmaPrefix_compProd`, `klDiv_map_hittingValue_sigmaPrefix_compProd`
-and the integral forms `klDiv_map_hittingProcess_sigmaPrefix`,
-`klDiv_map_hittingValue_sigmaPrefix`).
+For a stopping rule `S` (a measurable set of finite sequences of variable length) with stopping
+time `τ = hittingAfter (sigmaPrefix Z) S 0`, the laws of the prefixes stopped by the rule,
+`stoppedValue (sigmaPrefix Z) τ` and `stoppedProcess (sigmaPrefix Z) τ M`, are functions of the
+law of the path `fun ω n ↦ Z n ω`. The chain rule for two processes `Z`, `Z'` on two spaces
+stopped by the same rule follows from the one above by transport to the path space `Π n, X n`
+(`klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter_compProd`,
+`klDiv_map_stoppedValue_sigmaPrefix_hittingAfter_compProd` and the integral forms
+`klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter`,
+`klDiv_map_stoppedValue_sigmaPrefix_hittingAfter`). The series over the steps are turned into
+sums over the steps before `τ` by LMLExplore's `LMLExplore.tsum_indicator_natCast_lt_eq_sum_range`.
 
 This is the change-of-measure identity of sequential analysis: for an algorithm interacting with
 two environments it is specialized in
@@ -176,15 +179,6 @@ lemma sum_ite_lt_eq_sum_range_toNat_min {β : Type*} [AddCommMonoid β] (f : ℕ
     · rw [min_eq_right (by exact_mod_cast hkM), ENat.toNat_natCast]
       omega
 
-/-- A series of terms which vanish unless `t < τ`, for a finite `τ`, is a sum over `t < τ`. -/
-lemma tsum_ite_lt_eq_sum_range_toNat {β : Type*} [AddCommMonoid β] [TopologicalSpace β]
-    (f : ℕ → β) {τ : ℕ∞} (hτ : τ ≠ ⊤) :
-    ∑' t : ℕ, (if (t : ℕ∞) < τ then f t else 0) = ∑ t ∈ range τ.toNat, f t := by
-  obtain ⟨k, rfl⟩ := ENat.ne_top_iff_exists.1 hτ
-  simp_rw [ENat.natCast_lt_natCast, ENat.toNat_natCast]
-  rw [tsum_eq_sum (s := range k) fun t ht ↦ ite_eq_right (by simpa using ht)]
-  exact sum_congr rfl fun t ht ↦ ite_eq_left (mem_range.1 ht)
-
 section CountablyGenerated
 
 variable [∀ n, MeasurableSpace.CountablyGenerated (X n)]
@@ -229,9 +223,8 @@ lemma tsum_klDiv_compProd_restrict_lt_eq_lintegral (hZ : ∀ n, Measurable (Z n)
   rw [← lintegral_tsum fun t ↦ ((hmeas t).indicator (hlt t)).aemeasurable]
   refine lintegral_congr_ae ?_
   filter_upwards [hτ_top] with ω hω
-  simp_rw [Set.indicator_apply, Set.mem_ofPred_eq]
-  exact tsum_ite_lt_eq_sum_range_toNat (fun t ↦ klDiv (κ t (finPrefix Z t ω))
-    (κ' t (finPrefix Z t ω))) hω
+  exact (tsum_congr fun t ↦ rfl).trans (LMLExplore.tsum_indicator_natCast_lt_eq_sum_range hω
+    fun t ↦ klDiv (κ t (finPrefix Z t ω)) (κ' t (finPrefix Z t ω)))
 
 /-- **Chain rule at a bounded stopping time**, integral form: the divergence between the laws
 of the prefix stopped at time `M` is the expected sum, under the first law, of the divergences of
@@ -284,12 +277,12 @@ form. For two processes `Z`, `Z'` whose steps have conditional laws `κ n`, `κ'
 the prefix of length `n`, and a stopping rule `S`, the divergence between the laws of the prefixes
 stopped at time `M` is the sum over the steps `t < M` of the conditional divergences of `κ t`
 and `κ' t` given the prefix of length `t`, on the event `{t < τ}` (the step is taken). -/
-lemma klDiv_map_hittingProcess_sigmaPrefix_compProd (hZ : ∀ n, Measurable (Z n))
+lemma klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter_compProd (hZ : ∀ n, Measurable (Z n))
     (hZ' : ∀ n, Measurable (Z' n)) (hκ : ∀ n, HasCondDistrib (Z n) (finPrefix Z n) (κ n) P)
     (hκ' : ∀ n, HasCondDistrib (Z' n) (finPrefix Z' n) (κ' n) P') (hS : MeasurableSet S)
     (M : ℕ) :
-    klDiv (P.map (hittingProcess (sigmaPrefix Z) S 0 M))
-        (P'.map (hittingProcess (sigmaPrefix Z') S 0 M)) =
+    klDiv (P.map (stoppedProcess (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0) M))
+        (P'.map (stoppedProcess (sigmaPrefix Z') (hittingAfter (sigmaPrefix Z') S 0) M)) =
       ∑ t ∈ range M,
         klDiv ((P.restrict {ω | (t : WithTop ℕ) < hittingAfter (sigmaPrefix Z) S 0 ω}).map
             (finPrefix Z t) ⊗ₘ κ t)
@@ -306,9 +299,8 @@ lemma klDiv_map_hittingProcess_sigmaPrefix_compProd (hZ : ∀ n, Measurable (Z n
     (fun n ↦ (hκ' n).of_comp_hasLaw (measurable_finPrefix hW n) (hW n)
       (hasLaw_map hZm'.aemeasurable))
     (isStoppingTime_hittingAfter_sigmaPrefix hW hS) M
-  simp only [← hittingProcess_def] at h
-  rw [Measure.map_map (measurable_hittingProcess_sigmaPrefix hW hS M) hZm,
-    Measure.map_map (measurable_hittingProcess_sigmaPrefix hW hS M) hZm'] at h
+  have hm := measurable_stoppedProcess_sigmaPrefix hW (measurable_hittingAfter_sigmaPrefix hW hS) M
+  rw [Measure.map_map hm hZm, Measure.map_map hm hZm'] at h
   simp only [Measure.restrict_map hZm (hlt _),
     Measure.map_map (measurable_finPrefix hW _) hZm] at h
   exact h
@@ -319,13 +311,13 @@ composition-product form. For two processes `Z`, `Z'` whose steps have condition
 surely finite under both laws, the divergence between the laws of the stopped prefixes is the
 series over the steps `t` of the conditional divergences of `κ t` and `κ' t` given the prefix of
 length `t`, on the event `{t < τ}`. -/
-lemma klDiv_map_hittingValue_sigmaPrefix_compProd (hZ : ∀ n, Measurable (Z n))
+lemma klDiv_map_stoppedValue_sigmaPrefix_hittingAfter_compProd (hZ : ∀ n, Measurable (Z n))
     (hZ' : ∀ n, Measurable (Z' n)) (hκ : ∀ n, HasCondDistrib (Z n) (finPrefix Z n) (κ n) P)
     (hκ' : ∀ n, HasCondDistrib (Z' n) (finPrefix Z' n) (κ' n) P') (hS : MeasurableSet S)
     (hτ : ∀ᵐ ω ∂P, hittingAfter (sigmaPrefix Z) S 0 ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', hittingAfter (sigmaPrefix Z') S 0 ω ≠ ⊤) :
-    klDiv (P.map (hittingValue (sigmaPrefix Z) S 0))
-        (P'.map (hittingValue (sigmaPrefix Z') S 0)) =
+    klDiv (P.map (stoppedValue (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0)))
+        (P'.map (stoppedValue (sigmaPrefix Z') (hittingAfter (sigmaPrefix Z') S 0))) =
       ∑' t : ℕ,
         klDiv ((P.restrict {ω | (t : WithTop ℕ) < hittingAfter (sigmaPrefix Z) S 0 ω}).map
             (finPrefix Z t) ⊗ₘ κ t)
@@ -346,9 +338,8 @@ lemma klDiv_map_hittingValue_sigmaPrefix_compProd (hZ : ∀ n, Measurable (Z n))
       (hasLaw_map hZm'.aemeasurable))
     (isStoppingTime_hittingAfter_sigmaPrefix hW hS)
     ((ae_map_iff hZm.aemeasurable hne).2 hτ) ((ae_map_iff hZm'.aemeasurable hne).2 hτ')
-  simp only [← hittingValue_def] at h
-  rw [Measure.map_map (measurable_hittingValue_sigmaPrefix hW hS) hZm,
-    Measure.map_map (measurable_hittingValue_sigmaPrefix hW hS) hZm'] at h
+  have hm := measurable_stoppedValue_sigmaPrefix hW hτW
+  rw [Measure.map_map hm hZm, Measure.map_map hm hZm'] at h
   simp only [Measure.restrict_map hZm (hlt _),
     Measure.map_map (measurable_finPrefix hW _) hZm] at h
   exact h
@@ -361,31 +352,31 @@ variable [∀ n, MeasurableSpace.CountablyGenerated (X n)]
 the divergence between the laws of the prefixes stopped at time `M` is the expected sum, along
 the first process, of the divergences of `κ t` and `κ' t` at the prefix of length `t`, over the
 steps `t < min τ M`. -/
-lemma klDiv_map_hittingProcess_sigmaPrefix (hZ : ∀ n, Measurable (Z n))
+lemma klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter (hZ : ∀ n, Measurable (Z n))
     (hZ' : ∀ n, Measurable (Z' n)) (hκ : ∀ n, HasCondDistrib (Z n) (finPrefix Z n) (κ n) P)
     (hκ' : ∀ n, HasCondDistrib (Z' n) (finPrefix Z' n) (κ' n) P') (hS : MeasurableSet S)
     (M : ℕ) :
-    klDiv (P.map (hittingProcess (sigmaPrefix Z) S 0 M))
-        (P'.map (hittingProcess (sigmaPrefix Z') S 0 M)) =
+    klDiv (P.map (stoppedProcess (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0) M))
+        (P'.map (stoppedProcess (sigmaPrefix Z') (hittingAfter (sigmaPrefix Z') S 0) M)) =
       ∫⁻ ω, ∑ t ∈ range (ENat.toNat (min (hittingAfter (sigmaPrefix Z) S 0 ω) M)),
         klDiv (κ t (finPrefix Z t ω)) (κ' t (finPrefix Z t ω)) ∂P := by
-  rw [klDiv_map_hittingProcess_sigmaPrefix_compProd hZ hZ' hκ hκ' hS M,
+  rw [klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter_compProd hZ hZ' hκ hκ' hS M,
     sum_klDiv_compProd_restrict_lt_eq_lintegral hZ (measurable_hittingAfter_sigmaPrefix hZ hS) M]
 
 /-- **Chain rule at an almost surely finite stopping time** for two processes on two spaces,
 integral form: the divergence between the laws of the stopped prefixes is the expected sum,
 along the first process, of the divergences of `κ t` and `κ' t` at the prefix of length `t`,
 over the steps `t < τ`. -/
-lemma klDiv_map_hittingValue_sigmaPrefix (hZ : ∀ n, Measurable (Z n))
+lemma klDiv_map_stoppedValue_sigmaPrefix_hittingAfter (hZ : ∀ n, Measurable (Z n))
     (hZ' : ∀ n, Measurable (Z' n)) (hκ : ∀ n, HasCondDistrib (Z n) (finPrefix Z n) (κ n) P)
     (hκ' : ∀ n, HasCondDistrib (Z' n) (finPrefix Z' n) (κ' n) P') (hS : MeasurableSet S)
     (hτ : ∀ᵐ ω ∂P, hittingAfter (sigmaPrefix Z) S 0 ω ≠ ⊤)
     (hτ' : ∀ᵐ ω ∂P', hittingAfter (sigmaPrefix Z') S 0 ω ≠ ⊤) :
-    klDiv (P.map (hittingValue (sigmaPrefix Z) S 0))
-        (P'.map (hittingValue (sigmaPrefix Z') S 0)) =
+    klDiv (P.map (stoppedValue (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0)))
+        (P'.map (stoppedValue (sigmaPrefix Z') (hittingAfter (sigmaPrefix Z') S 0))) =
       ∫⁻ ω, ∑ t ∈ range (ENat.toNat (hittingAfter (sigmaPrefix Z) S 0 ω)),
         klDiv (κ t (finPrefix Z t ω)) (κ' t (finPrefix Z t ω)) ∂P := by
-  rw [klDiv_map_hittingValue_sigmaPrefix_compProd hZ hZ' hκ hκ' hS hτ hτ',
+  rw [klDiv_map_stoppedValue_sigmaPrefix_hittingAfter_compProd hZ hZ' hκ hκ' hS hτ hτ',
     tsum_klDiv_compProd_restrict_lt_eq_lintegral hZ (measurable_hittingAfter_sigmaPrefix hZ hS) hτ]
 
 end CountablyGenerated

@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Algorithm
-public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.Weighted
+public import LMLExplore.MeasureTheory.Measure.Weighted
 public import Mathlib.InformationTheory.KullbackLeibler.Basic
 
 /-!
@@ -35,6 +35,7 @@ probability space `Ω`:
 
 open MeasureTheory ProbabilityTheory Finset Learning Learning.MDP.Episodic Learning.MDP
   InformationTheory
+open LMLExplore (weightedMeasure)
 open scoped ENNReal
 
 namespace Essakine2026Tight

@@ -3,6 +3,10 @@
 Material of this project written in library generality, with its intended destination. The
 list grows with phase 2.
 
+Since 2026-11-12 the project builds on LMLExplore's copies of much of this material, and the
+local files that duplicated it are deleted (`notes/lmlexplore-dedup.md`); `PAPER_ROADMAP.md` is
+the current list of what remains to port.
+
 ## LML (`ForLMLExplore/MarkovDecisionProcess/`, `ForLMLExplore/ReinforcementLearning/Episodic/`)
 
 * `ForLMLExplore/MarkovDecisionProcess/Basic.lean` is the file of the `mdp` branch of LML (commit `ddfbff9`, "Merge branch

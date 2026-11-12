@@ -10,7 +10,7 @@ public import Essakine2026Tight.EV2026.Run
 public import Essakine2026Tight.EV2026.RateBounds
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Values
 public import Essakine2026Tight.ForLMLExplore.InformationTheory.KLBernstein
-public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.WeightedProbability
+public import LMLExplore.MeasureTheory.Measure.Weighted
 
 /-!
 # Analysis of Entropic-BPI: sign-independent lemmas
@@ -40,6 +40,8 @@ public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.WeightedProb
 
 open MeasureTheory ProbabilityTheory Finset Learning Learning.MDP.Episodic Learning.MDP
   InformationTheory
+open LMLExplore (weightedMeasure isProbabilityMeasure_weightedMeasure
+  measureReal_weightedMeasure_singleton mem_simplex_iff)
 open scoped ENNReal
 
 namespace Essakine2026Tight
@@ -122,7 +124,7 @@ lemma abs_vecExp_sub_le_of_klDiv_le (hp : ∀ s, 0 ≤ p s) (hp1 : ∑ s, p s = 
   · rw [eq_const_of_mem_Icc_add_zero hf, vecExp_const, vecExp_const, hp1, hq1]
     simp only [sub_self, abs_zero]
     positivity
-  have := isProbabilityMeasure_weightedMeasure hp hp1
+  have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hp, hp1⟩)
   have hpw : ∀ s, (weightedMeasure p).real {s} = p s := measureReal_weightedMeasure_singleton hp
   have hg : ∀ᵐ x ∂ν, f x - c ∈ Set.Icc 0 b :=
     Filter.Eventually.of_forall fun s ↦ ⟨by linarith [(hf s).1], by linarith [(hf s).2]⟩
@@ -143,7 +145,7 @@ lemma vecVar_le_two_mul_vecVar_add_of_klDiv_le (hp : ∀ s, 0 ≤ p s) (hp1 : �
   rcases hb.eq_or_lt with rfl | hb
   · rw [eq_const_of_mem_Icc_add_zero hf, vecVar_const hq1, vecVar_const hp1]
     simp
-  have := isProbabilityMeasure_weightedMeasure hp hp1
+  have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hp, hp1⟩)
   have hpw : ∀ s, (weightedMeasure p).real {s} = p s := measureReal_weightedMeasure_singleton hp
   have hg : ∀ᵐ x ∂ν, f x - c ∈ Set.Icc 0 b :=
     Filter.Eventually.of_forall fun s ↦ ⟨by linarith [(hf s).1], by linarith [(hf s).2]⟩
@@ -162,7 +164,7 @@ lemma vecVar_le_two_mul_vecVar_add_of_klDiv_le' (hp : ∀ s, 0 ≤ p s) (hp1 : �
   rcases hb.eq_or_lt with rfl | hb
   · rw [eq_const_of_mem_Icc_add_zero hf, vecVar_const hq1, vecVar_const hp1]
     simp
-  have := isProbabilityMeasure_weightedMeasure hp hp1
+  have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hp, hp1⟩)
   have hpw : ∀ s, (weightedMeasure p).real {s} = p s := measureReal_weightedMeasure_singleton hp
   have hg : ∀ᵐ x ∂ν, f x - c ∈ Set.Icc 0 b :=
     Filter.Eventually.of_forall fun s ↦ ⟨by linarith [(hf s).1], by linarith [(hf s).2]⟩
@@ -179,7 +181,7 @@ lemma vecVar_le_two_mul_vecVar_add (hp : ∀ s, 0 ≤ p s) (hp1 : ∑ s, p s = 1
     vecVar p f ≤ 2 * vecVar p g + 2 * b * vecExp p (fun s ↦ |f s - g s|) := by
   let _ : MeasurableSpace S := ⊤
   have : MeasurableSingletonClass S := ⟨fun _ ↦ trivial⟩
-  have := isProbabilityMeasure_weightedMeasure hp hp1
+  have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hp, hp1⟩)
   have hpw : ∀ s, (weightedMeasure p).real {s} = p s := measureReal_weightedMeasure_singleton hp
   have h := variance_le_two_mul_variance_add (μ := weightedMeasure p) (b := b)
     (f := fun s ↦ f s - c) (g := fun s ↦ g s - c)
@@ -197,7 +199,7 @@ lemma vecVar_le_mul_vecExp (hp : ∀ s, 0 ≤ p s) (hp1 : ∑ s, p s = 1)
     (hf : ∀ s, f s ∈ Set.Icc 0 b) : vecVar p f ≤ b * vecExp p f := by
   let _ : MeasurableSpace S := ⊤
   have : MeasurableSingletonClass S := ⟨fun _ ↦ trivial⟩
-  have := isProbabilityMeasure_weightedMeasure hp hp1
+  have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hp, hp1⟩)
   have hpw : ∀ s, (weightedMeasure p).real {s} = p s := measureReal_weightedMeasure_singleton hp
   have h := variance_le_mul_integral (μ := weightedMeasure p) (Filter.Eventually.of_forall hf)
     (measurable_of_countable _).aestronglyMeasurable
@@ -653,6 +655,6 @@ lemma mem_Icc_exp_one_of_neg {β u x : ℝ} (hβ : β < 0) (hu : 0 ≤ u)
 lemma rewardsIn_Icc_of_hasRewardFn {S A : Type*} [MeasurableSpace S] [MeasurableSpace A]
     {M : EpisodicMDP S A} {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r)
     (hr : ∀ h s a, r h s a ∈ Set.Icc (0 : ℝ) 1) : M.RewardsIn (Set.Icc 0 1) :=
-  rewardsIn_of_hasRewardFn M hM measurableSet_Icc hr
+  hM.rewardsIn hr
 
 end Essakine2026Tight

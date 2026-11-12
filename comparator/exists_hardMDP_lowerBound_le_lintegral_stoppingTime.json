@@ -3,18 +3,10 @@
     "solution_module": "Solution",
     "theorem_names": [
         "Essakine2026Tight.exists_hardMDP_lowerBound_le_lintegral_stoppingTime",
-        "Learning.MDP.measurable_lastObsAction",
-        "Learning.MDP.measurable_obsAction",
-        "Learning.MDP.instIsMarkovKernelHistEnvObsOfIsProbabilityMeasure",
-        "Learning.MDP.measurable_policyAlg_next",
         "Learning.MDP.Episodic.measurable_augPolicy",
-        "Learning.MDP.Episodic.EpisodicMDP.measurable_augTransFun",
-        "Learning.MDP.Episodic.EpisodicMDP.instIsMarkovKernelProdNatAugTrans",
-        "Learning.MDP.Episodic.EpisodicMDP.measurable_augRewardFun",
-        "Learning.MDP.Episodic.EpisodicMDP.instIsMarkovKernelProdNatRealAugReward",
+        "Learning.MDP.Episodic.nonempty_augState",
         "Learning.MDP.Episodic.measurable_statesLaw_extend",
-        "Learning.MDP.Episodic.instIsMarkovKernelPolicyTrajStatesKernel",
-        "Learning.MDP.env._proof_1"
+        "Learning.MDP.Episodic.instIsMarkovKernelPolicyTrajStatesKernel"
     ],
     "permitted_axioms": [
         "propext",

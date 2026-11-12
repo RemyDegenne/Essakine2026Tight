@@ -137,8 +137,9 @@ lemma measure_exists_le_pullCount_visitNextState_mem_le [DecidableEq S] [Decidab
     (E := fun n ↦ {ω | ∃ t, n ≤ pullCount (stepPair X Y h) (s, a) t ω})
     (W := fun k ω ↦ visitNextState X Y h s a (k + 1) ω)
     (fun n m hnm ω ⟨t, ht⟩ ↦ ⟨t, hnm.trans ht⟩) hξ (fun n C ↦ ?_) B
-  rw [hind.measure_prefix_mem_eq_pi hlaw n C]
-  exact measure_visitNextState_mem_le_pi M s₁ hseq h s a n C
+  refine (measure_visitNextState_mem_le_pi M s₁ hseq h s a n C).trans_eq ?_
+  exact ((iIndepFun.hasLaw_pi (fun k : Fin n ↦ hlaw k) (hind.precomp Fin.val_injective)).measure_eq
+    (p := (· ∈ C)) (Set.to_countable C).measurableSet).symm
 
 /-- **Domination of the observed next states by an i.i.d. sample, uniformly in the episodes**: let
 `ξ` be an i.i.d. sequence of law `p_h(· | s, a)`. For every sequence of sets `B n` of sequences of

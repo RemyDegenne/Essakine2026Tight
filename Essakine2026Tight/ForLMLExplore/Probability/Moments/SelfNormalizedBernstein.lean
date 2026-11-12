@@ -6,7 +6,9 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.ForLMLExplore.Analysis.SpecialFunctions.PoissonCramer
-public import Essakine2026Tight.ForLMLExplore.Probability.Martingale.Ville
+public import LMLExplore.Probability.Martingale.Freedman
+public import LMLExplore.Probability.Martingale.Mixture
+public import TauCeti.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.Complex.ExponentialBounds
@@ -16,11 +18,27 @@ public import Mathlib.Analysis.Complex.ExponentialBounds
 
 Let `(Y t)` be adapted with `|Y t| ≤ b` and `𝔼[Y t | ℱ t] = 0`, let `v t` be a predictable
 version of the conditional variance `𝔼[Y t² | ℱ t]` with values in `[0, b²]`, and let `w t` be
-predictable with values in `[0, 1]`. With
-`S t = ∑_{i < t} w i Y i` (`ProbabilityTheory.selfNormSum`) and
-`V t = ∑_{i < t} w i² v i` (`ProbabilityTheory.selfNormVar`), the processes
-`exp (lam S t - φ_b(lam) V t / b²)` are nonnegative supermartingales for every `lam ≥ 0`
-(`ProbabilityTheory.supermartingale_exp_selfNorm`), where `φ_b(lam) = e^{lam b} - 1 - lam b`.
+predictable with values in `[0, 1]`. Write `S t = ∑_{i < t} w i Y i`
+(`ProbabilityTheory.selfNormSum`), `V t = ∑_{i < t} w i² v i` (`ProbabilityTheory.selfNormVar`),
+`φ_b(lam) = e^{lam b} - 1 - lam b` and `h = Real.poissonCramer`.
+
+* `ProbabilityTheory.supermartingale_exp_selfNorm`: for every `lam ≥ 0`,
+  `exp (lam S t - φ_b(lam) V t / b²)` is a supermartingale. This is LMLExplore's
+  `LMLExplore.supermartingale_exp_sum_of_condExp_exp_le_one` for the increments `w t Y t`, whose
+  one-step bound is the one of Freedman's inequality,
+  `LMLExplore.condExp_exp_mul_sub_mul_condExp_sq_le_one`.
+* `ProbabilityTheory.supermartingale_selfNormMixture`: the mixture of these supermartingales for
+  `±lam = ±u / b` against `e^{-u} du` on `(0, ∞)` (`ProbabilityTheory.selfNormMixture`) is a
+  supermartingale, by LMLExplore's method of mixtures
+  `LMLExplore.supermartingale_integral_of_integrable`.
+* `ProbabilityTheory.ofReal_le_bernsteinMixture`: the mixture is at least
+  `e^T / (8 (1 + √(|s| / b + v / b²)))` with `T = (v / b² + 1) h(b |s| / (v + b²))`.
+* `ProbabilityTheory.measure_exists_log_le_selfNorm_poissonCramer_le` (and its primed version):
+  **the self-normalized Bernstein inequality** (Lemma 21 of Essakine, Vernade (2026)), by
+  Ville's inequality (LMLExplore's `MeasureTheory.Supermartingale.measure_exists_le_le`).
+* `ProbabilityTheory.measure_exists_sqrt_add_lt_abs_selfNormSum_le` (and its primed version): the
+  explicit forms `|S t| ≤ √(2 (V t + b²) L t) + (2/3) b L t` and `|S t| ≤ √(2 V t L t) + 3 b L t`
+  with `L t = log (4 e (2 t + 1) / δ)`.
 -/
 
 @[expose] public section
@@ -238,134 +256,6 @@ lemma abs_selfNormSum_le (hw : ∀ i ω, w i ω ∈ Set.Icc 0 1) {ω : Ω} {t : 
           _ ≤ b := hY i
     _ = t * b := by simp
 
-/-- A bounded random variable is integrable. -/
-lemma integrable_of_ae_abs_le [IsFiniteMeasure μ] {f : Ω → ℝ} {c : ℝ}
-    (hf : ∀ᵐ ω ∂μ, |f ω| ≤ c) (hfm : AEStronglyMeasurable f μ) : Integrable f μ := by
-  refine (memLp_of_bounded (a := -c) (b := c) ?_ hfm 1).integrable le_rfl
-  filter_upwards [hf] with ω hω using abs_le.1 hω
-
-/-- One step of the Bernstein exponential supermartingale: if `|Z| ≤ b`, `𝔼[Z | m] = 0`,
-`𝔼[Z² | m] = V` with `V` `m`-measurable in `[0, b²]` and `W` `m`-measurable in `[0, 1]`, then
-`𝔼[exp (lam W Z - φ_b(lam) W² V / b²) | m] ≤ 1` for `lam ≥ 0`. -/
-lemma condExp_exp_mul_sub_le_one [IsFiniteMeasure μ] {m : MeasurableSpace Ω} (hm : m ≤ mΩ)
-    {Z W V : Ω → ℝ} (hb : 0 < b) (hlam : 0 ≤ lam) (hZm : StronglyMeasurable[mΩ] Z)
-    (hZb : ∀ᵐ ω ∂μ, |Z ω| ≤ b) (hZ0 : μ[Z | m] =ᵐ[μ] 0) (hWm : StronglyMeasurable[m] W)
-    (hWb : ∀ ω, W ω ∈ Set.Icc 0 1) (hVm : StronglyMeasurable[m] V)
-    (hVb : ∀ ω, V ω ∈ Set.Icc 0 (b ^ 2)) (hV : μ[fun ω ↦ Z ω ^ 2 | m] =ᵐ[μ] V) :
-    μ[fun ω ↦ exp (lam * (W ω * Z ω) - expSubOneSub (lam * b) * (W ω ^ 2 * V ω) / b ^ 2) | m]
-      ≤ᵐ[μ] 1 := by
-  set φ := expSubOneSub (lam * b) with hφ
-  have hφ0 : 0 ≤ φ := expSubOneSub_nonneg _
-  set E : Ω → ℝ := fun ω ↦ exp (-(φ * (W ω ^ 2 * V ω) / b ^ 2)) with hE
-  set A : Ω → ℝ := fun ω ↦ exp (lam * (W ω * Z ω)) with hA
-  set c1 : Ω → ℝ := fun ω ↦ lam * W ω with hc1
-  set c2 : Ω → ℝ := fun ω ↦ φ * W ω ^ 2 / b ^ 2 with hc2
-  set Z2 : Ω → ℝ := fun ω ↦ Z ω ^ 2 with hZ2
-  -- measurability
-  have hEm : StronglyMeasurable[m] E := Real.continuous_exp.comp_stronglyMeasurable
-    ((((hWm.pow 2).mul hVm).const_mul φ).div stronglyMeasurable_const).neg
-  have hc1m : StronglyMeasurable[m] c1 := hWm.const_mul lam
-  have hc2m : StronglyMeasurable[m] c2 := ((hWm.pow 2).const_mul φ).div stronglyMeasurable_const
-  have hZ2m : StronglyMeasurable[mΩ] Z2 := hZm.pow 2
-  have hAm : StronglyMeasurable[mΩ] A :=
-    Real.continuous_exp.comp_stronglyMeasurable (((hWm.mono hm).mul hZm).const_mul lam)
-  -- bounds
-  have hWZ : ∀ᵐ ω ∂μ, |W ω * Z ω| ≤ b := by
-    filter_upwards [hZb] with ω hω
-    rw [abs_mul, abs_of_nonneg (hWb ω).1]
-    calc W ω * |Z ω| ≤ 1 * |Z ω| := mul_le_mul_of_nonneg_right (hWb ω).2 (abs_nonneg _)
-      _ ≤ b := by rw [one_mul]; exact hω
-  have hEb : ∀ ω, |E ω| ≤ 1 := fun ω ↦ by
-    rw [abs_of_pos (exp_pos _)]
-    refine exp_le_one_iff.2 ?_
-    have : 0 ≤ φ * (W ω ^ 2 * V ω) / b ^ 2 := by
-      have := (hVb ω).1
-      positivity
-    linarith
-  have hAb : ∀ᵐ ω ∂μ, |A ω| ≤ exp (lam * b) := by
-    filter_upwards [hWZ] with ω hω
-    rw [abs_of_pos (exp_pos _)]
-    exact exp_le_exp.2 (by nlinarith [abs_le.1 hω])
-  -- integrability
-  have hZint : Integrable Z μ := integrable_of_ae_abs_le hZb hZm.aestronglyMeasurable
-  have hZ2int : Integrable Z2 μ := by
-    refine integrable_of_ae_abs_le (c := b ^ 2) ?_ hZ2m.aestronglyMeasurable
-    filter_upwards [hZb] with ω hω
-    rw [hZ2, abs_of_nonneg (sq_nonneg _)]
-    nlinarith [abs_nonneg (Z ω), sq_abs (Z ω)]
-  have hAint : Integrable A μ := integrable_of_ae_abs_le hAb hAm.aestronglyMeasurable
-  have hc1Z : Integrable (c1 * Z) μ := by
-    refine integrable_of_ae_abs_le (c := lam * b) ?_ ((hc1m.mono hm).mul hZm).aestronglyMeasurable
-    filter_upwards [hWZ] with ω hω
-    simp only [Pi.mul_apply, hc1]
-    rw [mul_assoc, abs_mul, abs_of_nonneg hlam]
-    exact mul_le_mul_of_nonneg_left hω hlam
-  have hc2Z2 : Integrable (c2 * Z2) μ := by
-    refine integrable_of_ae_abs_le (c := φ) ?_ ((hc2m.mono hm).mul hZ2m).aestronglyMeasurable
-    filter_upwards [hWZ] with ω hω
-    simp only [Pi.mul_apply, hc2, hZ2]
-    have heq : φ * W ω ^ 2 / b ^ 2 * Z ω ^ 2 = φ * ((W ω * Z ω) ^ 2 / b ^ 2) := by ring
-    rw [heq, abs_mul, abs_of_nonneg hφ0]
-    have hsq : (W ω * Z ω) ^ 2 / b ^ 2 ≤ 1 := by
-      rw [div_le_one (by positivity)]
-      nlinarith [abs_nonneg (W ω * Z ω), sq_abs (W ω * Z ω)]
-    rw [abs_of_nonneg (by positivity)]
-    nlinarith
-  have hconst : Integrable (fun _ : Ω ↦ (1 : ℝ)) μ := integrable_const 1
-  have hBint : Integrable ((fun _ ↦ (1 : ℝ)) + (c1 * Z + c2 * Z2)) μ :=
-    hconst.add (hc1Z.add hc2Z2)
-  have hEA : Integrable (E * A) μ := by
-    refine integrable_of_ae_abs_le (c := exp (lam * b)) ?_
-      ((hEm.mono hm).mul hAm).aestronglyMeasurable
-    filter_upwards [hAb] with ω hω
-    rw [Pi.mul_apply, abs_mul]
-    calc |E ω| * |A ω| ≤ 1 * exp (lam * b) :=
-          mul_le_mul (hEb ω) hω (abs_nonneg _) zero_le_one
-      _ = exp (lam * b) := one_mul _
-  -- the function as a product
-  have hfun : (fun ω ↦ exp (lam * (W ω * Z ω) - φ * (W ω ^ 2 * V ω) / b ^ 2)) = E * A := by
-    funext ω
-    simp only [Pi.mul_apply, hE, hA, ← exp_add]
-    ring_nf
-  -- conditional expectation of the Taylor upper bound
-  have hAB : μ[A | m] ≤ᵐ[μ] μ[(fun _ ↦ (1 : ℝ)) + (c1 * Z + c2 * Z2) | m] := by
-    refine condExp_mono hAint hBint ?_
-    filter_upwards [hWZ] with ω hω
-    have h := exp_mul_le_of_abs_le hb hlam hω
-    simp only [Pi.add_apply, Pi.mul_apply, hc1, hc2, hZ2, hA]
-    calc exp (lam * (W ω * Z ω))
-        ≤ 1 + lam * (W ω * Z ω) + (W ω * Z ω) ^ 2 / b ^ 2 * φ := h
-      _ = 1 + (lam * W ω * Z ω + φ * W ω ^ 2 / b ^ 2 * Z ω ^ 2) := by ring
-  have hB : μ[(fun _ ↦ (1 : ℝ)) + (c1 * Z + c2 * Z2) | m]
-      =ᵐ[μ] fun ω ↦ 1 + c2 ω * V ω := by
-    have h1 := condExp_add hconst (hc1Z.add hc2Z2) m
-    have h2 := condExp_add hc1Z hc2Z2 m
-    have h3 : μ[c1 * Z | m] =ᵐ[μ] c1 * μ[Z | m] :=
-      condExp_mul_of_stronglyMeasurable_left hc1m hc1Z hZint
-    have h4 : μ[c2 * Z2 | m] =ᵐ[μ] c2 * μ[Z2 | m] :=
-      condExp_mul_of_stronglyMeasurable_left hc2m hc2Z2 hZ2int
-    have h5 : μ[fun _ : Ω ↦ (1 : ℝ) | m] = fun _ ↦ 1 := condExp_const hm 1
-    filter_upwards [h1, h2, h3, h4, hZ0, hV] with ω h1ω h2ω h3ω h4ω hZ0ω hVω
-    rw [h1ω, Pi.add_apply, h2ω, Pi.add_apply, h3ω, h4ω, h5]
-    simp only [Pi.mul_apply, hZ0ω, Pi.zero_apply, mul_zero, zero_add]
-    rw [show μ[Z2 | m] ω = V ω from hVω]
-  have hpull : μ[E * A | m] =ᵐ[μ] E * μ[A | m] :=
-    condExp_mul_of_stronglyMeasurable_left hEm hEA hAint
-  rw [hfun]
-  filter_upwards [hpull, hAB, hB] with ω hp hab hbω
-  rw [hp, Pi.mul_apply, Pi.one_apply]
-  have hEpos : 0 < E ω := exp_pos _
-  calc E ω * μ[A | m] ω ≤ E ω * (1 + c2 ω * V ω) := by
-        refine mul_le_mul_of_nonneg_left ?_ hEpos.le
-        rw [← hbω]; exact hab
-    _ ≤ E ω * exp (c2 ω * V ω) := by
-        refine mul_le_mul_of_nonneg_left ?_ hEpos.le
-        linarith [add_one_le_exp (c2 ω * V ω)]
-    _ = 1 := by
-        simp only [hE, hc2, ← exp_add]
-        rw [exp_eq_one_iff]
-        ring
-
 /-- `S t` is `ℱ t`-measurable. -/
 lemma stronglyMeasurable_selfNormSum (hYm : ∀ i, StronglyMeasurable[ℱ (i + 1)] (Y i))
     (hwm : ∀ i, StronglyMeasurable[ℱ i] (w i)) (t : ℕ) :
@@ -386,7 +276,9 @@ lemma stronglyMeasurable_selfNormVar (hvm : ∀ i, StronglyMeasurable[ℱ i] (v 
 
 /-- **The Bernstein exponential supermartingale**: for `lam ≥ 0`,
 `exp (lam S t - φ_b(lam) V t / b²)` is a supermartingale, where `S = selfNormSum Y w`,
-`V = selfNormVar v w` and `φ_b(lam) = expSubOneSub (lam * b)`. -/
+`V = selfNormVar v w` and `φ_b(lam) = expSubOneSub (lam * b)`. This is LMLExplore's
+`LMLExplore.supermartingale_exp_sum_of_condExp_exp_le_one` for the increments `w i Y i`, with the
+one-step bound `LMLExplore.condExp_exp_mul_sub_mul_condExp_sq_le_one` of Freedman's inequality. -/
 lemma supermartingale_exp_selfNorm [IsFiniteMeasure μ] (hb : 0 < b) (hlam : 0 ≤ lam)
     (hYm : ∀ i, StronglyMeasurable[ℱ (i + 1)] (Y i)) (hYb : ∀ i, ∀ᵐ ω ∂μ, |Y i ω| ≤ b)
     (hY0 : ∀ i, μ[Y i | ℱ i] =ᵐ[μ] 0)
@@ -395,68 +287,68 @@ lemma supermartingale_exp_selfNorm [IsFiniteMeasure μ] (hb : 0 < b) (hlam : 0 �
     (hv : ∀ i, μ[fun ω ↦ Y i ω ^ 2 | ℱ i] =ᵐ[μ] v i) :
     Supermartingale (fun t ω ↦ exp (lam * selfNormSum Y w t ω
       - expSubOneSub (lam * b) * selfNormVar v w t ω / b ^ 2)) ℱ μ := by
-  set φ := expSubOneSub (lam * b) with hφ
-  have hφ0 : 0 ≤ φ := expSubOneSub_nonneg _
-  set M : ℕ → Ω → ℝ := fun t ω ↦ exp (lam * selfNormSum Y w t ω
-      - φ * selfNormVar v w t ω / b ^ 2) with hM
-  have hMm : ∀ t, StronglyMeasurable[ℱ t] (M t) := fun t ↦
-    Real.continuous_exp.comp_stronglyMeasurable
-      (((stronglyMeasurable_selfNormSum hYm hwm t).const_mul lam).sub
-        (((stronglyMeasurable_selfNormVar hvm hwm t).const_mul φ).div stronglyMeasurable_const))
-  have hYball : ∀ᵐ ω ∂μ, ∀ i, |Y i ω| ≤ b := ae_all_iff.2 hYb
-  have hMb : ∀ t, ∀ᵐ ω ∂μ, |M t ω| ≤ exp (lam * (t * b)) := by
-    intro t
-    filter_upwards [hYball] with ω hω
-    rw [abs_of_pos (exp_pos _)]
-    refine exp_le_exp.2 ?_
-    have hS := abs_selfNormSum_le (w := w) hwb (t := t) hω
-    have hV := selfNormVar_nonneg (w := w) hvb t ω
-    have h1 : lam * selfNormSum Y w t ω ≤ lam * (t * b) :=
-      mul_le_mul_of_nonneg_left (le_trans (le_abs_self _) hS) hlam
-    have h2 : 0 ≤ φ * selfNormVar v w t ω / b ^ 2 := by positivity
-    linarith
-  have hMint : ∀ t, Integrable (M t) μ := fun t ↦
-    integrable_of_ae_abs_le (hMb t) ((hMm t).mono (ℱ.le t)).aestronglyMeasurable
-  refine supermartingale_nat hMm hMint fun t ↦ ?_
-  set Z : Ω → ℝ := fun ω ↦ exp (lam * (w t ω * Y t ω) - φ * (w t ω ^ 2 * v t ω) / b ^ 2)
-    with hZ
-  have hstep : M (t + 1) = M t * Z := by
-    funext ω
-    simp only [hM, hZ, Pi.mul_apply, selfNormSum_succ, selfNormVar_succ, ← exp_add]
-    ring_nf
-  have hone : μ[Z | ℱ t] ≤ᵐ[μ] 1 :=
-    condExp_exp_mul_sub_le_one (ℱ.le t) hb hlam ((hYm t).mono (ℱ.le (t + 1))) (hYb t)
-      (hY0 t) (hwm t) (hwb t) (hvm t) (hvb t) (hv t)
-  have hZm : StronglyMeasurable[mΩ] Z := by
-    have hZeq : Z = fun ω ↦ exp (lam * (w t ω * Y t ω) - φ * (w t ω ^ 2 * v t ω) / b ^ 2) := rfl
-    rw [hZeq]
-    exact Real.continuous_exp.comp_stronglyMeasurable
-      (((((hwm t).mono (ℱ.le t)).mul ((hYm t).mono (ℱ.le (t + 1)))).const_mul lam).sub
-        (((((hwm t).mono (ℱ.le t)).pow 2).mul
-          ((hvm t).mono (ℱ.le t))).const_mul φ |>.div stronglyMeasurable_const))
-  have hZint : Integrable Z μ := by
-    refine integrable_of_ae_abs_le (c := exp (lam * b)) ?_ hZm.aestronglyMeasurable
-    filter_upwards [hYb t] with ω hω
-    rw [abs_of_pos (exp_pos _)]
-    refine exp_le_exp.2 ?_
-    have hwY : w t ω * Y t ω ≤ b := by
-      calc w t ω * Y t ω ≤ |w t ω * Y t ω| := le_abs_self _
-        _ = w t ω * |Y t ω| := by rw [abs_mul, abs_of_nonneg (hwb t ω).1]
-        _ ≤ 1 * b := mul_le_mul (hwb t ω).2 hω (abs_nonneg _) zero_le_one
-        _ = b := one_mul b
-    have h2 : 0 ≤ φ * (w t ω ^ 2 * v t ω) / b ^ 2 := by
-      have := (hvb t ω).1
-      positivity
-    nlinarith
-  have hMZint : Integrable (M t * Z) μ := by rw [← hstep]; exact hMint (t + 1)
-  have hpull : μ[M t * Z | ℱ t] =ᵐ[μ] M t * μ[Z | ℱ t] :=
-    condExp_mul_of_stronglyMeasurable_left (hMm t) hMZint hZint
-  rw [hstep]
-  filter_upwards [hpull, hone] with ω hp ho
-  rw [hp, Pi.mul_apply]
-  calc M t ω * μ[Z | ℱ t] ω ≤ M t ω * 1 :=
-        mul_le_mul_of_nonneg_left ho (exp_pos _).le
-    _ = M t ω := mul_one _
+  set c := expSubOneSub (lam * b) / b ^ 2 with hc
+  have hc0 : 0 ≤ c := div_nonneg (expSubOneSub_nonneg _) (sq_nonneg b)
+  -- the increments `w i Y i` are bounded by `b`, centered, with conditional variance `w i ^ 2 v i`
+  have hXm : ∀ i, StronglyMeasurable[ℱ (i + 1)] (fun ω ↦ w i ω * Y i ω) := fun i ↦
+    ((hwm i).mono (ℱ.mono i.le_succ)).mul (hYm i)
+  have hXb : ∀ i, ∀ᵐ ω ∂μ, |w i ω * Y i ω| ≤ b := fun i ↦ (hYb i).mono fun ω hω ↦ by
+    rw [abs_mul, abs_of_nonneg (hwb i ω).1]
+    exact (mul_le_of_le_one_left (abs_nonneg _) (hwb i ω).2).trans hω
+  have hYi : ∀ i, Integrable (Y i) μ := fun i ↦
+    .of_bound ((hYm i).mono (ℱ.le (i + 1))).aestronglyMeasurable b (hYb i)
+  have hY2i : ∀ i, Integrable (fun ω ↦ Y i ω ^ 2) μ := fun i ↦
+    .of_bound (((hYm i).mono (ℱ.le (i + 1))).aestronglyMeasurable.pow 2) (b ^ 2) ((hYb i).mono
+      fun ω hω ↦ by simpa [Real.norm_eq_abs] using pow_le_pow_left₀ (abs_nonneg _) hω 2)
+  have hX2 : ∀ i, μ[fun ω ↦ (w i ω * Y i ω) ^ 2 | ℱ i] =ᵐ[μ] fun ω ↦ w i ω ^ 2 * v i ω := by
+    intro i
+    have hint : Integrable (w i ^ 2 * fun ω ↦ Y i ω ^ 2) μ :=
+      (hY2i i).bdd_mul (((hwm i).mono (ℱ.le i)).aestronglyMeasurable.pow 2)
+        (ae_of_all _ fun ω ↦ by
+          simpa [Real.norm_eq_abs, abs_of_nonneg (hwb i ω).1] using pow_le_one₀ (hwb i ω).1
+            (hwb i ω).2)
+    have heq : (fun ω ↦ (w i ω * Y i ω) ^ 2) = w i ^ 2 * fun ω ↦ Y i ω ^ 2 := by
+      ext ω
+      simp [mul_pow]
+    rw [heq]
+    filter_upwards [condExp_mul_of_stronglyMeasurable_left ((hwm i).pow 2) hint (hY2i i), hv i]
+      with ω h1 h2
+    rw [h1, Pi.mul_apply, h2, Pi.pow_apply]
+  -- the process is `exp (∑ i < t, Z i)` with `Z i = lam w i Y i - c w i ^ 2 v i`
+  have h_eq : (fun t ω ↦ exp (lam * selfNormSum Y w t ω
+      - expSubOneSub (lam * b) * selfNormVar v w t ω / b ^ 2)) = fun t ω ↦
+      exp (∑ i ∈ Finset.range t, (lam * (w i ω * Y i ω) - c * (w i ω ^ 2 * v i ω))) := by
+    ext t ω
+    simp only [selfNormSum, selfNormVar, hc, Finset.sum_sub_distrib, Finset.mul_sum,
+      Finset.sum_div]
+    congr 2
+    exact Finset.sum_congr rfl fun i _ ↦ by ring
+  rw [h_eq]
+  have hZm : ∀ i, Measurable[ℱ (i + 1)]
+      (fun ω ↦ lam * (w i ω * Y i ω) - c * (w i ω ^ 2 * v i ω)) := fun i ↦
+    ((hXm i).measurable.const_mul lam).sub (((((hwm i).measurable.pow_const 2).mul
+      (hvm i).measurable).const_mul c).mono (ℱ.mono i.le_succ) le_rfl)
+  refine LMLExplore.supermartingale_exp_sum_of_condExp_exp_le_one hZm (fun i ↦ ?_) fun i ↦ ?_
+  · refine .of_bound ((hZm i).mono (ℱ.le (i + 1)) le_rfl).exp.aestronglyMeasurable
+      (exp (lam * b)) ((hXb i).mono fun ω hω ↦ ?_)
+    rw [Real.norm_of_nonneg (exp_pos _).le, exp_le_exp]
+    have : 0 ≤ c * (w i ω ^ 2 * v i ω) := mul_nonneg hc0 (mul_nonneg (sq_nonneg _) (hvb i ω).1)
+    nlinarith [mul_le_mul_of_nonneg_left (le_abs_self (w i ω * Y i ω) |>.trans hω) hlam]
+  · have h := LMLExplore.condExp_exp_mul_sub_mul_condExp_sq_le_one (μ := μ) (ℱ.le i) hb hlam
+      (c := c) le_rfl ((hXm i).mono (ℱ.le (i + 1))).aestronglyMeasurable
+      (.of_bound (((hXm i).mono (ℱ.le (i + 1))).aestronglyMeasurable.pow 2) (b ^ 2) ((hXb i).mono
+        fun ω hω ↦ by simpa [Real.norm_eq_abs] using pow_le_pow_left₀ (abs_nonneg _) hω 2))
+      (by
+        filter_upwards [condExp_mul_of_stronglyMeasurable_left (hwm i)
+          ((hYi i).bdd_mul ((hwm i).mono (ℱ.le i)).aestronglyMeasurable
+            (ae_of_all _ fun ω ↦ by simpa [abs_of_nonneg (hwb i ω).1] using (hwb i ω).2))
+          (hYi i), hY0 i] with ω h1 h2
+        simp only [Pi.mul_apply] at h1
+        simp [show (fun ω ↦ w i ω * Y i ω) = w i * Y i from rfl, h1, h2])
+      ((hXb i).mono fun ω hω ↦ (le_abs_self _).trans hω)
+    refine (condExp_congr_ae ?_).trans_le h
+    filter_upwards [hX2 i] with ω hω
+    rw [hω]
 
 /-- The weighted sum of `-Y` is `-S`. -/
 lemma selfNormSum_neg (Y w : ℕ → Ω → ℝ) (t : ℕ) (ω : Ω) :
@@ -616,45 +508,32 @@ lemma measurable_selfNorm_mixture (t : ℕ) :
   measurable_bernsteinMixture_comp (stronglyMeasurable_selfNormSum hYm hwm t).measurable
     (stronglyMeasurable_selfNormVar hvm hwm t).measurable
 
-/-- Supermartingale inequality for the mixture in `ℝ≥0∞`, by Tonelli. -/
-lemma setLIntegral_selfNorm_mixture_le {i j : ℕ} (hij : i ≤ j) {A : Set Ω}
-    (hA : MeasurableSet[ℱ i] A) :
-    ∫⁻ ω in A, bernsteinMixture b (selfNormSum Y w j ω) (selfNormVar v w j ω) ∂μ
-      ≤ ∫⁻ ω in A, bernsteinMixture b (selfNormSum Y w i ω) (selfNormVar v w i ω) ∂μ := by
-  have hswap : ∀ t, ∫⁻ ω in A, bernsteinMixture b (selfNormSum Y w t ω) (selfNormVar v w t ω) ∂μ
-      = ∫⁻ u in Ioi 0, ∫⁻ ω in A, ENNReal.ofReal (bernsteinMixtureIntegrand b
-          (selfNormSum Y w t ω) (selfNormVar v w t ω) u) ∂μ := by
-    intro t
-    have hS := ((stronglyMeasurable_selfNormSum hYm hwm t).mono (ℱ.le t)).measurable
-    have hV := ((stronglyMeasurable_selfNormVar hvm hwm t).mono (ℱ.le t)).measurable
-    have hprod : Measurable (fun p : Ω × ℝ ↦
-        (selfNormSum Y w t p.1, selfNormVar v w t p.1, p.2)) :=
-      (hS.comp measurable_fst).prodMk ((hV.comp measurable_fst).prodMk measurable_snd)
-    have hmeas := ENNReal.measurable_ofReal.comp
-      ((continuous_bernsteinMixtureIntegrand b).measurable.comp hprod)
-    have hswap' := lintegral_lintegral_swap (μ := μ.restrict A) (ν := volume.restrict (Ioi 0))
-      (f := fun ω u ↦ ENNReal.ofReal (bernsteinMixtureIntegrand b
-        (selfNormSum Y w t ω) (selfNormVar v w t ω) u)) hmeas.aemeasurable
-    exact hswap'
-  rw [hswap j, hswap i]
-  refine setLIntegral_mono' measurableSet_Ioi fun u hu ↦ ?_
-  have hsup := supermartingale_bernsteinMixtureIntegrand hb hYm hYb hY0 hwm hwb hvm hvb hv
-    (le_of_lt hu)
-  have hle := hsup.setIntegral_le hij hA
-  rw [← ofReal_integral_eq_lintegral_ofReal (hsup.integrable j).integrableOn
-      (.of_forall fun _ ↦ bernsteinMixtureIntegrand_nonneg _ _ _ _),
-    ← ofReal_integral_eq_lintegral_ofReal (hsup.integrable i).integrableOn
-      (.of_forall fun _ ↦ bernsteinMixtureIntegrand_nonneg _ _ _ _)]
-  exact ENNReal.ofReal_le_ofReal hle
-
-/-- The mixture has expectation at most `1`. -/
+/-- The mixture has expectation at most `1`: by Tonelli, its expectation is the mixture of the
+expectations of the supermartingales `supermartingale_bernsteinMixtureIntegrand`, each at most
+its initial value `e^{-u}`. -/
 lemma lintegral_selfNorm_mixture_le_one (t : ℕ) :
     ∫⁻ ω, bernsteinMixture b (selfNormSum Y w t ω) (selfNormVar v w t ω) ∂μ ≤ 1 := by
-  have h := setLIntegral_selfNorm_mixture_le hb hYm hYb hY0 hwm hwb hvm hvb hv
-    (Nat.zero_le t) (A := univ) MeasurableSet.univ
-  simp only [Measure.restrict_univ, selfNormSum_zero, selfNormVar_zero,
-    bernsteinMixture_zero_zero, lintegral_const, measure_univ, mul_one] at h
-  exact h
+  have hS := ((stronglyMeasurable_selfNormSum hYm hwm t).mono (ℱ.le t)).measurable
+  have hV := ((stronglyMeasurable_selfNormVar hvm hwm t).mono (ℱ.le t)).measurable
+  simp only [bernsteinMixture]
+  rw [lintegral_lintegral_swap (f := fun ω u ↦ ENNReal.ofReal (bernsteinMixtureIntegrand b
+    (selfNormSum Y w t ω) (selfNormVar v w t ω) u)) (ENNReal.measurable_ofReal.comp
+    ((continuous_bernsteinMixtureIntegrand b).measurable.comp ((hS.comp measurable_fst).prodMk
+      ((hV.comp measurable_fst).prodMk measurable_snd)))).aemeasurable]
+  calc ∫⁻ u in Ioi 0, ∫⁻ ω, ENNReal.ofReal (bernsteinMixtureIntegrand b
+        (selfNormSum Y w t ω) (selfNormVar v w t ω) u) ∂μ
+      ≤ ∫⁻ u in Ioi 0, ENNReal.ofReal (exp (-u)) := by
+        refine setLIntegral_mono' measurableSet_Ioi fun u hu ↦ ?_
+        have hsup := supermartingale_bernsteinMixtureIntegrand hb hYm hYb hY0 hwm hwb hvm hvb hv
+          (le_of_lt hu)
+        rw [← ofReal_integral_eq_lintegral_ofReal (hsup.integrable t)
+          (.of_forall fun _ ↦ bernsteinMixtureIntegrand_nonneg _ _ _ _)]
+        refine ENNReal.ofReal_le_ofReal ?_
+        simpa [bernsteinMixtureIntegrand] using hsup.setIntegral_le (Nat.zero_le t)
+          MeasurableSet.univ
+    _ = 1 := by
+        rw [← ofReal_integral_eq_lintegral_ofReal (integrableOn_exp_neg_Ioi 0)
+          (.of_forall fun _ ↦ (exp_pos _).le), integral_exp_neg_Ioi_zero, ENNReal.ofReal_one]
 
 /-- The mixture is almost surely finite at every time. -/
 lemma ae_bernsteinMixture_lt_top :
@@ -679,32 +558,38 @@ omit hb hYm hYb hY0 hwm hwb hvm hvb hv [IsProbabilityMeasure μ] in
 lemma selfNormMixture_nonneg (t : ℕ) (ω : Ω) : 0 ≤ selfNormMixture b Y w v t ω :=
   ENNReal.toReal_nonneg
 
-/-- **The mixture supermartingale**. -/
+omit hb hYm hYb hY0 hwm hwb hvm hvb hv [IsProbabilityMeasure μ] in
+/-- The mixture supermartingale is the Bochner integral of the integrands over `(0, ∞)`. -/
+lemma selfNormMixture_eq_integral (t : ℕ) (ω : Ω) :
+    selfNormMixture b Y w v t ω = ∫ u in Ioi 0,
+      bernsteinMixtureIntegrand b (selfNormSum Y w t ω) (selfNormVar v w t ω) u :=
+  (integral_eq_lintegral_of_nonneg_ae (.of_forall fun _ ↦ bernsteinMixtureIntegrand_nonneg _ _ _ _)
+    (by unfold bernsteinMixtureIntegrand; fun_prop)).symm
+
+/-- **The mixture supermartingale**: LMLExplore's method of mixtures
+`LMLExplore.supermartingale_integral_of_integrable` for the supermartingales
+`supermartingale_bernsteinMixtureIntegrand` (taken at `max u 0`), mixed over `u ∈ (0, ∞)`. -/
 lemma supermartingale_selfNormMixture : Supermartingale (selfNormMixture b Y w v) ℱ μ := by
-  have hmeas : ∀ t, Measurable[ℱ t] (fun ω ↦ bernsteinMixture b (selfNormSum Y w t ω)
-      (selfNormVar v w t ω)) := measurable_selfNorm_mixture hYm hwm hvm
-  have hfin := ae_bernsteinMixture_lt_top hb hYm hYb hY0 hwm hwb hvm hvb hv
-  have hone := lintegral_selfNorm_mixture_le_one hb hYm hYb hY0 hwm hwb hvm hvb hv
-  have hint : ∀ t, Integrable (selfNormMixture b Y w v t) μ := fun t ↦
-    integrable_toReal_of_lintegral_ne_top (((hmeas t).mono (ℱ.le t) le_rfl).aemeasurable)
-      (ne_top_of_le_ne_top ENNReal.one_ne_top (hone t))
-  refine supermartingale_of_setIntegral_succ_le
-    (fun t ↦ (hmeas t).ennreal_toReal.stronglyMeasurable) hint fun t A hA ↦ ?_
-  have hAm : MeasurableSet A := ℱ.le t A hA
-  have hfinA : ∀ t', ∀ᵐ ω ∂μ.restrict A,
-      bernsteinMixture b (selfNormSum Y w t' ω) (selfNormVar v w t' ω) < ⊤ := fun t' ↦
-    ae_restrict_of_ae (hfin.mono fun ω hω ↦ hω t')
-  have e1 := integral_toReal (μ := μ.restrict A)
-    (((hmeas (t + 1)).mono (ℱ.le (t + 1)) le_rfl).aemeasurable) (hfinA (t + 1))
-  have e2 := integral_toReal (μ := μ.restrict A)
-    (((hmeas t).mono (ℱ.le t) le_rfl).aemeasurable) (hfinA t)
-  simp only [selfNormMixture]
-  rw [e1, e2]
-  have hle := setLIntegral_selfNorm_mixture_le hb hYm hYb hY0 hwm hwb hvm hvb hv
-    (Nat.le_succ t) hA
-  refine ENNReal.toReal_mono ?_ hle
-  exact ne_top_of_le_ne_top ENNReal.one_ne_top
-    ((setLIntegral_le_lintegral A _).trans (hone t))
+  have heq : selfNormMixture b Y w v = fun t ω ↦ ∫ u, bernsteinMixtureIntegrand b
+      (selfNormSum Y w t ω) (selfNormVar v w t ω) (max u 0) ∂(volume.restrict (Ioi 0)) := by
+    ext t ω
+    rw [selfNormMixture_eq_integral]
+    exact setIntegral_congr_fun measurableSet_Ioi fun u hu ↦ by rw [max_eq_left (le_of_lt hu)]
+  rw [heq]
+  refine LMLExplore.supermartingale_integral_of_integrable (fun u ↦
+    supermartingale_bernsteinMixtureIntegrand hb hYm hYb hY0 hwm hwb hvm hvb hv (le_max_right u 0))
+    (fun _ _ _ ↦ bernsteinMixtureIntegrand_nonneg _ _ _ _) (fun t ↦ ?_) ?_
+  · -- joint measurability in `(u, ω)`, for the σ-algebra `ℱ t` on `Ω`
+    let : MeasurableSpace Ω := ℱ t
+    have hS : Measurable (selfNormSum Y w t) :=
+      (stronglyMeasurable_selfNormSum hYm hwm t).measurable
+    have hV : Measurable (selfNormVar v w t) :=
+      (stronglyMeasurable_selfNormVar hvm hwm t).measurable
+    exact (continuous_bernsteinMixtureIntegrand b).measurable.comp ((hS.comp measurable_snd).prodMk
+      ((hV.comp measurable_snd).prodMk (measurable_fst.max measurable_const)))
+  · -- the initial expectations are `e^{-u}`
+    refine (integrableOn_exp_neg_Ioi 0).congr_fun (fun u hu ↦ ?_) measurableSet_Ioi
+    simp [bernsteinMixtureIntegrand, max_eq_left (le_of_lt hu)]
 
 /-- Almost surely, for every `t`, the mixture supermartingale dominates
 `e^{T t} / (8 (1 + √(2 t)))` with `T t = (V t / b² + 1) h(b |S t| / (V t + b²))`. -/
@@ -738,7 +623,8 @@ theorem measure_exists_log_le_selfNorm_poissonCramer_le {δ : ℝ} (hδ : 0 < δ
         * poissonCramer (b * |selfNormSum Y w t ω| / (selfNormVar v w t ω + b ^ 2))}
       ≤ ENNReal.ofReal δ := by
   have hsup := supermartingale_selfNormMixture hb hYm hYb hY0 hwm hwb hvm hvb hv
-  have hville := hsup.measure_exists_ge_le selfNormMixture_nonneg (c := 1 / δ) (by positivity)
+  have hville := hsup.measure_exists_le_le (fun t ↦ ae_of_all _ (selfNormMixture_nonneg t))
+    (c := 1 / δ) (by positivity)
   simp only [selfNormMixture_zero, integral_const, probReal_univ, smul_eq_mul, one_mul,
     one_div_one_div] at hville
   refine le_trans (measure_mono_ae ?_) hville
@@ -855,9 +741,10 @@ lemma measure_exists_sqrt_add_lt_abs_selfNormSum_le' {δ : ℝ} (hδ : 0 < δ) (
     nlinarith
   have hsplit : √(2 * (selfNormVar v w t ω + b ^ 2) * L)
       ≤ √(2 * selfNormVar v w t ω * L) + b * √(2 * L) := by
-    have h := Real.sqrt_add_le (a := 2 * selfNormVar v w t ω * L) (b := b ^ 2 * (2 * L))
-      (by positivity) (by positivity)
-    rw [Real.sqrt_mul (sq_nonneg b), Real.sqrt_sq hb.le] at h
+    have h := Real.sqrt_le_sqrt_add_sqrt_abs_sub
+      (2 * selfNormVar v w t ω * L + b ^ 2 * (2 * L)) (2 * selfNormVar v w t ω * L)
+    rw [add_sub_cancel_left, abs_of_nonneg (by positivity), Real.sqrt_mul (sq_nonneg b),
+      Real.sqrt_sq hb.le] at h
     calc √(2 * (selfNormVar v w t ω + b ^ 2) * L)
         = √(2 * selfNormVar v w t ω * L + b ^ 2 * (2 * L)) := by ring_nf
       _ ≤ _ := h

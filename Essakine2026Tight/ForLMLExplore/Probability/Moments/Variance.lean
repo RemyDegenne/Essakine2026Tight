@@ -5,11 +5,17 @@ Authors: Rémy Degenne
 -/
 module
 
+public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.Probability.Moments.Variance
 public import Essakine2026Tight.ForLMLExplore.Algebra.Order.Field.Basic
 
 /-!
 # The normalized variance of an exponential transform
+
+The mean of a random variable with values in `[a, b]` lies in `[a, b]`
+(`ProbabilityTheory.integral_mem_Icc_of_ae_mem_Icc`, by Mathlib's `Convex.integral_mem`); this
+generalizes LMLExplore's `MeasureTheory.integral_id_mem_Icc_of_ae_mem_Icc`, the case of the
+identity under a law on `ℝ`.
 
 For a random variable `f` with values in `[0, R]` and `Y = exp (β f)`, the Bhatia–Davis inequality
 (`ProbabilityTheory.variance_le_sub_mul_sub`) gives
@@ -27,13 +33,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 
 /-- The mean of a random variable with values in `[a, b]` almost surely lies in `[a, b]`. -/
 lemma integral_mem_Icc_of_ae_mem_Icc {X : Ω → ℝ} {a b : ℝ} (h : ∀ᵐ ω ∂μ, X ω ∈ Set.Icc a b)
-    (hX : AEStronglyMeasurable X μ) : μ[X] ∈ Set.Icc a b := by
-  have hint : Integrable X μ := (memLp_of_bounded h hX 1).integrable le_rfl
-  constructor
-  · calc a = ∫ _, a ∂μ := by simp
-      _ ≤ μ[X] := integral_mono_ae (integrable_const a) hint (h.mono fun ω hω ↦ hω.1)
-  · calc μ[X] ≤ ∫ _, b ∂μ := integral_mono_ae hint (integrable_const b) (h.mono fun ω hω ↦ hω.2)
-      _ = b := by simp
+    (hX : AEStronglyMeasurable X μ) : μ[X] ∈ Set.Icc a b :=
+  (convex_Icc a b).integral_mem isClosed_Icc h (Integrable.of_mem_Icc a b hX.aemeasurable h)
 
 /-- `exp (β f)` lies in `[min 1 e^{β R}, max 1 e^{β R}]` when `f ∈ [0, R]`. -/
 lemma exp_mul_mem_Icc_min_max {f R β : ℝ} (hf : f ∈ Set.Icc 0 R) :

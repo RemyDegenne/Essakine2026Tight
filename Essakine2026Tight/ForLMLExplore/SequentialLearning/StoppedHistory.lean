@@ -19,13 +19,15 @@ belongs to `S`) and the *stopped history* `stoppedValue (sigmaHistory O X Y) τ`
 prefixes of the process of rounds `step O X Y` (`sigmaHistory_eq_sigmaPrefix`,
 `history_eq_finPrefix`), so the layer on prefixes of a process stopped at a stopping time
 (`Essakine2026Tight.ForLMLExplore.Probability.Process.SigmaPrefix`: characterizations of the
-stopping time, stopped prefixes and their truncation, laws) applies to them. This file records the
-specializations used downstream:
+stopping time, stopped prefixes and their truncation, laws) applies to them. This file records
+its specializations to histories:
 
 * `hittingAfter_sigmaHistory_eq_coe_iff`, `stoppedValue_sigmaHistory_of_eq`: the stopping rule
   fires after exactly `n` rounds iff the history of the first `n` rounds belongs to `S` and no
   shorter history does, and the history stopped at a time equal to `n` is the history of the
-  first `n` rounds;
+  first `n` rounds (for the stopping rule of an identification algorithm, these are LMLExplore's
+  `Learning.IdentAlg.stoppingTime_eq_coe_iff` and
+  `Learning.IdentAlg.stoppedHist_eq_of_stoppingTime_eq`);
 * `IsAlgEnvSeq.hasCondDistrib_step_restrict_lt_hittingAfter_sigmaHistory`,
   `IsAlgEnvSeq.hasCondDistrib_obs_restrict_lt_hittingAfter_sigmaHistory`,
   `IsAlgEnvSeq.hasCondDistrib_action_restrict_lt_hittingAfter_sigmaHistory`: on the event

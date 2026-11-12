@@ -10,7 +10,9 @@ public import Mathlib.Analysis.Real.Sqrt
 /-!
 # Elementary inequalities on real square roots
 
-* `Real.sqrt_add_le`: subadditivity `√(a + b) ≤ √a + √b`.
+The subadditivity `√(a + b) ≤ √a + √b` is the case `t = a + b`, `s = a` of Tau Ceti's
+`Real.sqrt_le_sqrt_add_sqrt_abs_sub`.
+
 * `Real.two_mul_sqrt_mul_le`, `Real.sqrt_mul_le_half_add_half`, `Real.sqrt_mul_le_add`: the
   weighted AM–GM inequality `√(a b) ≤ η a / 2 + b / (2 η) ≤ η a + b / η` for `η > 0`.
 * `Real.le_add_sqrt_of_sq_le`: the root of a quadratic inequality, `x² ≤ b x + c` with
@@ -22,11 +24,6 @@ public import Mathlib.Analysis.Real.Sqrt
 namespace Real
 
 variable {a b c x η : ℝ}
-
-/-- Subadditivity of the square root: `√(a + b) ≤ √a + √b` for `a, b ≥ 0`. -/
-lemma sqrt_add_le (ha : 0 ≤ a) (hb : 0 ≤ b) : √(a + b) ≤ √a + √b := by
-  rw [sqrt_le_left (by positivity)]
-  nlinarith [sq_sqrt ha, sq_sqrt hb, mul_nonneg (sqrt_nonneg a) (sqrt_nonneg b)]
 
 /-- Weighted AM–GM inequality: `2 √(a b) ≤ η a + b / η` for `a, b ≥ 0` and `η > 0`. -/
 lemma two_mul_sqrt_mul_le (ha : 0 ≤ a) (hb : 0 ≤ b) (hη : 0 < η) :

@@ -248,7 +248,7 @@ lemma entropicVarQ_eq_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRe
       = Real.exp (2 * β * r h s a')
         * (variance (expValue M H β π (h + 1)) (M.trans h (s, a'))
           + ∫ s', entropicVarV M H β π (h + 1) s' ∂M.trans h (s, a')) := by
-  have hR := rewardsIn_of_hasRewardFn M hM measurableSet_Icc hr
+  have hR := hM.rewardsIn hr
   set m := ∫ s', expValue M H β π (h + 1) s' ∂M.trans h (s, a') with hm
   have hinner (s' : S) :
       ∫ y, (Real.exp (β * (r h s a' + episodeReturn (H - (h + 1)) y)) - expQ M H β π h s a') ^ 2
@@ -291,7 +291,7 @@ lemma entropicVarQ_eq_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRe
     refine pow_le_pow_left₀ (abs_nonneg _) ((abs_sub _ _).trans (add_le_add ?_ le_rfl)) 2
     rw [abs_of_pos (expValue_pos M H β hR hπ (h + 1) s')]
     exact expValue_le_exp M H β hR hπ (h + 1) s'
-  rw [entropicVarQ, hM h s a', integral_dirac]
+  rw [entropicVarQ, (M.hasRewardFn_def r).1 hM h s a', integral_dirac]
   simp_rw [hinner]
   rw [integral_const_mul, integral_add (integrable_entropicVarV M H β hR hπ (h + 1) _) hsq,
     variance_eq_integral (measurable_expValue M H β π (h + 1)).aemeasurable, ← hm, add_comm]
@@ -389,7 +389,7 @@ lemma sum_integral_exp_mul_variance_eq_variance {r : ℕ → S → A → ℝ} (h
         ∂stepLaw M π (s₁, 0)
       = variance (fun x ↦ Real.exp (β * episodeReturn H x)) (stepLaw M π (s₁, 0)) := by
   rw [sum_integral_exp_mul_variance_eq_entropicVarV M H β hπ s₁ hM hr,
-    entropicVarV_eq_variance M H β (rewardsIn_of_hasRewardFn M hM measurableSet_Icc hr) hπ,
+    entropicVarV_eq_variance M H β (hM.rewardsIn hr) hπ,
     Nat.sub_zero]
 
 /-- **Telescoping of the entropic variances** on a finite state space, with the transition

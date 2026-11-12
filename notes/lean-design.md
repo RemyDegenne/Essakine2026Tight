@@ -5,6 +5,10 @@ from the paper are in `notes/blueprint-outline.md` (conventions and deviations l
 `blueprint/src/content.tex`. The MDP library was generalized after phase 2 (2026-09-17, see the
 last section); the comparator challenges were regenerated for the new statements.
 
+Since 2026-11-12 the MDPs, episodic MDPs, their environments and the time-augmented MDP are
+LMLExplore's, and the local copies below are deleted (`notes/lmlexplore-dedup.md`): the first two
+items describe the design they had, which LMLExplore's follows.
+
 * **MDPs come from LML's `mdp` branch.** `Learning.MDP 𝓢 𝓐 𝓡` (transition kernel `P`, reward
   kernel `R`, environment `MDP.env M μ₀` whose observation is the current state, stationary
   policies `policyAlg`, trajectory law `policyMeasure`) is the design of the `mdp` branch of

@@ -14,16 +14,15 @@ public import Mathlib.Probability.Kernel.Composition.Lemmas
 
 For random variables `X`, `Y` such that `Y` has conditional law `κ` given `X` under `P`:
 
-* `ProbabilityTheory.HasCondDistrib.lintegral_prodMk`:
-  `∫⁻ ω, f (X ω, Y ω) ∂P = ∫⁻ ω, ∫⁻ y, f (X ω, y) ∂κ (X ω) ∂P` for measurable `f ≥ 0`;
-* `ProbabilityTheory.HasCondDistrib.integral_prodMk`: the same for the Bochner integral of an
-  integrable `f`;
+* `ProbabilityTheory.HasCondDistrib.integral_prodMk`:
+  `∫ ω, f (X ω, Y ω) ∂P = ∫ ω, ∫ y, f (X ω, y) ∂κ (X ω) ∂P` for integrable `f`, the Bochner
+  version of LMLExplore's `HasCondDistrib.lintegral_comp_prodMk_eq_lintegral_lintegral`;
 * `ProbabilityTheory.hasCondDistrib_of_lintegral_eq`: conversely, the identity for all measurable
   `f ≥ 0` characterizes the conditional law;
 * `ProbabilityTheory.HasCondDistrib.compProd_left_of_sectR`: if `Y` has conditional law `η (a, ·)`
   given `X` under every `κ a`, then under `μ ⊗ₘ κ` the variable `Y ∘ snd` has conditional law `η`
-  given `(fst, X ∘ snd)` (a version of `HasCondDistrib.compProd_left` in which the conditional
-  law may depend on the first coordinate).
+  given `(fst, X ∘ snd)`; with `η = Kernel.prodMkLeft α η'` (`Kernel.sectR_prodMkLeft`), the
+  conditional law does not depend on the first coordinate.
 -/
 
 @[expose] public section
@@ -36,14 +35,6 @@ namespace ProbabilityTheory
 variable {Ω α β γ δ : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
   {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ} {P : Measure Ω}
   {X : Ω → α} {Y : Ω → β} {κ : Kernel α β}
-
-/-- The Lebesgue integral of a function of `(X, Y)` is the integral of its conditional expectation
-given `X`. -/
-lemma HasCondDistrib.lintegral_prodMk [SFinite P] [IsSFiniteKernel κ]
-    (h : HasCondDistrib Y X κ P) {f : α × β → ℝ≥0∞} (hf : Measurable f) :
-    ∫⁻ ω, f (X ω, Y ω) ∂P = ∫⁻ ω, ∫⁻ b, f (X ω, b) ∂κ (X ω) ∂P := by
-  rw [HasLaw.lintegral_comp h hf.aemeasurable, Measure.lintegral_compProd hf,
-    lintegral_map' (hf.lintegral_kernel_prod_right').aemeasurable h.aemeasurable_fst]
 
 /-- The integral of a function of `(X, Y)` is the integral of its conditional expectation given
 `X`. -/

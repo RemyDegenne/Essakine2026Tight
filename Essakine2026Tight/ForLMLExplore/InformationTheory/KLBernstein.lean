@@ -5,8 +5,8 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Mathlib.InformationTheory.KullbackLeibler.Basic
-public import Mathlib.MeasureTheory.Measure.Tilted
+public import LMLExplore.Probability.Moments.Bernstein
+public import TauCeti.InformationTheory.KullbackLeibler.Variational
 public import Essakine2026Tight.ForLMLExplore.Analysis.Real.Sqrt
 public import Essakine2026Tight.ForLMLExplore.Analysis.SpecialFunctions.PoissonCramer
 public import Essakine2026Tight.ForLMLExplore.Probability.Moments.VarianceTransport
@@ -15,12 +15,15 @@ public import Essakine2026Tight.ForLMLExplore.Probability.Moments.VarianceTransp
 # The KL–Bernstein inequality
 
 A Kullback–Leibler constraint `KL(μ ‖ ν) ≤ a` bounds the difference of the means of a bounded
-function by a Bernstein-type quantity:
+function by a Bernstein-type quantity. The two ingredients are upstream: the
+Gibbs/Donsker–Varadhan variational inequality `∫ f ∂μ - log (∫ e^f ∂ν) ≤ KL(μ ‖ ν)` is Tau Ceti's
+`TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv`, and Bennett's bound on the moment
+generating function is LMLExplore's `MeasureTheory.MemLp.mgf_le_exp_mul_exp_sub_one_sub_of_ae_le`.
 
-* `InformationTheory.ofReal_integral_sub_log_integral_exp_le_klDiv`: the one-sided
-  Gibbs/Donsker–Varadhan variational inequality `∫ f ∂μ - log (∫ e^f ∂ν) ≤ KL(μ ‖ ν)`;
 * `ProbabilityTheory.log_integral_exp_mul_sub_le`: the Bernstein bound on the log-moment
   generating function of a centered function with values in `[0, b]`;
+* `InformationTheory.integral_sub_log_integral_exp_le_of_klDiv_le`: the variational inequality
+  under a KL constraint `KL(μ ‖ ν) ≤ a`;
 * `InformationTheory.abs_integral_sub_integral_le_of_klDiv_le`: the KL–Bernstein inequality
   (Lemma 22 of Essakine, Vernade (2026), Lemma 3 of Talebi, Maillard (2018)),
   `|∫ f ∂μ - ∫ f ∂ν| ≤ √(2 Var_ν(f) a) + (2/3) b a`;
@@ -45,58 +48,19 @@ lemma log_integral_exp_mul_sub_le [IsProbabilityMeasure ν] (hb : 0 < b) (hlam :
     (hf : ∀ᵐ x ∂ν, f x ∈ Set.Icc 0 b) (hfm : AEStronglyMeasurable f ν) :
     log (∫ x, exp (lam * (f x - ν[f])) ∂ν) ≤ variance f ν * expSubOneSub (lam * b) / b ^ 2 := by
   have hmean : ν[f] ∈ Set.Icc 0 b := integral_mem_Icc_of_ae_mem_Icc hf hfm
-  have hint : Integrable f ν := integrable_of_ae_mem_Icc hf hfm
-  have habs : ∀ᵐ x ∂ν, |f x - ν[f]| ≤ b := by
-    filter_upwards [hf] with x hx
-    rw [abs_le]
-    constructor <;> linarith [hx.1, hx.2, hmean.1, hmean.2]
-  have hsq : ∀ᵐ x ∂ν, (f x - ν[f]) ^ 2 ∈ Set.Icc 0 (b ^ 2) := by
-    filter_upwards [habs] with x hx
-    exact ⟨sq_nonneg _, by nlinarith [abs_nonneg (f x - ν[f]), sq_abs (f x - ν[f])]⟩
-  have hexpb : ∀ᵐ x ∂ν, exp (lam * (f x - ν[f])) ∈ Set.Icc 0 (exp (lam * b)) := by
-    filter_upwards [habs] with x hx
-    exact ⟨(exp_pos _).le, exp_le_exp.2 (by nlinarith [abs_le.1 hx])⟩
-  have hexpm : AEStronglyMeasurable (fun x ↦ exp (lam * (f x - ν[f]))) ν := by fun_prop
-  have hiexp : Integrable (fun x ↦ exp (lam * (f x - ν[f]))) ν :=
-    integrable_of_ae_mem_Icc hexpb hexpm
-  have hisq : Integrable (fun x ↦ (f x - ν[f]) ^ 2) ν :=
-    integrable_of_ae_mem_Icc hsq (by fun_prop)
-  have hicen : Integrable (fun x ↦ f x - ν[f]) ν := hint.sub (integrable_const _)
-  have hiaff : Integrable (fun x ↦ 1 + lam * (f x - ν[f])) ν :=
-    (integrable_const 1).add (hicen.const_mul lam)
-  have hitail : Integrable
-      (fun x ↦ (f x - ν[f]) ^ 2 / b ^ 2 * expSubOneSub (lam * b)) ν :=
-    (hisq.div_const _).mul_const _
-  have hibd : Integrable
-      (fun x ↦ 1 + lam * (f x - ν[f]) + (f x - ν[f]) ^ 2 / b ^ 2 * expSubOneSub (lam * b)) ν :=
-    hiaff.add hitail
-  have e2 : ∫ x, (1 + lam * (f x - ν[f])) ∂ν = 1 := by
-    rw [integral_add (integrable_const 1) (hicen.const_mul lam), integral_const_mul,
-      integral_sub hint (integrable_const _)]
-    simp
-  have e3 : ∫ x, (f x - ν[f]) ^ 2 / b ^ 2 * expSubOneSub (lam * b) ∂ν
-      = variance f ν / b ^ 2 * expSubOneSub (lam * b) := by
-    rw [integral_mul_const, integral_div, ← variance_eq_integral hint.aemeasurable]
-  have hle : ∫ x, exp (lam * (f x - ν[f])) ∂ν ≤ 1 + variance f ν / b ^ 2 * expSubOneSub (lam * b) :=
-    calc ∫ x, exp (lam * (f x - ν[f])) ∂ν
-        ≤ ∫ x, (1 + lam * (f x - ν[f]) + (f x - ν[f]) ^ 2 / b ^ 2 * expSubOneSub (lam * b)) ∂ν := by
-          refine integral_mono_ae hiexp hibd ?_
-          filter_upwards [habs] with x hx
-          exact exp_mul_le_of_abs_le hb hlam hx
-      _ = 1 + variance f ν / b ^ 2 * expSubOneSub (lam * b) := by
-          rw [integral_add hiaff hitail, e2, e3]
-  have hpos : 0 < ∫ x, exp (lam * (f x - ν[f])) ∂ν := integral_exp_pos hiexp
-  have hvar : 0 ≤ variance f ν := variance_nonneg _ _
-  have hphi : 0 ≤ expSubOneSub (lam * b) := expSubOneSub_nonneg _
-  calc log (∫ x, exp (lam * (f x - ν[f])) ∂ν)
-      ≤ log (exp (variance f ν * expSubOneSub (lam * b) / b ^ 2)) := by
-        refine log_le_log hpos (hle.trans ?_)
-        have := add_one_le_exp (variance f ν * expSubOneSub (lam * b) / b ^ 2)
-        have heq : variance f ν / b ^ 2 * expSubOneSub (lam * b)
-            = variance f ν * expSubOneSub (lam * b) / b ^ 2 := by ring
-        rw [heq]
-        linarith
-    _ = variance f ν * expSubOneSub (lam * b) / b ^ 2 := log_exp _
+  have hY : ∀ᵐ x ∂ν, f x - ν[f] ∈ Set.Icc (-b) b := hf.mono fun x hx ↦
+    ⟨by linarith [hx.1, hmean.2], by linarith [hx.2, hmean.1]⟩
+  have hYm : AEStronglyMeasurable (fun x ↦ f x - ν[f]) ν := hfm.sub aestronglyMeasurable_const
+  have hYb : ∀ᵐ x ∂ν, f x - ν[f] ≤ b := hY.mono fun x hx ↦ hx.2
+  -- Bennett's bound on the moment generating function of the centered function
+  have hmgf := (memLp_of_bounded hY hYm 2).mgf_le_exp_mul_exp_sub_one_sub_of_ae_le
+    (by rw [integral_sub (Integrable.of_mem_Icc 0 b hfm.aemeasurable hf) (integrable_const _)]
+        simp) hb hYb hlam
+  rw [← variance_eq_integral hfm.aemeasurable] at hmgf
+  refine (log_le_log (mgf_pos (integrable_exp_mul_of_le lam b hlam hYm.aemeasurable hYb))
+    hmgf).trans_eq ?_
+  rw [log_exp, expSubOneSub]
+  ring
 
 end ProbabilityTheory
 
@@ -106,30 +70,13 @@ open ProbabilityTheory
 
 variable {α : Type*} {mα : MeasurableSpace α} {μ ν : Measure α} {f : α → ℝ} {a b : ℝ}
 
-/-- The one-sided Gibbs (Donsker–Varadhan) variational inequality:
-`∫ f ∂μ - log (∫ e^f ∂ν) ≤ KL(μ ‖ ν)` for probability measures. -/
-lemma ofReal_integral_sub_log_integral_exp_le_klDiv [IsProbabilityMeasure μ]
-    [IsProbabilityMeasure ν] (hfμ : Integrable f μ) (hfν : Integrable (fun x ↦ exp (f x)) ν) :
-    ENNReal.ofReal (∫ x, f x ∂μ - log (∫ x, exp (f x) ∂ν)) ≤ klDiv μ ν := by
-  by_cases htop : klDiv μ ν = ∞
-  · simp [htop]
-  obtain ⟨hμν, hint⟩ := klDiv_ne_top_iff.1 htop
-  have hprob : IsProbabilityMeasure (ν.tilted f) := isProbabilityMeasure_tilted hfν
-  have hac : μ ≪ ν.tilted f := hμν.trans (absolutelyContinuous_tilted hfν)
-  have hint' : Integrable (llr μ (ν.tilted f)) μ := integrable_llr_tilted_right hμν hfμ hint hfν
-  have hnn := integral_llr_add_sub_measure_univ_nonneg hac hint'
-  rw [integral_llr_tilted_right hμν hfμ hfν hint] at hnn
-  simp only [probReal_univ, add_sub_cancel_right] at hnn
-  have hkl : (klDiv μ ν).toReal = ∫ x, llr μ ν x ∂μ := toReal_klDiv_of_measure_eq hμν (by simp)
-  rw [ENNReal.ofReal_le_iff_le_toReal htop, hkl]
-  linarith
-
-/-- The Gibbs variational inequality in the form used under a KL constraint. -/
+/-- The Gibbs variational inequality under a KL constraint: if `KL(μ ‖ ν) ≤ a`, then
+`∫ f ∂μ - log (∫ e^f ∂ν) ≤ a`. -/
 lemma integral_sub_log_integral_exp_le_of_klDiv_le [IsProbabilityMeasure μ]
     [IsProbabilityMeasure ν] (ha : 0 ≤ a) (hfμ : Integrable f μ)
     (hfν : Integrable (fun x ↦ exp (f x)) ν) (h : klDiv μ ν ≤ ENNReal.ofReal a) :
     ∫ x, f x ∂μ - log (∫ x, exp (f x) ∂ν) ≤ a := by
-  have h' := (ofReal_integral_sub_log_integral_exp_le_klDiv hfμ hfν).trans h
+  have h' := (TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv hfμ hfν).trans h
   rwa [ENNReal.ofReal_le_ofReal_iff ha] at h'
 
 section KLBernstein
@@ -146,8 +93,8 @@ lemma integral_sub_integral_le_of_klDiv_le (hb : 0 < b) (ha : 0 ≤ a)
   obtain ⟨hμν, -⟩ := klDiv_ne_top_iff.1 htop
   have hfmμ : AEStronglyMeasurable f μ := AEStronglyMeasurable.mono_ac hμν hfm
   have hfμ : ∀ᵐ x ∂μ, f x ∈ Set.Icc 0 b := hμν.ae_le hf
-  have hintμ : Integrable f μ := integrable_of_ae_mem_Icc hfμ hfmμ
-  have hintν : Integrable f ν := integrable_of_ae_mem_Icc hf hfm
+  have hintμ : Integrable f μ := .of_mem_Icc 0 b hfmμ.aemeasurable hfμ
+  have hintν : Integrable f ν := .of_mem_Icc 0 b hfm.aemeasurable hf
   have hvar : 0 ≤ variance f ν := variance_nonneg _ _
   set d := ∫ x, f x ∂μ - ∫ x, f x ∂ν with hd
   -- the Gibbs inequality at every nonnegative `lam`
@@ -165,7 +112,7 @@ lemma integral_sub_integral_le_of_klDiv_le (hb : 0 < b) (ha : 0 ≤ a)
       filter_upwards [habs] with x hx
       exact ⟨(exp_pos _).le, exp_le_exp.2 (by nlinarith [abs_le.1 hx])⟩
     have hiexp : Integrable (fun x ↦ exp (lam * (f x - ν[f]))) ν :=
-      integrable_of_ae_mem_Icc hexpb (by fun_prop)
+      .of_mem_Icc _ _ (by fun_prop) hexpb
     have hgibbs := integral_sub_log_integral_exp_le_of_klDiv_le ha hg hiexp h
     have hmgf := log_integral_exp_mul_sub_le (ν := ν) (f := f) hb hlam hf hfm
     have hint_eq : ∫ x, lam * (f x - ν[f]) ∂μ = lam * d := by
@@ -219,8 +166,8 @@ lemma abs_integral_sub_integral_le_of_klDiv_le (hb : 0 < b) (ha : 0 ≤ a)
   obtain ⟨hμν, -⟩ := klDiv_ne_top_iff.1 htop
   have hfmμ : AEStronglyMeasurable f μ := AEStronglyMeasurable.mono_ac hμν hfm
   have hfμ : ∀ᵐ x ∂μ, f x ∈ Set.Icc 0 b := hμν.ae_le hf
-  have hintμ : Integrable f μ := integrable_of_ae_mem_Icc hfμ hfmμ
-  have hintν : Integrable f ν := integrable_of_ae_mem_Icc hf hfm
+  have hintμ : Integrable f μ := .of_mem_Icc 0 b hfmμ.aemeasurable hfμ
+  have hintν : Integrable f ν := .of_mem_Icc 0 b hfm.aemeasurable hf
   have h1 := integral_sub_integral_le_of_klDiv_le (μ := μ) (ν := ν) hb ha hf hfm h
   have hf' : ∀ᵐ x ∂ν, b - f x ∈ Set.Icc 0 b := by
     filter_upwards [hf] with x hx

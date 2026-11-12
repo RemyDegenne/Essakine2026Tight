@@ -10,10 +10,18 @@ public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Embed
 /-!
 # Splitting off the last coordinate of a dependent product over `Fin (n + 1)`
 
-`MeasurableEquiv.piFinSuccProd X n : (Π i : Fin (n + 1), X i) ≃ᵐ (Π i : Fin n, X i) × X n`:
-a sequence of length `n + 1` is its initial segment of length `n` together with its last term
-(`Fin.snoc`). It is the dependent version of LML's `MeasurableEquiv.finSuccProd`
-(`piFinSuccProd_const`).
+`MeasurableEquiv.piFinSuccProd X n : (Π i : Fin (n + 1), X i) ≃ᵐ (Π i : Fin n, X i) × X n`, for a
+family `X : ℕ → Type*` of measurable spaces: a sequence of length `n + 1` is its initial segment
+of length `n` together with its last term (`Fin.snoc`).
+
+It is the dependent version of LML's `MeasurableEquiv.finSuccProd X n`, which is
+`(MeasurableEquiv.piFinSuccAbove (fun _ ↦ X) (Fin.last n)).trans MeasurableEquiv.prodComm` for a
+single space `X` (`piFinSuccProd_const`). For a family indexed by `ℕ`, Mathlib's
+`MeasurableEquiv.piFinSuccAbove (fun i : Fin (n + 1) ↦ X i) (Fin.last n)` has the second factor
+`Π j : Fin n, X ((Fin.last n).succAbove j)`, which is `Π j : Fin n, X j` only up to the
+propositional equality `(Fin.last n).succAbove j = j.castSucc` (`Fin.succAbove_last`): the
+initial segment would have to be transported along it, while here it is
+`fun i ↦ x i.castSucc` on the nose.
 -/
 
 @[expose] public section

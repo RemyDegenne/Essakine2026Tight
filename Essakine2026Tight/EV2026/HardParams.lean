@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.EV2026.Constants
-public import Essakine2026Tight.ForLMLExplore.InformationTheory.KLBer
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.KullbackLeibler.Bernoulli
 
 /-!
 # Parameters of the hard instances of the lower bound
@@ -29,7 +29,9 @@ For `β ≠ 0`, the effective horizon `H'` and `ε > 0`, with `c = e^{|β| H'} -
 
 @[expose] public section
 
-open Real InformationTheory
+open Real
+open LMLExplore (klBer klBerReal klBerReal_le_sq_sub_div klBer_eq_ofReal_klBerReal klBer_ne_top
+  klBer_eq_top_iff sub_log_two_le_klBerReal)
 
 namespace Essakine2026Tight
 
@@ -201,7 +203,7 @@ lemma klBerReal_hardPMinus_hardPPlus_le (hβ : β ≠ 0) (hH' : 1 ≤ H') (hε :
   have hΔle := hardDelta_le hβ hH' hε
   have hprod : 0 < hardPPlus β H' ε * (1 - hardPPlus β H' ε) :=
     mul_pos (by linarith) (by linarith)
-  have hkl := klBerReal_le_div h0.le (by linarith) (by linarith) h3
+  have hkl := klBerReal_le_sq_sub_div ⟨h0.le, by linarith⟩ ⟨by linarith, h3⟩
   refine hkl.trans ?_
   rw [show hardPMinus β H' - hardPPlus β H' ε = - hardDelta β H' ε by simp [hardPPlus]]
   rw [neg_sq, div_le_div_iff₀ hprod (by positivity)]
@@ -333,17 +335,19 @@ lemma ofReal_le_sum_klBer {ι : Type*} (U : Finset ι) (hU : 4 ≤ U.card) {δ :
     obtain ⟨hy0, hy1⟩ := hy i hi
     rcases hy1.lt_or_eq with hy1 | hy1
     · have hq0 : 0 < y i := by linarith
-      rw [klBer_eq_ofReal hq0.ne' hy1.ne]
+      rw [klBer_eq_ofReal_klBerReal ⟨hx0, hx1⟩ ⟨hq0.le, hy1.le⟩ (klBer_ne_top ⟨hq0, hy1⟩)]
       refine ENNReal.ofReal_le_ofReal ((sub_le_sub_right ?_ _).trans
         (sub_log_two_le_klBerReal hx0 hq0 hy1))
       refine mul_le_mul_of_nonneg_left (log_le_log (by positivity) ?_) (by linarith)
       rw [div_le_div_iff₀ hδ (by linarith)]
       linarith
-    · rw [hy1, klBer_one_right]
-      split_ifs with hx1'
-      · rw [hx1', sub_self, zero_mul, zero_sub]
-        exact (ENNReal.ofReal_eq_zero.2 (neg_nonpos.2 (log_nonneg (by norm_num)))).le
-      · exact le_top
+    · rw [hy1]
+      rcases eq_or_ne (x i) 1 with hx1' | hx1'
+      · rw [hx1', sub_self, zero_mul, zero_sub,
+          ENNReal.ofReal_of_nonpos (neg_nonpos.2 (log_nonneg (by norm_num)))]
+        exact zero_le
+      · rw [(klBer_eq_top_iff ⟨hx0, hx1⟩ ⟨zero_le_one, le_rfl⟩).2 (Or.inr ⟨rfl, hx1'⟩)]
+        exact le_top
   calc ENNReal.ofReal (U.card / 2 * log (1 / δ))
       ≤ ENNReal.ofReal (∑ i ∈ U, ((1 - x i) * log (1 / δ) - log 2)) := by
         refine ENNReal.ofReal_le_ofReal ?_

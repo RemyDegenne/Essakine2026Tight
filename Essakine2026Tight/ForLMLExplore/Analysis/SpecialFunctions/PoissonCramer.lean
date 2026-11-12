@@ -6,18 +6,18 @@ Authors: Rémy Degenne
 module
 
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Analysis.SpecialFunctions.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Essakine2026Tight.ForLMLExplore.Analysis.Real.Sqrt
 
 /-!
-# The Cramér transform of the Poisson distribution and the Bernstein exponential bound
+# The Cramér transform of the Poisson distribution
 
 Two elementary functions of the Bernstein/Bennett inequalities:
 
 * `Real.expSubOneSub u = exp u - 1 - u`, so that the `φ_b` of the literature is
-  `fun lam ↦ Real.expSubOneSub (lam * b)`;
+  `fun lam ↦ Real.expSubOneSub (lam * b)`; LMLExplore writes it inline, and its Taylor bound
+  `exp (l x) ≤ 1 + l x + (exp (l b) - 1 - l b) / b ^ 2 * x ^ 2` for `x ≤ b` is LMLExplore's
+  `Real.exp_mul_le_one_add_mul_add_mul_sq`;
 * `Real.poissonCramer x = (1 + x) * log (1 + x) - x`, the Cramér transform of the Poisson
   distribution of parameter `1`.
 
@@ -28,18 +28,14 @@ Main results:
   the Padé-type bound `Real.div_le_log_one_add`;
 * `Real.mul_poissonCramer_eq`: the value of `lam ↦ lam b s - c φ_b(lam)` at
   `lam = log (1 + s / c) / b` is `c * poissonCramer (s / c)`;
-* `Real.le_sqrt_add_of_mul_poissonCramer_le`: `c h(s/c) ≤ l` forces `s ≤ √(2 c l) + 2 l / 3`;
-* `Real.exp_mul_le_of_abs_le`: the Taylor bound
-  `exp (lam y) ≤ 1 + lam y + (y² / b²) φ_b(lam)` for `lam ≥ 0` and `|y| ≤ b`.
+* `Real.le_sqrt_add_of_mul_poissonCramer_le`: `c h(s/c) ≤ l` forces `s ≤ √(2 c l) + 2 l / 3`.
 -/
 
 @[expose] public section
 
-open scoped Nat
-
 namespace Real
 
-variable {b c l lam s u x y : ℝ}
+variable {c l s x : ℝ}
 
 /-- `expSubOneSub u = e^u - 1 - u`; the function `φ_b` of the Bernstein inequality is
 `fun lam ↦ expSubOneSub (lam * b)`. -/
@@ -65,52 +61,6 @@ lemma continuous_expSubOneSub : Continuous expSubOneSub := by
 lemma expSubOneSub_nonneg (u : ℝ) : 0 ≤ expSubOneSub u := by
   have := add_one_le_exp u
   simp only [expSubOneSub]
-  linarith
-
-/-- The power series of `expSubOneSub`: `e^u - 1 - u = ∑_{k ≥ 2} u^k / k!`. -/
-lemma expSubOneSub_eq_tsum (u : ℝ) :
-    expSubOneSub u = ∑' n : ℕ, u ^ (n + 2) / ((n + 2)! : ℝ) := by
-  have hs : Summable (fun n : ℕ ↦ u ^ n / (n ! : ℝ)) := Real.summable_pow_div_factorial u
-  have h := hs.sum_add_tsum_nat_add 2
-  have hu : exp u = ∑' n : ℕ, u ^ n / (n ! : ℝ) := by
-    rw [Real.exp_eq_exp_ℝ, NormedSpace.exp_eq_tsum_div]
-  simp only [expSubOneSub, hu, ← h, Finset.sum_range_succ]
-  norm_num
-  ring
-
-/-- The scaling bound `e^{ct} - 1 - ct ≤ t² (e^c - 1 - c)` for `c ≥ 0` and `|t| ≤ 1`. -/
-lemma expSubOneSub_mul_le (hc : 0 ≤ c) (ht : |x| ≤ 1) :
-    expSubOneSub (c * x) ≤ x ^ 2 * expSubOneSub c := by
-  rw [expSubOneSub_eq_tsum, expSubOneSub_eq_tsum]
-  have hs1 : Summable (fun n : ℕ ↦ (c * x) ^ (n + 2) / (((n + 2))! : ℝ)) :=
-    (summable_nat_add_iff 2).2 (Real.summable_pow_div_factorial (c * x))
-  have hs2 : Summable (fun n : ℕ ↦ c ^ (n + 2) / (((n + 2))! : ℝ)) :=
-    (summable_nat_add_iff 2).2 (Real.summable_pow_div_factorial c)
-  rw [← hs2.tsum_mul_left]
-  refine hs1.tsum_le_tsum (fun n ↦ ?_) (hs2.mul_left _)
-  have hfac : (0 : ℝ) < ((n + 2)! : ℝ) := by positivity
-  rw [div_le_iff₀ hfac]
-  have hxn : x ^ n ≤ 1 :=
-    (le_abs_self _).trans (by rw [abs_pow]; exact pow_le_one₀ (abs_nonneg x) ht)
-  have hcn : (0 : ℝ) ≤ c ^ (n + 2) * x ^ 2 := by positivity
-  calc (c * x) ^ (n + 2) = c ^ (n + 2) * x ^ 2 * x ^ n := by ring
-    _ ≤ c ^ (n + 2) * x ^ 2 * 1 := by gcongr
-    _ = x ^ 2 * (c ^ (n + 2) / ((n + 2)! : ℝ)) * ((n + 2)! : ℝ) := by field_simp
-    _ = _ := rfl
-
-/-- The Taylor bound `e^{lam y} ≤ 1 + lam y + (y² / b²) φ_b(lam)` for `b > 0`, `lam ≥ 0` and
-`|y| ≤ b`, where `φ_b(lam) = expSubOneSub (lam * b)`. -/
-lemma exp_mul_le_of_abs_le (hb : 0 < b) (hlam : 0 ≤ lam) (hy : |y| ≤ b) :
-    exp (lam * y) ≤ 1 + lam * y + y ^ 2 / b ^ 2 * expSubOneSub (lam * b) := by
-  have ht : |y / b| ≤ 1 := by
-    rw [abs_div, abs_of_pos hb, div_le_one hb]
-    exact hy
-  have h := expSubOneSub_mul_le (c := lam * b) (x := y / b) (by positivity) ht
-  have hcx : lam * b * (y / b) = lam * y := by field_simp
-  rw [hcx] at h
-  have hsq : (y / b) ^ 2 = y ^ 2 / b ^ 2 := by rw [div_pow]
-  rw [hsq] at h
-  simp only [expSubOneSub] at h ⊢
   linarith
 
 /-- A Padé-type lower bound for the logarithm:

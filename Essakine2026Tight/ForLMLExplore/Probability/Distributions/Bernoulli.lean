@@ -5,7 +5,7 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Mathlib.Probability.Distributions.Bernoulli
+public import LMLExplore.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Measure.Decomposition.Lebesgue
 
 /-!
@@ -15,13 +15,16 @@ For the Bernoulli measure `Ber(x, y, p) = p δₓ + (1 - p) δ_y` of Mathlib
 (`ProbabilityTheory.bernoulliMeasure`, `p : unitInterval`):
 
 * `bernoulliMeasure_apply_singleton_left`, `bernoulliMeasure_apply_singleton_right`: the masses
-  of the two atoms;
+  of the two atoms (Mathlib's `bernoulliMeasure_apply_of_mem_of_notMem` and
+  `bernoulliMeasure_apply_of_notMem_of_mem` give the masses of measurable sets);
+* `ae_bernoulliMeasure`: almost every point of `Ber(x, y, p)` is `x` or `y`;
 * `lintegral_bernoulliMeasure`: `∫⁻ f ∂Ber(x, y, p) = p f x + (1 - p) f y`;
 * `bernoulliMeasure_eq_withDensity`: for `x ≠ y` and `q ∉ {0, 1}`, `Ber(x, y, p)` has density
   `p / q` at `x` and `(1 - p) / (1 - q)` at `y` with respect to `Ber(x, y, q)`, hence
-  `rnDeriv_bernoulliMeasure`;
-* `bernoulliMeasure_absolutelyContinuous_iff`: for `x ≠ y`, `Ber(x, y, p) ≪ Ber(x, y, q)` unless
-  `q ∈ {0, 1}` and `p ≠ q`.
+  `rnDeriv_bernoulliMeasure`.
+
+The absolute continuity of two Bernoulli measures is LMLExplore's
+`ProbabilityTheory.bernoulliMeasure_absolutelyContinuous_iff`.
 -/
 
 @[expose] public section
@@ -54,6 +57,17 @@ lemma bernoulliMeasure_apply_singleton_right (hxy : x ≠ y) (p : I) :
   rw [bernoulliMeasure_apply_of_notMem_of_mem _ (measurableSet_singleton y) (by simpa using hxy)
     (Set.mem_singleton y), coe_toNNReal_eq_ofReal, coe_symm_eq]
 
+/-- Almost every point of the Bernoulli measure `Ber(x, y, p)` is `x` or `y`. -/
+lemma ae_bernoulliMeasure (p : I) : ∀ᵐ z ∂Ber(x, y, p), z = x ∨ z = y := by
+  rw [bernoulliMeasure_def, ae_add_measure_iff]
+  constructor
+  · refine Measure.ae_smul_measure ?_ _
+    rw [ae_dirac_eq]
+    simp
+  · refine Measure.ae_smul_measure ?_ _
+    rw [ae_dirac_eq]
+    simp
+
 /-- The Lebesgue integral of a function against a Bernoulli measure. -/
 lemma lintegral_bernoulliMeasure (x y : X) (p : I) (f : X → ℝ≥0∞) :
     ∫⁻ z, f z ∂Ber(x, y, p) = ENNReal.ofReal p * f x + ENNReal.ofReal (1 - p) * f y := by
@@ -83,13 +97,6 @@ lemma bernoulliMeasure_eq_withDensity [DecidableEq X] (hxy : x ≠ y) (p : I) (h
     congr 1
     field_simp
 
-/-- For `x ≠ y` and `q ∉ {0, 1}`, `Ber(x, y, p) ≪ Ber(x, y, q)`. -/
-lemma bernoulliMeasure_absolutelyContinuous (hxy : x ≠ y) (p : I) (hq : q ≠ 0) (hq1 : q ≠ 1) :
-    Ber(x, y, p) ≪ Ber(x, y, q) := by
-  classical
-  rw [bernoulliMeasure_eq_withDensity hxy p hq hq1]
-  exact withDensity_absolutelyContinuous _ _
-
 /-- The Radon–Nikodym derivative of `Ber(x, y, p)` with respect to `Ber(x, y, q)`, for `x ≠ y`
 and `q ∉ {0, 1}`. -/
 lemma rnDeriv_bernoulliMeasure [DecidableEq X] (hxy : x ≠ y) (p : I) (hq : q ≠ 0) (hq1 : q ≠ 1) :
@@ -98,23 +105,5 @@ lemma rnDeriv_bernoulliMeasure [DecidableEq X] (hxy : x ≠ y) (p : I) (hq : q �
   rw [bernoulliMeasure_eq_withDensity hxy p hq hq1]
   exact Measure.rnDeriv_withDensity _
     (Measurable.ite (measurableSet_singleton x) measurable_const measurable_const)
-
-/-- For `x ≠ y`, `Ber(x, y, p) ≪ Ber(x, y, q)` unless `q ∈ {0, 1}` and `p ≠ q`. -/
-lemma bernoulliMeasure_absolutelyContinuous_iff (hxy : x ≠ y) :
-    Ber(x, y, p) ≪ Ber(x, y, q) ↔ (q = 0 → p = 0) ∧ (q = 1 → p = 1) := by
-  refine ⟨fun h ↦ ⟨fun hq ↦ ?_, fun hq ↦ ?_⟩, fun ⟨h0, h1⟩ ↦ ?_⟩
-  · subst hq
-    have hx : Ber(x, y, p) {x} = 0 := h (by simp [hxy.symm])
-    rw [bernoulliMeasure_apply_singleton_left hxy, ENNReal.ofReal_eq_zero] at hx
-    exact Set.Icc.coe_eq_zero.1 (le_antisymm hx p.2.1)
-  · subst hq
-    have hy : Ber(x, y, p) {y} = 0 := h (by simp [hxy])
-    rw [bernoulliMeasure_apply_singleton_right hxy, ENNReal.ofReal_eq_zero, sub_nonpos] at hy
-    exact Set.Icc.coe_eq_one.1 (le_antisymm p.2.2 hy)
-  · by_cases hq : q = 0
-    · rw [h0 hq, hq]
-    by_cases hq1 : q = 1
-    · rw [h1 hq1, hq1]
-    exact bernoulliMeasure_absolutelyContinuous hxy p hq hq1
 
 end ProbabilityTheory

@@ -9,7 +9,7 @@ public import Essakine2026Tight.EV2026.Algorithm
 public import Essakine2026Tight.EV2026.Constants
 public import Essakine2026Tight.EV2026.TailNeg
 public import Essakine2026Tight.EV2026.TailPos
-public import Essakine2026Tight.ForLMLExplore.Identification.IdentificationAlg
+public import LMLExplore.Identification.Basic
 
 /-!
 # Theorem 4: sample complexity of Entropic-BPI
@@ -46,7 +46,8 @@ theorem isEntropicPAC_entropicBPI (r : ℕ → S → A → ℝ) (hr : ∀ h s a,
     (hε : ε ∈ Set.Ioc 0 (2 / (|β| * H * Fintype.card S))) (s₁ : S) :
     IsEntropicPAC (entropicBPI H r β δ ε s₁) r β ε δ s₁ := by
   intro M
-  have hrun := (entropicBPI H r β δ ε s₁).isRun_runMeasure (statesEnv M.1 H s₁)
+  have hrun := LMLExplore.Identification.isRun_runMeasure (entropicBPI H r β δ ε s₁)
+    (statesEnv M.1 H s₁)
   rw [← hrun.hasLaw_output.measureReal_eq (Set.to_countable _).measurableSet]
   rcases hβ.lt_or_gt with hneg | hpos
   · exact measureReal_bad_le_of_neg M.2 hr hneg hδ.1 hδ.2.le hε.1 hrun

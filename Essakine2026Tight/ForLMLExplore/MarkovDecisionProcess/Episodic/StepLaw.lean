@@ -53,28 +53,25 @@ variable {S A : Type*} [MeasurableSpace S] [MeasurableSpace A] (M : EpisodicMDP 
 include hπ
 
 lemma stepLaw_eq_trajMeasure (p : S × ℕ) :
-    stepLaw M π p = trajMeasure (policyAlg (augPolicy π) (measurable_augPolicy hπ))
-      (M.augmented.env (Measure.dirac p)) :=
-  stepLaw_of_measurable M hπ p
+    stepLaw M π p = haveI := nonempty_augState p
+      trajMeasure (policyAlg (augPolicy π) (measurable_augPolicy hπ))
+        (M.augmented.env (Measure.dirac p)) := by
+  have := nonempty_augState p
+  rw [stepLaw_of_measurable M hπ, policyMeasure_def]
 
 lemma policyKernel_augmented_apply (p : S × ℕ) :
     policyKernel M.augmented (measurable_augPolicy hπ) p = stepLaw M π p := by
+  have := nonempty_augState p
   rw [policyKernel_apply, stepLaw_of_measurable M hπ]
-
-omit hπ in
-lemma augTrans_apply' (s : S) (h : ℕ) (a : A) :
-    M.augTrans ((s, h), a) = (M.trans h (s, a)).map fun s' ↦ (s', h + 1) := rfl
-
-omit hπ in
-lemma augReward_apply' (s : S) (h : ℕ) (a : A) : M.augReward ((s, h), a) = M.reward h (s, a) := rfl
 
 /-! ### The first round -/
 
 lemma hasLaw_obs_zero_stepLaw (p : S × ℕ) :
     HasLaw (IT.obs 0) (Measure.dirac p) (stepLaw M π p) := by
-  rw [stepLaw_eq_trajMeasure M hπ]
-  exact IT.hasLaw_obs_zero (policyAlg (augPolicy π) (measurable_augPolicy hπ))
+  have := nonempty_augState p
+  have h := IT.hasLaw_obs_zero (policyAlg (augPolicy π) (measurable_augPolicy hπ))
     (M.augmented.env (Measure.dirac p))
+  rwa [obsZero_env, ← stepLaw_eq_trajMeasure M hπ] at h
 
 variable [MeasurableSingletonClass S] [MeasurableSingletonClass A]
 
@@ -86,6 +83,7 @@ omit [MeasurableSingletonClass A] in
 /-- The action of the first round is `π h s`. -/
 lemma hasLaw_action_zero_stepLaw (s : S) (h : ℕ) :
     HasLaw (IT.action 0) (Measure.dirac (π h s)) (stepLaw M π (s, h)) := by
+  have := nonempty_augState (s, h)
   have := isProbabilityMeasure_stepLaw M hπ (s, h)
   have h' := IT.hasCondDistrib_action_zero (policyAlg (augPolicy π) (measurable_augPolicy hπ))
     (M.augmented.env (Measure.dirac (s, h)))
@@ -101,6 +99,7 @@ lemma ae_action_zero_stepLaw (s : S) (h : ℕ) :
 
 lemma hasLaw_feedback_zero_stepLaw (s : S) (h : ℕ) :
     HasLaw (IT.feedback 0) (M.reward h (s, π h s)) (stepLaw M π (s, h)) := by
+  have := nonempty_augState (s, h)
   have := isProbabilityMeasure_stepLaw M hπ (s, h)
   have h' := IT.hasCondDistrib_feedback_zero (policyAlg (augPolicy π) (measurable_augPolicy hπ))
     (M.augmented.env (Measure.dirac (s, h)))
@@ -110,11 +109,12 @@ lemma hasLaw_feedback_zero_stepLaw (s : S) (h : ℕ) :
     filter_upwards [ae_obs_zero_stepLaw M hπ (s, h), ae_action_zero_stepLaw M hπ s h] with x h0 h1
     rw [h0, h1]
   have h'' := hasCondDistrib_const_iff.1 (h'.congr hae (Filter.EventuallyEq.refl _ _))
-  rwa [feedbackZero_env] at h''
+  rwa [feedbackZero_env, EpisodicMDP.augmented_R_apply] at h''
 
 lemma hasCondDistrib_obs_one_feedback_zero_stepLaw (s : S) (h : ℕ) :
     HasCondDistrib (IT.obs 1) (IT.feedback 0)
       (Kernel.const ℝ ((M.trans h (s, π h s)).map fun s' ↦ (s', h + 1))) (stepLaw M π (s, h)) := by
+  have := nonempty_augState (s, h)
   have h' := hasCondDistrib_obs_one_trajMeasure M.augmented (measurable_augPolicy hπ)
     (Measure.dirac (s, h))
   rw [← stepLaw_eq_trajMeasure M hπ] at h'
@@ -126,7 +126,7 @@ lemma hasCondDistrib_obs_one_feedback_zero_stepLaw (s : S) (h : ℕ) :
     exact Prod.ext h0.symm (Prod.ext h1.symm rfl)
   have h3 := (h'.congr hae (Filter.EventuallyEq.refl _ _)).of_measurableEmbedding_comp_right hψ
   convert h3 using 1
-  exact Kernel.ext fun _ ↦ rfl
+  exact Kernel.ext fun _ ↦ (M.augmented_P_apply s h (π h s)).symm
 
 lemma hasLaw_obs_one_stepLaw (s : S) (h : ℕ) :
     HasLaw (IT.obs 1) ((M.trans h (s, π h s)).map fun s' ↦ (s', h + 1)) (stepLaw M π (s, h)) := by
@@ -188,6 +188,7 @@ lemma hasLaw_stepLaw_succ (s : S) (h : ℕ) :
       ((M.reward h (s, π h s)).prod (M.trans h (s, π h s))
         ⊗ₘ Kernel.prodMkLeft ℝ (stepLawKernel M π (h + 1)))
       (stepLaw M π (s, h)) := by
+  have := nonempty_augState (s, h)
   have hgen := hasCondDistrib_shiftRound_trajMeasure M.augmented (measurable_augPolicy hπ)
     (Measure.dirac (s, h))
   rw [← stepLaw_eq_trajMeasure M hπ] at hgen
@@ -544,7 +545,7 @@ lemma ae_feedback_eq_policy_stepLaw {r : ℕ → S → A → ℝ} (hM : M.HasRew
     (measurableSet_eq_fun (by fun_prop) (hr'.comp (measurable_snd.comp measurable_fst)))
     (fun _ s' ↦ by
       have hl := hasLaw_feedback_zero_stepLaw M hπ s' (h + k)
-      rw [hM (h + k) s' (π (h + k) s')] at hl
+      rw [(M.hasRewardFn_def r).1 hM (h + k) s' (π (h + k) s')] at hl
       exact hl.ae_eq_of_dirac)
   filter_upwards [this] with x hx
   simpa [shiftRounds, IT.feedback] using hx
@@ -677,7 +678,7 @@ lemma hasCondDistrib_feedback_succ_statesEnv (s₁ : S)
       ext q : 1
       rw [Kernel.sectR_apply, episodeStepKernel_apply, statesTransKernel_apply,
         Policy.extend_fin]
-  exact HasCondDistrib.comp_of_hasLaw h2 h1
+  exact HasCondDistrib.comp_hasLaw h2 h1
 
 end EpisodeEnv
 

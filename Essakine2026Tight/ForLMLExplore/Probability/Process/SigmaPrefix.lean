@@ -10,7 +10,6 @@ public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Basic
 public import Essakine2026Tight.ForLMLExplore.MeasureTheory.MeasurableSpace.PiFinSuccProd
 public import LeanMachineLearning.ForMathlib.Probability.Process.HittingTime
 public import Essakine2026Tight.ForLMLExplore.Probability.CondDistrib
-public import Essakine2026Tight.ForLMLExplore.Probability.Process.HittingTime
 public import Mathlib.Order.SuccPred.ENat
 
 /-!
@@ -51,10 +50,11 @@ stopped after `n` steps if its prefix of length `n` belongs to `S`. The number o
 (`lt_hittingAfter_sigmaPrefix_iff`, `hittingAfter_sigmaPrefix_eq_coe_iff`); it is a stopping
 time of the prefix filtration (`isStoppingTime_hittingAfter_sigmaPrefix`), and every stopping
 time of the prefix filtration is of this form (`IsStoppingTime.exists_eq_hittingAfter_sigmaPrefix`).
-The prefix at that time is `hittingValue (sigmaPrefix Z) S 0` and the prefix stopped at time `M`
-by the rule is `hittingProcess (sigmaPrefix Z) S 0 M`
-(`Essakine2026Tight.ForLMLExplore.Probability.Process.HittingTime`; their measurability is
-`measurable_hittingValue_sigmaPrefix`, `measurable_hittingProcess_sigmaPrefix`).
+The prefix at that time is `stoppedValue (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0)` and
+the prefix stopped at time `M` by the rule is
+`stoppedProcess (sigmaPrefix Z) (hittingAfter (sigmaPrefix Z) S 0) M`; for the process of rounds
+of an algorithm-environment sequence and the stopping rule of an identification algorithm, the
+former is LML's `IdentAlg.stoppedHist`.
 
 Time is `0`-indexed: the prefix of length `n` records the steps `0, …, n - 1`, and the decision
 to stop after `n` steps depends on these steps only.
@@ -373,16 +373,6 @@ lemma measurable_stoppedValue_sigmaPrefix (hτ : Measurable τ) :
 lemma measurable_stoppedProcess_sigmaPrefix (hτ : Measurable τ) (M : ℕ) :
     Measurable (stoppedProcess (sigmaPrefix Z) τ M) :=
   measurable_stoppedValue_sigmaPrefix hZ (by fun_prop)
-
-/-- The prefix stopped by a measurable stopping rule is measurable. -/
-lemma measurable_hittingValue_sigmaPrefix (hS : MeasurableSet S) :
-    Measurable (hittingValue (sigmaPrefix Z) S 0) :=
-  measurable_stoppedValue_sigmaPrefix hZ (measurable_hittingAfter_sigmaPrefix hZ hS)
-
-/-- The prefix stopped by a measurable stopping rule, at time `M`, is measurable. -/
-lemma measurable_hittingProcess_sigmaPrefix (hS : MeasurableSet S) (M : ℕ) :
-    Measurable (hittingProcess (sigmaPrefix Z) S 0 M) :=
-  measurable_stoppedProcess_sigmaPrefix hZ (measurable_hittingAfter_sigmaPrefix hZ hS) M
 
 /-- The event `{τ ≤ M}` for the stopping time of a stopping rule is measurable. -/
 lemma measurableSet_hittingAfter_sigmaPrefix_le (hS : MeasurableSet S) (M : ℕ) :

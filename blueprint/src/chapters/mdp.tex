@@ -41,10 +41,10 @@ and from $P(\cdot \mid s, a)$ after the round $(s, a)$) and whose feedback to th
 the state $s$ is a reward drawn from $R(\cdot \mid s, a)$.
 \end{definition}
 
-\textbf{Lean remark.} This is LML's \texttt{Learning.MDP 𝓢 𝓐 𝓡} (fields \texttt{M.P},
-\texttt{M.R}, Markov kernels on \texttt{𝓢 × 𝓐}), copied from the \texttt{mdp} branch of LML to
-\texttt{Essakine2026Tight/ForLMLExplore/MarkovDecisionProcess/Basic.lean}, and its
-environment \texttt{MDP.env M μ₀ : Environment 𝓢 𝓐 𝓡}. The state and action spaces of this
+\textbf{Lean remark.} This is LMLExplore's \texttt{MDP 𝓢 𝓐 𝓡} (fields \texttt{M.P},
+\texttt{M.R}, Markov kernels on \texttt{𝓢 × 𝓐}; \texttt{LMLExplore/MarkovDecisionProcess/Basic.lean}),
+and its environment \texttt{MDP.env M μ₀ : Environment 𝓢 𝓐 𝓡}, defined for a nonempty state
+space (the first state is drawn from $\mu_0$ when $\mu_0$ is a probability measure). The state and action spaces of this
 blueprint are finite types with the discrete $\sigma$-algebra (\texttt{Fintype},
 \texttt{MeasurableSingletonClass}), so every function on them is measurable and the kernels are
 determined by their transition probabilities.
@@ -130,7 +130,7 @@ current step; this reuses LML's trajectory measures and makes the Markov propert
 of the Ionescu--Tulcea construction.
 
 \begin{definition}[Time-augmented MDP]\label{def:layered_mdp}
-\lean{Learning.MDP.Episodic.EpisodicMDP.augmented, Learning.MDP.Episodic.EpisodicMDP.augTrans, Learning.MDP.Episodic.EpisodicMDP.augReward, Learning.MDP.Episodic.augPolicy, Learning.MDP.Episodic.measurable_augPolicy, Learning.MDP.Episodic.Policy.extend, Learning.MDP.Episodic.Policy.measurable_extend}\leanok
+\lean{Learning.MDP.Episodic.EpisodicMDP.augmented, Learning.MDP.Episodic.EpisodicMDP.augmented_P_apply, Learning.MDP.Episodic.EpisodicMDP.augmented_R_apply, Learning.MDP.Episodic.augPolicy, Learning.MDP.Episodic.measurable_augPolicy, Learning.MDP.Episodic.Policy.extend, Learning.MDP.Episodic.Policy.measurable_extend}\leanok
 \uses{def:episodic_mdp, def:policy, def:mdp}
 The \emph{time-augmented MDP} of $\mathcal M$ is the stationary MDP (Definition~\ref{def:mdp})
 on the state space $\Ss \times \N$ with actions $\As$: from a state $(s, h)$ and an action $a$,
@@ -140,8 +140,10 @@ stationary policy $\pi^{\mathrm{aug}}(s, h) := \pi_h(s)$; an $H$-step policy is 
 fixed action beyond the horizon.
 \end{definition}
 
-\textbf{Lean remark.} \texttt{M.augmented : MDP (S × ℕ) A ℝ} (kernels \texttt{M.augTrans},
-\texttt{M.augReward}) and \texttt{augPolicy π : S × ℕ → A}, measurable when every
+\textbf{Lean remark.} \texttt{M.augmented : MDP (S × ℕ) A ℝ} is LMLExplore's (its kernels are
+described by \texttt{augmented\_P\_apply} and \texttt{augmented\_R\_apply}), as are
+\texttt{EpisodicMDP}, \texttt{MDP} and its environment \texttt{MDP.env}, and
+\texttt{augPolicy π : S × ℕ → A} is measurable when every
 \texttt{π h} is (\texttt{measurable\_augPolicy}, by
 \texttt{measurable\_from\_prod\_countable\_left}). The steps are all of $\N$: there is no
 terminal layer, the trajectory runs forever and the finite horizon only enters through the
@@ -225,9 +227,9 @@ kernel from the initial state is \texttt{policyKernel M hπ}, built with Mathlib
 is Mathlib's; the first round and the state of round $1$ are
 \texttt{firstRoundState}, the shift is \texttt{shiftRound}, the auxiliary measure is
 \texttt{shiftMeasure} and the prepending map is \texttt{consRound}. The general
-\texttt{HasCondDistrib} tools used are in \texttt{ForLMLExplore/Probability/HasCondDistrib.lean}
-(\texttt{hasCondDistrib\_snd\_compProd}, \texttt{HasCondDistrib.comp\_hasLaw},
-\texttt{HasCondDistrib.compProd\_left}).
+\texttt{HasCondDistrib} tools used are LMLExplore's \texttt{hasCondDistrib\_snd\_compProd\_comap},
+LML's \texttt{HasCondDistrib.comp\_hasLaw} and \texttt{HasCondDistrib.compProd\_left\_of\_sectR}
+(\texttt{ForLMLExplore/Probability/HasCondDistribIntegral.lean}).
 
 \begin{lemma}[Markov property of the trajectory law]\label{lem:step_law_markov}
 \lean{Learning.MDP.Episodic.hasLaw_stepLaw_succ, Learning.MDP.Episodic.ae_obs_zero_stepLaw, Learning.MDP.Episodic.ae_action_zero_stepLaw, Learning.MDP.Episodic.hasLaw_feedback_zero_stepLaw, Learning.MDP.Episodic.ae_feedback_eq_policy_stepLaw, Learning.MDP.Episodic.episodeReturn_succ_eq_add_shiftRound, Learning.MDP.Episodic.ae_stepLaw_succ_of_ae, Learning.MDP.Episodic.lintegral_stepLaw_succ, Learning.MDP.Episodic.integral_stepLaw_succ}\leanok
@@ -774,7 +776,7 @@ mass at most $\delta$ to the bad outputs; for a run $(X, Y, \hat\pi)$ on $(\Omeg
 \texttt{IsPAC.measureReal\_bad\_of\_isRun} gives $\Prob(\hat\pi \text{ bad}) \le \delta$
 (\texttt{IsRun.hasLaw\_output}: the output of a run has law \texttt{outputMeasure}). Conversely,
 to prove that an algorithm is PAC one proves the bound for one run, the canonical run on the
-Ionescu--Tulcea space (LML \texttt{IdentAlg.runMeasure}, \texttt{isRun\_runMeasure}), which
+Ionescu--Tulcea space (LMLExplore \texttt{Identification.runMeasure}, \texttt{isRun\_runMeasure}), which
 is what Theorem~\ref{thm:upper_bound_pac} does. Two points of the encoding are decisions
 recorded in the overview (deviation~7): the PAC property is a property of the \emph{algorithm}
 (quantified over the environments of the class), not of a run, and the class is

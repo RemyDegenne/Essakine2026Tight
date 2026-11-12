@@ -6,6 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.StepLaw
+public import LMLExplore.MarkovDecisionProcess.Episodic.Occupancy
 
 /-!
 # Occupancy measures of a finite-horizon MDP
@@ -13,13 +14,14 @@ public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Ste
 For a finite-horizon MDP `M`, a policy `π : ℕ → S → A` (measurable at every step, `hπ`) and an
 initial state `s₁`:
 
-* `stateLawAt M π s₁ h` is the law of the state `S_h` of the step `h` and
-  `occupancyMeasure M π s₁ h` the law of the state-action pair `(S_h, A_h)`
-  (`ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`); the action is the policy's
-  (`hasCondDistrib_action_obs_stepLaw`), so the occupancy measure is the image of the state law
-  by `s ↦ (s, π h s)` (`occupancyMeasure_eq_map`), and the state laws satisfy the **forward
-  recursion** `stateLawAt (h + 1) = policyTransKernel h ∘ₘ stateLawAt h` (`stateLawAt_succ`) with
-  the transition kernel `policyTransKernel M hπ h : Kernel S S` of the policy;
+* `occupancyMeasure M π s₁ h` is the law of the state-action pair `(S_h, A_h)`
+  (`ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`); the trajectory law is the law of a
+  run of the Markov policy `detPolicy hπ` of the deterministic kernels of `π`
+  (`isAlgEnvSeq_markov_stepLaw`), so the occupancy measure is LMLExplore's
+  `EpisodicMDP.occupancy` of that policy from `δ_{s₁}` (`occupancyMeasure_eq_occupancy`), whose
+  state marginals `stateMarginal M.trans (detPolicy hπ) (δ_{s₁})` satisfy the forward recursion
+  `EpisodicMDP.stateMarginal_trans_add_one`; the action of each round is the policy's
+  (`hasCondDistrib_action_obs_stepLaw`);
 * the expectation of a function of `(S_h, A_h)` is its integral against the occupancy measure
   (`integral_comp_stateAction_stepLaw`);
 * on finite state and action spaces, the occupancy `occupancy M π s₁ h s a = P^π(S_h = s, A_h = a)`
@@ -42,14 +44,6 @@ variable {S A : Type*} [MeasurableSpace S] [MeasurableSpace A] (M : EpisodicMDP 
 section NoMeasurability
 
 variable (π : ℕ → S → A) (s₁ : S)
-
-/-- The law of the state `S_h` of the step `h` of the trajectory of `π` from `s₁`. -/
-noncomputable def stateLawAt (h : ℕ) : Measure S :=
-  (stepLaw M π (s₁, 0)).map fun x ↦ (IT.obs h x).1
-
-lemma hasLaw_fst_obs_stateLawAt (h : ℕ) :
-    HasLaw (fun x ↦ (IT.obs h x).1) (stateLawAt M π s₁ h) (stepLaw M π (s₁, 0)) :=
-  ⟨(measurable_fst.comp (IT.measurable_obs h)).aemeasurable, rfl⟩
 
 lemma hasLaw_stateAction_occupancyMeasure (h : ℕ) :
     HasLaw (stateAction h) (occupancyMeasure M π s₁ h) (stepLaw M π (s₁, 0)) :=
@@ -94,24 +88,14 @@ lemma integral_sum_comp_obs_action_stepLaw (n : ℕ) (f : ℕ → S → A → �
 
 end NoMeasurability
 
-/-- The transition kernel of the policy `π` at the step `h`: `s ↦ p_h(· | s, π_h(s))`. -/
-noncomputable def policyTransKernel {π : ℕ → S → A} (hπ : ∀ h, Measurable (π h)) (h : ℕ) :
-    Kernel S S :=
-  (M.trans h).comap (fun s ↦ (s, π h s)) (measurable_id.prodMk (hπ h))
-
 variable {π : ℕ → S → A} (hπ : ∀ h, Measurable (π h)) (s₁ : S)
 
-lemma policyTransKernel_apply (h : ℕ) (s : S) :
-    policyTransKernel M hπ h s = M.trans h (s, π h s) := rfl
+/-- The deterministic Markov policy `h ↦ δ_{π h}` of the policy `π`. -/
+noncomputable def detPolicy (h : ℕ) : Kernel S A := Kernel.deterministic (π h) (hπ h)
 
-instance (h : ℕ) : IsMarkovKernel (policyTransKernel M hπ h) := by
-  unfold policyTransKernel; infer_instance
+instance (h : ℕ) : IsMarkovKernel (detPolicy hπ h) := by unfold detPolicy; infer_instance
 
 include hπ
-
-lemma isProbabilityMeasure_stateLawAt (h : ℕ) : IsProbabilityMeasure (stateLawAt M π s₁ h) := by
-  have := isProbabilityMeasure_stepLaw M hπ (s₁, 0)
-  unfold stateLawAt; infer_instance
 
 lemma isProbabilityMeasure_occupancyMeasure (h : ℕ) :
     IsProbabilityMeasure (occupancyMeasure M π s₁ h) := by
@@ -121,6 +105,34 @@ lemma isProbabilityMeasure_occupancyMeasure (h : ℕ) :
 lemma occupancy_le_one (h : ℕ) (s : S) (a : A) : occupancy M π s₁ h s a ≤ 1 := by
   have := isProbabilityMeasure_occupancyMeasure M hπ s₁ h
   exact measureReal_le_one
+
+/-- The trajectory law of `π` from `p` is the law of a run of the Markov policy `detPolicy hπ` in
+the time-augmented MDP. -/
+lemma isAlgEnvSeq_markov_stepLaw (p : S × ℕ) :
+    haveI := nonempty_augState p
+    IsAlgEnvSeq IT.obs IT.action IT.feedback
+      (Algorithm.markov fun _ ↦ augMarkovPolicy (detPolicy hπ))
+      (M.augmented.env (Measure.dirac p)) (stepLaw M π p) := by
+  have := nonempty_augState p
+  have h := IT.isAlgEnvSeq_trajMeasure (policyAlg (augPolicy π) (measurable_augPolicy hπ))
+    (M.augmented.env (Measure.dirac p))
+  rw [← stepLaw_eq_trajMeasure M hπ, policyAlg_eq_markov] at h
+  convert h using 3
+  ext q : 1
+  rw [augMarkovPolicy_apply, detPolicy, Kernel.deterministic_apply, Kernel.deterministic_apply,
+    augPolicy_apply]
+
+/-- The occupancy measure of `π` from `s₁` is LMLExplore's occupancy measure of the Markov policy
+`detPolicy hπ` from the initial law `δ_{s₁}`. -/
+lemma occupancyMeasure_eq_occupancy (h : ℕ) :
+    occupancyMeasure M π s₁ h = M.occupancy (detPolicy hπ) (Measure.dirac s₁) h := by
+  have : Nonempty S := ⟨s₁⟩
+  have := isProbabilityMeasure_stepLaw M hπ (s₁, 0)
+  have hl := EpisodicMDP.hasLaw_obs_fst_action_markov (μ := Measure.dirac (s₁, 0))
+    ((ae_dirac_iff (measurableSet_eq_fun measurable_snd measurable_const)).2 rfl)
+    (isAlgEnvSeq_markov_stepLaw M hπ (s₁, 0)) h
+  rw [Measure.map_dirac' measurable_fst] at hl
+  exact hl.map_eq
 
 variable [MeasurableSingletonClass S] [MeasurableSingletonClass A]
 
@@ -142,49 +154,13 @@ lemma hasCondDistrib_action_obs_stepLaw (s : S) (h k : ℕ) :
     (Filter.Eventually.of_forall fun x ↦ ?_)
   simp [shiftRounds, IT.action]
 
-/-- The state of the round `k + 1` has conditional law `p_{h+k}(· | S_k, π(S_k))` given the state
-of the round `k`. -/
-lemma hasCondDistrib_fst_obs_succ_stepLaw (s : S) (h k : ℕ) :
-    HasCondDistrib (fun x ↦ (IT.obs (k + 1) x).1) (fun x ↦ (IT.obs k x).1)
-      (policyTransKernel M hπ (h + k)) (stepLaw M π (s, h)) :=
-  HasCondDistrib.comp_right (Z := IT.hist (k + 1)) (κ := policyTransKernel M hπ (h + k))
-    (f := fun p : Hist (S × ℕ) A ℝ (k + 1) ↦ (p (Fin.last k)).obs.1)
-    (hf := measurable_fst.comp (Round.measurable_obs.comp (measurable_pi_apply (Fin.last k))))
-    (hasCondDistrib_obs_succ_hist_stepLaw M hπ s h k)
-
-/-- The occupancy measure is the image of the state law by `s ↦ (s, π h s)`. -/
-lemma occupancyMeasure_eq_map (h : ℕ) :
-    occupancyMeasure M π s₁ h = (stateLawAt M π s₁ h).map fun s ↦ (s, π h s) := by
-  have hc := hasCondDistrib_action_obs_stepLaw M hπ s₁ 0 h
-  rw [Nat.zero_add] at hc
-  unfold occupancyMeasure stateAction stateLawAt
-  rw [← Measure.compProd_deterministic (hπ h)]
-  exact hc.map_eq
-
-/-- **Forward recursion of the state laws**: the law of `S_{h+1}` is the law of `S_h` pushed
-through the transition kernel of the policy. -/
-lemma stateLawAt_succ (h : ℕ) :
-    stateLawAt M π s₁ (h + 1) = policyTransKernel M hπ h ∘ₘ stateLawAt M π s₁ h := by
-  have hc := hasCondDistrib_fst_obs_succ_stepLaw M hπ s₁ 0 h
-  rw [Nat.zero_add] at hc
-  unfold stateLawAt
-  rw [← Measure.snd_compProd, ← hc.map_eq, Measure.snd,
-    Measure.map_map measurable_snd (by fun_prop)]
-  rfl
-
-omit [MeasurableSingletonClass S] [MeasurableSingletonClass A] in
-lemma stateLawAt_zero : stateLawAt M π s₁ 0 = Measure.dirac s₁ := by
-  rw [stateLawAt]
-  change (stepLaw M π (s₁, 0)).map (Prod.fst ∘ IT.obs 0) = _
-  rw [← Measure.map_map measurable_fst (IT.measurable_obs 0),
-    (hasLaw_obs_zero_stepLaw M hπ (s₁, 0)).map_eq]
-  exact Measure.map_dirac' measurable_fst (s₁, 0)
-
 /-- The occupancy of `(s, a)` is the probability of visiting `s` if `a = π_h(s)`, and `0`
 otherwise. -/
 lemma occupancy_eq [DecidableEq A] (h : ℕ) (s : S) (a : A) :
-    occupancy M π s₁ h s a = if a = π h s then (stateLawAt M π s₁ h).real {s} else 0 := by
-  rw [occupancy, occupancyMeasure_eq_map M hπ, map_measureReal_apply (f := fun s ↦ (s, π h s))
+    occupancy M π s₁ h s a = if a = π h s
+      then (stateMarginal M.trans (detPolicy hπ) (Measure.dirac s₁) h).real {s} else 0 := by
+  rw [occupancy, occupancyMeasure_eq_occupancy M hπ, EpisodicMDP.occupancy_def, detPolicy,
+    Measure.compProd_deterministic (hπ h), map_measureReal_apply (f := fun s ↦ (s, π h s))
     (measurable_id.prodMk (hπ h)) (measurableSet_singleton _)]
   split_ifs with ha
   · congr 1
@@ -193,7 +169,7 @@ lemma occupancy_eq [DecidableEq A] (h : ℕ) (s : S) (a : A) :
     constructor
     · rintro ⟨rfl, -⟩; rfl
     · rintro rfl; exact ⟨rfl, ha.symm⟩
-  · rw [← measureReal_empty (μ := stateLawAt M π s₁ h)]
+  · rw [← measureReal_empty (μ := stateMarginal M.trans (detPolicy hπ) (Measure.dirac s₁) h)]
     congr 1
     ext s'
     simp only [Set.mem_preimage, Set.mem_singleton_iff, Prod.ext_iff, Set.mem_empty_iff_false,
@@ -208,45 +184,21 @@ lemma sum_occupancy (h : ℕ) : ∑ s, ∑ a, occupancy M π s₁ h s a = 1 := b
   have := isProbabilityMeasure_stepLaw M hπ (s₁, 0)
   simpa using (integral_comp_obs_action_stepLaw M π s₁ h (fun _ _ ↦ 1)).symm
 
-/-- **Forward recursion of the occupancies**. -/
+/-- **Forward recursion of the occupancies**, from LMLExplore's flow equation
+`EpisodicMDP.stateMarginal_trans_add_one`. -/
 lemma occupancy_succ [DecidableEq A] (h : ℕ) (s' : S) (a' : A) :
     occupancy M π s₁ (h + 1) s' a' = if a' = π (h + 1) s'
       then ∑ s, ∑ a, occupancy M π s₁ h s a * M.transVec h s a s' else 0 := by
-  classical
   rw [occupancy_eq M hπ]
-  by_cases ha : a' = π (h + 1) s'
-  swap; · simp [ha]
-  simp only [ha, ↓reduceIte]
-  have hind := integral_mul_obs_succ_stepLaw M hπ s₁ 0 h (Ψ := fun _ ↦ 1) measurable_const (C := 1)
-    (fun _ ↦ by simp) (g := fun s'' ↦ if s'' = s' then 1 else 0) (measurable_of_countable _)
-    (D := 1) (fun _ ↦ by split_ifs <;> simp)
-  simp only [one_mul, Nat.zero_add] at hind
-  have hmeas : MeasurableSet {x : ℕ → Round (S × ℕ) A ℝ | (IT.obs (h + 1) x).1 = s'} :=
-    (measurableSet_singleton s').preimage (measurable_fst.comp (IT.measurable_obs _))
-  calc (stateLawAt M π s₁ (h + 1)).real {s'}
-      = (stepLaw M π (s₁, 0)).real {x | (IT.obs (h + 1) x).1 = s'} := by
-        rw [stateLawAt, map_measureReal_apply (f := fun x : ℕ → Round (S × ℕ) A ℝ ↦
-          (IT.obs (h + 1) x).1) (measurable_fst.comp (IT.measurable_obs _))
-          (measurableSet_singleton _)]
-        rfl
-    _ = ∫ x, {x : ℕ → Round (S × ℕ) A ℝ | (IT.obs (h + 1) x).1 = s'}.indicator 1 x
-          ∂stepLaw M π (s₁, 0) := (integral_indicator_one hmeas).symm
-    _ = ∫ x, (if (IT.obs (h + 1) x).1 = s' then 1 else 0) ∂stepLaw M π (s₁, 0) := by
-        refine integral_congr_ae (Filter.Eventually.of_forall fun x ↦ ?_)
-        simp only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.one_apply]
-    _ = ∫ x, M.transVec h (IT.obs h x).1 (π h (IT.obs h x).1) s' ∂stepLaw M π (s₁, 0) := by
-        rw [hind]
-        refine integral_congr_ae (Filter.Eventually.of_forall fun x ↦ ?_)
-        simp only
-        rw [integral_fintype Integrable.of_finite]
-        simp [EpisodicMDP.transVec, MDP.transVec, Finset.sum_ite_eq']
-    _ = ∑ s, ∑ a, occupancy M π s₁ h s a * M.transVec h s (π h s) s' :=
-        integral_comp_obs_action_stepLaw M π s₁ h (fun s _ ↦ M.transVec h s (π h s) s')
-    _ = _ := by
-        refine sum_congr rfl fun s _ ↦ sum_congr rfl fun a _ ↦ ?_
-        rw [occupancy_eq M hπ]
-        split_ifs with has
-        · rw [has]
-        · simp
+  split_ifs with ha
+  · rw [EpisodicMDP.stateMarginal_trans_add_one, ← occupancyMeasure_eq_occupancy M hπ,
+      measureReal_def, Measure.bind_apply (measurableSet_singleton _)
+        (M.trans h).measurable.aemeasurable, lintegral_fintype, ENNReal.toReal_sum
+        fun p _ ↦ ENNReal.mul_ne_top (measure_ne_top _ _) (measure_ne_top _ _),
+      Fintype.sum_prod_type]
+    refine sum_congr rfl fun s _ ↦ sum_congr rfl fun a _ ↦ ?_
+    rw [ENNReal.toReal_mul, mul_comm, occupancy, EpisodicMDP.transVec, MDP.transVec,
+      measureReal_def, measureReal_def]
+  · rfl
 
 end Learning.MDP.Episodic

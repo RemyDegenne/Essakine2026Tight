@@ -10,15 +10,16 @@ public import Mathlib.Data.Nat.Choose.Bounds
 public import Mathlib.Probability.HasLaw
 public import Mathlib.Probability.Independence.Basic
 public import Essakine2026Tight.ForLMLExplore.InformationTheory.KullbackLeibler.Fintype
-public import Essakine2026Tight.ForLMLExplore.MeasureTheory.Measure.WeightedProbability
+public import LMLExplore.MeasureTheory.Measure.Weighted
 
 /-!
 # The method of types and Sanov's bound
 
-Let `X : Fin n → Ω → α` be an i.i.d. sample with law `weightedMeasure p` on a finite type `α` with
-`m` elements. The *type* of a sequence `x : Fin n → α` is its vector of counts
-`InformationTheory.typeCount x`, and its empirical distribution is
-`weightedMeasure (InformationTheory.empiricalFreq x)`.
+Let `X : Fin n → Ω → α` be an i.i.d. sample with law `weightedMeasure p` (LMLExplore's
+`LMLExplore.weightedMeasure`) on a finite type `α` with `m` elements. The *type* of a sequence
+`x : Fin n → α` is its vector of counts `InformationTheory.typeCount x`, and its empirical
+distribution is `weightedMeasure (InformationTheory.empiricalFreq x)`. The law of the sample is
+the product measure `p^{⊗n}` by Mathlib's `ProbabilityTheory.iIndepFun.hasLaw_pi`.
 
 * `InformationTheory.card_piAntidiag_univ`, `Nat.choose_add_le_add_one_pow`,
   `InformationTheory.card_le_pow_of_sum_eq`: there are `(m + n - 1).choose n` count vectors of
@@ -32,7 +33,7 @@ Let `X : Fin n → Ω → α` be an i.i.d. sample with law `weightedMeasure p` o
 
 @[expose] public section
 
-open MeasureTheory Real Finset
+open MeasureTheory Real Finset LMLExplore
 open scoped ENNReal
 
 
@@ -82,20 +83,6 @@ lemma pi_weightedMeasure_typeCount_eq {n : ℕ} {r : α → ℝ} (hr : ∀ a, 0 
     simp_rw [ENNReal.ofReal_pow (hr _)]
   rw [Finset.sum_congr rfl hterm, Finset.sum_const, nsmul_eq_mul,
     ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast]
-
-omit [Fintype α] [DecidableEq α] in
-/-- For an i.i.d. sample `X` with law `ρ`, the law of the vector `(X k)ₖ` is `ρ^{⊗n}`. -/
-lemma measure_typeCount_eq [Finite α] {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-    {n : ℕ} {X : Fin n → Ω → α} (hX : ProbabilityTheory.iIndepFun X μ)
-    {ρ : Measure α} (hlaw : ∀ k, ProbabilityTheory.HasLaw (X k) ρ μ) (s : Set (Fin n → α)) :
-    μ {ω | (fun k ↦ X k ω) ∈ s} = Measure.pi (fun _ ↦ ρ) s := by
-  have hmeas : ∀ k, AEMeasurable (X k) μ := fun k ↦ (hlaw k).aemeasurable
-  have hmap := hX.map_fun_eq_pi_map hmeas
-  simp_rw [(hlaw _).map_eq] at hmap
-  rw [← hmap, Measure.map_apply₀ (AEMeasurable.of_eval hmeas)
-    (s.toFinite.measurableSet.nullMeasurableSet)]
-  rfl
-
 
 omit [DecidableEq α] [MeasurableSpace α] [MeasurableSingletonClass α] in
 /-- **The number of types** (Lemma of the method of types): a finite set of count vectors
@@ -182,9 +169,10 @@ lemma measure_typeCount_eq_le (hX : ProbabilityTheory.iIndepFun X μ) (hp0 : ∀
   have hPeq : μ {ω | typeCount (fun k ↦ X k ω) = N}
       = ENNReal.ofReal (#{x : Fin n → α | typeCount x = N} * ∏ a, p a ^ N a) := by
     rw [← pi_weightedMeasure_typeCount_eq hp0 N]
-    exact measure_typeCount_eq hX hlaw {x | typeCount x = N}
+    exact (hX.hasLaw_pi hlaw).measure_eq (p := fun x ↦ typeCount x = N)
+      (Set.toFinite _).measurableSet
   have hQle : (#{x : Fin n → α | typeCount x = N} : ℝ) * ∏ a, q a ^ N a ≤ 1 := by
-    have := isProbabilityMeasure_weightedMeasure hq0 hq1
+    have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hq0, hq1⟩)
     have h := prob_le_one (μ := Measure.pi (fun _ : Fin n ↦ weightedMeasure q))
       (s := {x | typeCount x = N})
     rw [pi_weightedMeasure_typeCount_eq hq0 N] at h
@@ -195,7 +183,7 @@ lemma measure_typeCount_eq_le (hX : ProbabilityTheory.iIndepFun X μ) (hp0 : ∀
       weightedMeasure_absolutelyContinuous fun a ha ↦ hsupp a (by
         simp only [hq] at ha
         exact_mod_cast (div_pos_iff_of_pos_right hnR).1 ha)
-    have := isProbabilityMeasure_weightedMeasure hq0 hq1
+    have := isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2 ⟨hq0, hq1⟩)
     have : IsProbabilityMeasure (weightedMeasure p) :=
       (hlaw ⟨0, hn⟩).isProbabilityMeasure_iff.1 inferInstance
     have hKL := toReal_klDiv_eq_sum hac

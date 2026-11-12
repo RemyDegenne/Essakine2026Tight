@@ -47,6 +47,7 @@ after `t` episodes being the empirical distribution of the first `n_h^t(s, a)` o
 
 open MeasureTheory ProbabilityTheory Finset Learning Learning.MDP.Episodic Learning.MDP
   InformationTheory
+open LMLExplore (weightedMeasure)
 open scoped ENNReal
 
 namespace Essakine2026Tight
@@ -459,9 +460,7 @@ lemma measure_compl_goodEvent_le [IsProbabilityMeasure P]
     (hM : M.HasRewardFn r) (hr : ∀ h s a, r h s a ∈ Set.Icc 0 1) (β : ℝ) (hδ : 0 < δ)
     (hδ1 : δ ≤ 1) :
     P (goodEvent X Y M s₁ β δ)ᶜ ≤ ENNReal.ofReal δ := by
-  have hRew : M.RewardsIn (Set.Icc 0 1) := fun h s a ↦ by
-    rw [hM h s a]
-    exact (ae_dirac_iff measurableSet_Icc).2 (hr h s a)
+  have hRew : M.RewardsIn (Set.Icc 0 1) := hM.rewardsIn hr
   have hKL := measure_compl_eventKL_le hseq hδ
   have hBern := measure_compl_eventBern_le hseq hδ hδ1 (f := optExpValue M H β)
     (b := fun h ↦ if 0 < β then Real.exp (β * (H - 1 - h : ℕ))

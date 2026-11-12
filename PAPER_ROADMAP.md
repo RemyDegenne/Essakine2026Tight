@@ -6,10 +6,10 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
 
 | Id | Item | Tag | Link | Status | Files |
 |---|---|---|---|---|---|
-| R1 | MDPs, their environment and stationary deterministic policies (`MDP`, `MDP.env`, `policyAlg`, `policyMeasure`, `stateLaw`, `meanReward`) | exists | `Learning.MDP.env` | – | `ForLMLExplore/MarkovDecisionProcess/Basic.lean` |
+| R1 | MDPs, their environment and stationary deterministic policies (`MDP`, `MDP.env`, `policyAlg`, `policyMeasure`, `stateLaw`, `meanReward`) | exists | `Learning.MDP.env` | – | |
 | R2 | Episodic MDPs and the time-augmented MDP (`EpisodicMDP`, `ofDet`, `meanReward`, `RewardsIn`, `HasRewardFn`, `augmented`) | exists | `Learning.MDP.Episodic.EpisodicMDP` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean` |
 | R3 | State marginals and occupancy measures of an episodic MDP | exists | `Learning.MDP.Episodic.EpisodicMDP.occupancy` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Occupancy.lean` |
-| R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/Probability/HasCondDistrib.lean`, `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
+| R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
 | R5 | Markov property of the trajectory of a stationary deterministic policy (`policyKernel` through `Kernel.traj`, shifted trajectories) | target | ReinforcementLearning 7.2 | proved | `ForLMLExplore/MarkovDecisionProcess/Markov.lean` |
 | R6 | `H`-step policies and episode trajectories (`Policy`, `Policy.extend`, `stepLaw`, `episodeReturn`, `episodeStates`), with the Markov property along an episode | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean` |
 | R7 | Episodes as rounds: the law of the state sequence of an episode, `statesEnv` and best policy identification algorithms `BPIAlg` | target | ReinforcementLearning 7.7 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StateSeq.lean` |
@@ -18,16 +18,16 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
 | R10 | Empirical models of episodes: visit counts, reward sums, transition counts and empirical transitions | target | ReinforcementLearning 14.1 | proved | `ForLMLExplore/ReinforcementLearning/Episodic/Empirical.lean`, `ForLMLExplore/ReinforcementLearning/Episodic/EmpiricalCounts.lean` |
 | R11 | Visits of a step–state–action pair across episodes, the next states observed at them and their domination by i.i.d. samples | target | ReinforcementLearning 14.2 | proved | `ForLMLExplore/ReinforcementLearning/Episodic/Visits.lean`, `ForLMLExplore/ReinforcementLearning/Episodic/VisitConcentration.lean`, `ForLMLExplore/Probability/Process/FirstEntrance.lean` |
 | R12 | Counts versus pseudo-counts: the Bernoulli maximal inequality | target | ReinforcementLearning 19.2 | proved | `ForLMLExplore/Probability/Martingale/Ville.lean` |
-| R13 | Ville's inequality | exists | `MeasureTheory.Supermartingale.measure_exists_le_le` | – | `ForLMLExplore/Probability/Martingale/Ville.lean` |
-| R14 | Weighted measures of probability vectors | exists | `LMLExplore.weightedMeasure` | – | `ForLMLExplore/MeasureTheory/Measure/Weighted.lean`, `ForLMLExplore/MeasureTheory/Measure/WeightedProbability.lean` |
-| R15 | Bernoulli measures, the binary relative entropy, Pinsker's inequality and data processing to an event | exists | `LMLExplore.klBer` | – | `ForLMLExplore/InformationTheory/KLBer.lean`, `ForLMLExplore/InformationTheory/Pinsker.lean`, `ForLMLExplore/Probability/Distributions/Bernoulli.lean` |
-| R16 | The divergence of two Bernoulli measures on any two distinct points | refactor | `LMLExplore.klDiv_bernoulliMeasure` | proved | `ForLMLExplore/InformationTheory/Pinsker.lean` |
-| R17 | Canonical runs of identification algorithms and their transport | exists | `LMLExplore.Identification.runMeasure` | – | `ForLMLExplore/Identification/IdentificationAlg.lean` |
+| R13 | Ville's inequality | exists | `MeasureTheory.Supermartingale.measure_exists_le_le` | – | |
+| R14 | Weighted measures of probability vectors | exists | `LMLExplore.weightedMeasure` | – | |
+| R15 | Bernoulli measures, the binary relative entropy, Pinsker's inequality and data processing to an event | exists | `LMLExplore.klBer` | – | `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean`, `ForLMLExplore/Probability/Distributions/Bernoulli.lean` |
+| R16 | The divergence of two Bernoulli measures on any two distinct points | refactor | `LMLExplore.klDiv_bernoulliMeasure` | proved | `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean` |
+| R17 | Canonical runs of identification algorithms and their transport | exists | `LMLExplore.Identification.runMeasure` | – | |
 | R18 | Change of measure at a stopping time for identification algorithms | exists | `LMLExplore.Identification.klBer_measureReal_histOutputMeasure_le` | – | `ForLMLExplore/Identification/ChangeOfMeasure.lean` |
-| R19 | Chain rule for the KL divergence at a stopping time, with equality: prefix filtrations, stopped histories, regrouping by action counts | target | Identification 2.1 | proved | `ForLMLExplore/Probability/Process/SigmaPrefix.lean`, `ForLMLExplore/Probability/Process/HittingTime.lean`, `ForLMLExplore/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean`, `ForLMLExplore/InformationTheory/KLStoppedPrefix.lean`, `ForLMLExplore/SequentialLearning/StoppedHistory.lean`, `ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean` |
+| R19 | Chain rule for the KL divergence at a stopping time, with equality: prefix filtrations, stopped histories, regrouping by action counts | target | Identification 2.1 | proved | `ForLMLExplore/Probability/Process/SigmaPrefix.lean`, `ForLMLExplore/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean`, `ForLMLExplore/InformationTheory/KLStoppedPrefix.lean`, `ForLMLExplore/SequentialLearning/StoppedHistory.lean`, `ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean` |
 | R20 | Method of types and Sanov's bound on a finite set | target | ReinforcementLearning 3.4 | proved | `ForLMLExplore/InformationTheory/MethodOfTypes.lean`, `ForLMLExplore/InformationTheory/KullbackLeibler/Fintype.lean` |
 | R21 | Time-uniform KL concentration of the empirical distribution by the Laplace mixture | target | ReinforcementLearning 3.4 | proved | `ForLMLExplore/InformationTheory/KLTimeUniform.lean` |
-| R22 | Donsker–Varadhan inequality and the Bernstein bound on the log-moment generating function | exists | `TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv` | – | `ForLMLExplore/InformationTheory/KLBernstein.lean` |
+| R22 | Donsker–Varadhan inequality and the Bernstein bound on the log-moment generating function | exists | `TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv` | – | |
 | R23 | KL-to-Bernstein transport and variance transport under a KL constraint | target | ReinforcementLearning 19.2 | proved | `ForLMLExplore/InformationTheory/KLBernstein.lean`, `ForLMLExplore/Probability/Moments/VarianceTransport.lean` |
 | R24 | Square roots, logarithms against powers and the self-bounding inequality | target | ReinforcementLearning 19.2 | proved | `ForLMLExplore/Analysis/Real/Sqrt.lean`, `ForLMLExplore/Analysis/SpecialFunctions/Pow/Real.lean`, `ForLMLExplore/Analysis/SpecialFunctions/Log/SelfBounding.lean` |
 | R25 | Logarithmic sum bound | target | ReinforcementLearning 19.2 | proved | `ForLMLExplore/Analysis/SpecialFunctions/Log/Basic.lean` |
@@ -41,36 +41,40 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
 
 ## Notes
 
-- R1: LMLExplore's `MDP`, `MDP.env`, `MDP.policyAlg`, `MDP.policyMeasure`, `MDP.stateLaw` and
-  `MDP.meanReward` have the same full names as the local copy, so the two cannot be imported
-  together. The local `MDP.env` requires `[IsProbabilityMeasure μ₀]` and builds its observation
-  kernel `envObs` by `Nat.rec`; LMLExplore's agrees with it on probability measures
-  (`obsZero_env`, `env_obs_add_one`, `env_feedback`). The closure of the three headline statements
-  contains `MDP.env` (through `statesEnv` and `stepLaw`): the bump regenerates the challenges.
-- R2: the same structure field for field (LMLExplore adds `@[ext]`), with the same full names.
-  `meanReward` agrees definitionally, the transition kernel of `augmented` only propositionally
-  (`augmented_P_apply`). Keep `augmented_P`, `augmented_R`, `transVec` and `measurable_rewardFn`,
-  re-proved on LMLExplore's.
-- R3: LMLExplore's `MDP.stateMarginal` and `EpisodicMDP.occupancy` are more general (stochastic
-  Markov policies, any initial law); the local `stateLawAt`, `occupancyMeasure` and `occupancy` are
-  the case of a deterministic policy and a Dirac initial law. Keep the finite pointwise forms
-  (`occupancy_eq`, `occupancy_succ`, `sum_occupancy`) and the `stepLaw` forms, re-proved on
-  LMLExplore's.
-- R4: a direct prerequisite of R5, R6, R11 and R19, ported with the first of them. Drop the
-  duplicates: `hasCondDistrib_snd_compProd_comap` (same full name as LMLExplore's),
-  `hasCondDistrib_snd_compProd` (its case `f = id`), `HasCondDistrib.comp_of_hasLaw` (LML's
-  `HasCondDistrib.comp_hasLaw`), `HasCondDistrib.lintegral_prodMk` (LMLExplore's
-  `HasCondDistrib.lintegral_comp_prodMk_eq_lintegral_lintegral`) and
-  `Measure.restrict_compProd_prod_univ` (Tau Ceti's `Measure.compProd_restrict_left`); merge
-  `HasCondDistrib.compProd_left` into `HasCondDistrib.compProd_left_of_sectR`. New:
-  `HasCondDistrib.integral_prodMk`, `hasCondDistrib_of_lintegral_eq`, `restrict_preimage`,
+- R1: the project uses LMLExplore's `MDP`, `MDP.env`, `MDP.policyAlg`, `MDP.policyMeasure`,
+  `MDP.stateLaw` and `MDP.meanReward`; the local copy is deleted (2026-11-12). LMLExplore's
+  `MDP.env` needs `[Nonempty 𝓢]`, which the headline statements do not assume: `stepLaw` takes the
+  instance from its initial state through the named lemma `nonempty_augState`, so that its
+  definition has no nested proof. The closure of the three headline statements imports these
+  definitions instead of copying them.
+- R2: the project uses LMLExplore's `EpisodicMDP`, `ofDet`, `meanReward`, `RewardsIn`,
+  `HasRewardFn` (with `HasRewardFn.rewardsIn`) and `augmented` (with `augmented_P_apply`,
+  `augmented_R_apply`); the local copies are deleted (2026-11-12). Their bodies are not exposed:
+  the proofs go through `rewardsIn_def`, `hasRewardFn_def`, `meanReward_def` and `ofDet_trans`.
+  `transVec` and `measurable_rewardFn` remain in `Episodic/Basic.lean`.
+- R3: the local `occupancyMeasure M π s₁ h`, the law of the state-action pair at the step `h`
+  under `stepLaw`, is LMLExplore's `M.occupancy (detPolicy hπ) (Measure.dirac s₁) h` for the
+  deterministic kernels of `π` (`occupancyMeasure_eq_occupancy`, through
+  `isAlgEnvSeq_markov_stepLaw` and `EpisodicMDP.hasLaw_obs_fst_action_markov`). The local state
+  laws and their forward recursion are gone in favour of LMLExplore's `stateMarginal` and
+  `EpisodicMDP.stateMarginal_trans_add_one`; the finite pointwise forms (`occupancy_eq`,
+  `occupancy_succ`, `sum_occupancy`) and the `stepLaw` forms remain, re-proved on LMLExplore's.
+- R4: a direct prerequisite of R5, R6, R11 and R19, ported with the first of them. The
+  duplicates are deleted (2026-11-12): LMLExplore's `hasCondDistrib_snd_compProd_comap` (also for
+  `f = id`) and `HasCondDistrib.lintegral_comp_prodMk_eq_lintegral_lintegral`, LML's
+  `HasCondDistrib.comp_hasLaw`, Tau Ceti's `Measure.compProd_restrict_left`, and
+  `HasCondDistrib.compProd_left` is `HasCondDistrib.compProd_left_of_sectR` with
+  `Kernel.sectR_prodMkLeft`. New: `HasCondDistrib.integral_prodMk`,
+  `hasCondDistrib_of_lintegral_eq`, `HasCondDistrib.compProd_left_of_sectR`, `restrict_preimage`,
   `of_comp_hasLaw`, and `condExp_comap_ae_eq_integral` without a standard Borel space.
 - R5: Layer 7.2 asks for stochastic Markov policies (`Algorithm.markov`) and for the law of the
   state process as Tau Ceti's `markovChainLaw`, whose shift Markov property Tau Ceti has
   (`condExp_shift_iterate_markovChainLaw`). The port states the Markov property of runs for
   `Algorithm.markov`, on LMLExplore's `MDP.env` (R1), and gets the deterministic case through
-  LMLExplore's `policyAlg_eq_markov`. `Kernel.traj_congr` is `congrArg`; `measurable_finCons` and
-  `measurable_finSnoc` follow from Mathlib's `MeasurableEquiv.piFinSuccAbove`.
+  LMLExplore's `policyAlg_eq_markov`. The local file is on LMLExplore's `MDP.env` since
+  2026-11-12; `Kernel.traj_congr` is gone (`congr`), and `measurable_finCons` and
+  `measurable_finSnoc` are proved from Mathlib's `MeasurableEquiv.piFinSuccAbove` and LML's
+  `MeasurableEquiv.finSuccProd`.
 - R6: Layer 7.6 takes the `H`-step policies `Policy 𝓢 𝓐 H = Fin H → 𝓢 → 𝓐` and `Policy.extend`
   from here, with measurability as a separate hypothesis. LMLExplore has the Markov-policy side
   (`augMarkovPolicy`, `EpisodicMDP.value`, `runReturn_augmented_markov`, the one-step laws
@@ -117,56 +121,68 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
   (`LMLExplore.measure_exists_mul_sum_condExp_sq_add_log_div_le_sum_le`) gives only
   `- 2 log(1/δ)`. Port it on LMLExplore's Ville inequality (R13) and
   `LMLExplore.supermartingale_exp_sum_of_condExp_exp_le_one`.
-- R13: LMLExplore's needs only almost-everywhere nonnegativity. The local
-  `Supermartingale.measure_exists_ge_le`, `Supermartingale.mul_measureReal_exists_le_le` and
-  `condExp_exp_sub_le_one` go at the bump.
-- R14: the same definition. The namespace differs (`MeasureTheory` here), and LMLExplore's
-  `isProbabilityMeasure_weightedMeasure` takes `p ∈ simplex ι`.
-- R15: LMLExplore's `klBer p q` is the divergence of the Bernoulli laws on `{1, 0}` at the
-  parameters clipped to `[0, 1]`: it agrees with the local one on `[0, 1]²`, not definitionally.
-  Pinsker for an event is Tau Ceti's `TauCeti.two_mul_sq_measureReal_sub_le_klDiv`, data
-  processing LMLExplore's `klBer_measureReal_le_klDiv`. Keep, re-proved on LMLExplore's:
-  `sub_log_two_le_klBerReal`, `mul_log_sub_log_two_le_klBerReal`, `exp_neg_le_of_klBer_le`,
-  `klBerReal_zero_left`, `abs_sub_le_sqrt_klDiv`, and the `lintegral`, `withDensity` and `rnDeriv`
-  forms of `bernoulliMeasure` (used by `EV2026/HardParams.lean` and `EV2026/HardMDP.lean`).
-  `ProbabilityTheory.bernoulliMeasure_absolutelyContinuous` and its `_iff` have the same full names
-  as LMLExplore's.
+- R13: the project uses LMLExplore's Ville inequality
+  (`MeasureTheory.Supermartingale.measure_exists_le_le`, which needs only almost-everywhere
+  nonnegativity) and its finite-horizon form `Supermartingale.maximal_ineq`; the local copies are
+  deleted (2026-11-12). `Ville.lean` holds only R12; `condExp_exp_sub_le_one` stays there, since
+  LMLExplore's conditional Bennett bound does not give `e^{-P/2}`.
+- R14: the project uses LMLExplore's `weightedMeasure` and its API; the local copy is deleted
+  (2026-11-12). LMLExplore's `isProbabilityMeasure_weightedMeasure` takes `p ∈ simplex ι`.
+- R15: the project uses LMLExplore's `klBer` (the divergence of the Bernoulli laws at the
+  parameters clipped to `[0, 1]`, which is the binary divergence on `[0, 1]²`, where every use
+  lies), `klBerReal` and their API, LMLExplore's `klBer_measureReal_le_klDiv`, Tau Ceti's
+  `TauCeti.two_mul_sq_measureReal_sub_le_klDiv` and Mathlib's
+  `hasLaw_indicator_one_bernoulliMeasure`; `KLBer.lean` and `Pinsker.lean` are deleted
+  (2026-11-12). What LMLExplore lacks is in `InformationTheory/KullbackLeibler/Bernoulli.lean`
+  (LMLExplore's path), re-proved on LMLExplore's definitions: `sub_log_two_le_klBerReal`,
+  `mul_log_sub_log_two_le_klBerReal`, `exp_neg_le_of_klBer_le` (namespace `LMLExplore`) and
+  `abs_sub_le_sqrt_klDiv`; and in `Probability/Distributions/Bernoulli.lean`: the `lintegral`,
+  `withDensity` and `rnDeriv` forms of `bernoulliMeasure` and `ae_bernoulliMeasure` (used by
+  `EV2026/HardParams.lean` and `EV2026/HardMDP.lean`).
 - R16: LMLExplore's `klDiv_bernoulliMeasure` is stated for the Bernoulli laws on `{1, 0} ⊆ ℝ`; the
   local `InformationTheory.klDiv_bernoulliMeasure` holds for `Ber(x, y, ·)` with `x ≠ y` in any
   measurable space with measurable singletons, and `EV2026/HardMDP.lean` uses it for the good and
   bad absorbing states. The refactor restates LMLExplore's lemma in that generality and updates
-  its uses (the current statement is the case `x = 1`, `y = 0`).
-- R17: identical definitions (`runMeasure`, `isRun_runMeasure`, `snd_runMeasure`).
-  `Learning.IsAlgEnvSeq.comp_hasLaw` and `Learning.IdentAlg.IsRun.comp_hasLaw` have the same full
-  names as LMLExplore's; `measurable_stoppedHist_traj` is a case of
-  `Learning.IdentAlg.measurable_stoppedHist`.
-- R18: LMLExplore's assumes, like the local one, almost-sure stopping under the first model only,
-  and rests on a `klDiv` bound (`Learning.klDiv_stoppedHistMeasure_le`), so the local truncation
-  (`truncSet` and the time-`M` lemmas) is not needed; runs reach it through
-  `Learning.IdentAlg.IsRun.hasLaw_stoppedHist_output`. `EV2026/LowerBound.lean` uses
-  `IsRun.klBer_measureReal_outputMeasure_le_sum_pullCount`, to restate on top of it.
-  `Learning.IdentAlg.stoppedHist_mem_stopSet_iff` and `Learning.IdentAlg.fst_stoppedHist` have the
-  same full names as LMLExplore's. The two-sided equality
-  `IsRun.klDiv_map_stoppedHist_out_eq_sum_pullCount` belongs to R19.
+  its uses (the current statement is the case `x = 1`, `y = 0`). The local lemma now reads
+  `klDiv Ber(x, y, p) Ber(x, y, q) = LMLExplore.klBer p q`, proved by data processing both ways
+  from LMLExplore's.
+- R17: the project uses LMLExplore's `Identification.runMeasure`, `isRun_runMeasure`,
+  `snd_runMeasure`, `IsAlgEnvSeq.comp_hasLaw`, `IdentAlg.IsRun.comp_hasLaw` and
+  `IdentAlg.measurable_stoppedHist`; the local file is deleted (2026-11-12).
+- R18: the local truncation (`truncSet` and the time-`M` lemmas) is deleted (2026-11-12):
+  `IsRun.klBer_measureReal_le_sum_pullCount` is re-proved from LMLExplore's
+  `Identification.klBer_measureReal_histOutputMeasure_le` (almost-sure stopping under the first
+  model only, through `Learning.klDiv_stoppedHistMeasure_le`) and
+  `Learning.IdentAlg.IsRun.hasLaw_stoppedHist_output`, and `stoppedHist_mem_stopSet_iff`,
+  `fst_stoppedHist` are LMLExplore's. The run-level forms that `EV2026/LowerBound.lean` uses
+  remain (`IsRun.klBer_measureReal_outputMeasure_le_sum_pullCount`,
+  `IsRun.klDiv_bernoulliMeasure_le_sum_pullCount`,
+  `IsRun.klBerReal_measureReal_le_toReal_sum_pullCount`): LMLExplore states the measure-level
+  forms only. The two-sided equality `IsRun.klDiv_map_stoppedHist_out_eq_sum_pullCount` belongs
+  to R19.
 - R19: Identification 2.1 asks for the equality case, when τ is almost surely finite under both
   pairs, which the Generalization roadmap leaves to it; LMLExplore has the inequalities for any two
   pairs (`Learning.klDiv_stoppedHistMeasure_le_tsum`, `Learning.klDiv_stoppedHistMeasure_le_lintegral`),
   stated with `stoppedHistMeasure` and `notStoppedSet`, which the port follows. The local chain
   rule along the prefix filtration of any process (`klDiv_map_stoppedValue_sigmaPrefix_compProd`,
   with bounded-time forms) proves it, and the regrouping by action counts gives the bandit
-  equality. Drop: the abbreviations `hittingValue` and `hittingProcess` (they unfold to LML's
-  `IdentAlg.stoppedHist`); `natCast_pullCount_toNat_le` and
-  `Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount` (same full names as LMLExplore's);
-  `sum_klDiv_eq_sum_pullCount` (LML's `Learning.sum_pullCount_mul`);
-  `lintegral_sum_klDiv_eq_sum_pullCount` (LMLExplore's `sum_lintegral_pullCount_mul`);
-  `tsum_ite_lt_eq_sum_range_toNat` (LMLExplore's `tsum_indicator_natCast_lt_eq_sum_range`).
-  Compare `piFinSuccProd` with LML's `MeasurableEquiv.finSuccProd` and Mathlib's
-  `MeasurableEquiv.piFinSuccAbove`.
+  equality. The drops are done (2026-11-12): `hittingValue`, `hittingProcess` and
+  `HittingTime.lean` are gone in favour of Mathlib's `stoppedValue`/`stoppedProcess` at
+  `hittingAfter` (the lemmas are renamed `…stoppedValue…`/`…stoppedProcess…`, with the suffix
+  `_hittingAfter` in `KLStoppedPrefix.lean`), and the project uses LMLExplore's
+  `natCast_pullCount_toNat_le`, `IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount`,
+  `sum_lintegral_pullCount_mul` and `tsum_indicator_natCast_lt_eq_sum_range` and LML's
+  `Learning.sum_pullCount_mul`. `piFinSuccProd` stays: for a family `X : ℕ → Type*`, Mathlib's
+  `MeasurableEquiv.piFinSuccAbove` at `Fin.last n` has the factor
+  `Π j, X ((Fin.last n).succAbove j)`, equal to `Π j : Fin n, X j` only propositionally, and LML's
+  `MeasurableEquiv.finSuccProd` is for one space.
 - R20: Layer 3.4 states `(n+1)^m e^{-nε}`; the local `measure_lt_klDiv_empiricalFreq_le` has
   `(n+1)^{m-1}` (`notes/paper-errata.md` E22). `toReal_klDiv_eq_sum` is close to Tau Ceti's
-  `TauCeti.klDiv_eq_ofReal_sum_log_singleton` (which assumes full support), and
-  `rnDeriv_apply_eq_div` is Tau Ceti's `Measure.rnDeriv_eq_measure_singleton_div`.
-  `measure_typeCount_eq` duplicates `iIndepFun.measure_prefix_mem_eq_pi` (R26): merge them.
+  `TauCeti.klDiv_eq_ofReal_sum_log_singleton` (which assumes full support; the local one needs
+  only absolute continuity) and is proved from Tau Ceti's
+  `Measure.rnDeriv_eq_measure_singleton_div`; `rnDeriv_apply_eq_div`, `measure_typeCount_eq` and
+  `iIndepFun.measure_prefix_mem_eq_pi` are deleted (2026-11-12) in favour of it and of Mathlib's
+  `iIndepFun.hasLaw_pi`.
 - R21: Layer 3.4 asks for the martingale property of the likelihood ratio of every predictable
   predictor and, for Laplace's predictor, the threshold `log(1/δ) + (m-1) log(e(1 + n/(m-1)))` of
   [JKMDLV20, Proposition 1]. The local threshold `log(1/δ) + (m-1) log(n+1) + 1 + log(n)/2` is
@@ -174,22 +190,23 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
   keep this one. `Stirling.factorial_le_exp_one_mul_sqrt_mul_div_pow`,
   `Nat.ascFactorial_le_factorial_mul_add_one_pow` and
   `Measure.absolutelyContinuous_of_forall_singleton` are Mathlib-shaped helpers.
-- R22: the local `InformationTheory.ofReal_integral_sub_log_integral_exp_le_klDiv` is Tau Ceti's,
-  with the same hypotheses; `log_integral_exp_mul_sub_le` follows from LMLExplore's
-  `MeasureTheory.MemLp.mgf_le_exp_mul_exp_sub_one_sub_of_ae_le`.
+- R22: the project uses Tau Ceti's `TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv`;
+  the local copy is deleted (2026-11-12), and `log_integral_exp_mul_sub_le` is proved from
+  LMLExplore's `MeasureTheory.MemLp.mgf_le_exp_mul_exp_sub_one_sub_of_ae_le`.
 - R23: Layer 19.2 asks for the KL-to-Bernstein transport `|pf - qf| ≤ √(2 Var_q(f) α) + (2/3) b α`
   for `f ∈ [0, b]`, which is `abs_integral_sub_integral_le_of_klDiv_le` on any measurable space,
   and for the variance transfers [MDJKLV21, Lemmas 10–12], toward which go
   `variance_le_two_mul_variance_add_of_klDiv_le`, `variance_le_two_mul_variance_add` and
   `variance_le_variance_add_sum_abs_sub` (with the sharper constants of `notes/paper-errata.md`
-  E24); check them against the source. `integrable_of_ae_mem_Icc` is Mathlib's
-  `Integrable.of_mem_Icc`, and `variance_le_mul_integral` follows from Mathlib's
+  E24); check them against the source. `integrable_of_ae_mem_Icc` and `integrable_of_ae_abs_le`
+  are deleted (2026-11-12) in favour of Mathlib's `Integrable.of_mem_Icc` and
+  `Integrable.of_bound`, and `variance_le_mul_integral` is proved from Mathlib's
   `variance_le_sub_mul_sub`.
 - R24: Layer 19.2 asks for the inversion of the implicit inequality on τ [MDJKLV21, Lemma 13]:
   `Real.le_of_le_sqrt_mul_add`, with the constant corrected (`notes/paper-errata.md` E8: the factor
   `C + D` of `C₁` is squared) and without the hypotheses `A, B, C, D > 0` and `B ≥ 1`. Check the
-  constant `C₁` of Layer 19.2 against it. `Real.sqrt_add_le` follows from Tau Ceti's
-  `Real.sqrt_le_sqrt_add_sqrt_abs_sub`; the weighted AM–GM inequalities and
+  constant `C₁` of Layer 19.2 against it. `Real.sqrt_add_le` is deleted (2026-11-12) in favour
+  of Tau Ceti's `Real.sqrt_le_sqrt_add_sqrt_abs_sub`; the weighted AM–GM inequalities and
   `Real.le_add_sqrt_of_sq_le` are new, for LMLExplore's `Analysis/Real/Sqrt.lean`.
 - R25: Layer 19.2 asks for `∑_t u_{t+1}/max(1, U_t) ≤ 4 log(U_{T+1} + 1)` [MDJKLV21, Lemma 9]:
   `Real.sum_div_max_one_le_four_mul_log`, from the constant `3` of
@@ -198,10 +215,14 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d
 - R26: the one-step bound and the exponential supermartingale are LMLExplore's
   `condExp_exp_mul_sub_mul_condExp_sq_le_one` and
   `supermartingale_exp_mul_sum_sub_mul_sum_condExp_sq` (Freedman, one-sided, more general), and
-  the mixture step is `LMLExplore.supermartingale_integral`: the port keeps the mixture bound, its
-  explicit forms and the i.i.d. corollary, on top of them. `exp u - 1 - u` has its API inline in
-  LMLExplore's `Analysis/SpecialFunctions/Exp.lean` (`Real.exp_mul_le_one_add_mul_add_mul_sq` is
-  more general than `exp_mul_le_of_abs_le`); `x²/(2(1 + x/3)) ≤ h(x)`, the Padé bound
+  the mixture step is `LMLExplore.supermartingale_integral`: the local proof rests on them since
+  2026-11-12 (`condExp_exp_mul_sub_le_one` and `setLIntegral_selfNorm_mixture_le` are deleted, the
+  mixture is a Bochner integral, `selfNormMixture_eq_integral`), and the port keeps the mixture
+  bound, its explicit forms and the i.i.d. corollary. `exp u - 1 - u` has its API inline in
+  LMLExplore's `Analysis/SpecialFunctions/Exp.lean`: `Real.exp_mul_le_of_abs_le`,
+  `Real.expSubOneSub_mul_le` and `Real.expSubOneSub_eq_tsum` are deleted in favour of
+  `Real.exp_mul_le_one_add_mul_add_mul_sq` and `Real.hasSum_pow_add_two_div_factorial`, and the
+  local `Real.expSubOneSub` remains in statements; `x²/(2(1 + x/3)) ≤ h(x)`, the Padé bound
   `div_le_log_one_add` and the inversion `le_sqrt_add_of_mul_poissonCramer_le` are new.
   `Filtration.naturalPast` is built inline in LMLExplore's `Probability/Martingale/RateFunction.lean`
   and `Probability/Martingale/SubGaussian.lean`. Constants: `notes/paper-errata.md` E23.

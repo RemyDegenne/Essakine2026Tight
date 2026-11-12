@@ -21,11 +21,12 @@ is measurable at time `n + 1` (`MeasureTheory.Filtration.measurable_naturalPast_
 For an independent sequence, `ξ n` is independent of its strict past
 (`ProbabilityTheory.iIndepFun.indep_comap_naturalPast`), hence the conditional expectation of a
 function of `ξ n` given the strict past is its expectation
-(`ProbabilityTheory.iIndepFun.condExp_naturalPast_ae_eq`): the centered variables form martingale
-differences for this filtration.
+(`ProbabilityTheory.iIndepFun.condExp_naturalPast_ae_eq`, from Mathlib's
+`MeasureTheory.condExp_indep_eq`): the centered variables form martingale differences for this
+filtration.
 
-For an i.i.d. sequence of law `ν` with values in a countable type, the prefix
-`(ξ 0, …, ξ (n - 1))` has law `ν^{⊗ n}` (`ProbabilityTheory.iIndepFun.measure_prefix_mem_eq_pi`).
+LMLExplore builds this filtration inline, for instance in
+`LMLExplore/Probability/Martingale/RateFunction.lean`.
 -/
 
 @[expose] public section
@@ -74,18 +75,5 @@ lemma iIndepFun.condExp_naturalPast_ae_eq [IsFiniteMeasure μ] (hξ : ∀ i, Mea
     μ[fun ω ↦ f (ξ i ω) | Filtration.naturalPast ξ hξ i] =ᵐ[μ] fun _ ↦ μ[fun ω ↦ f (ξ i ω)] :=
   condExp_indep_eq (hξ i).comap_le ((Filtration.naturalPast ξ hξ).le i)
     (hf.comp (comap_measurable (ξ i))).stronglyMeasurable (hind.indep_comap_naturalPast hξ i)
-
-/-- For an i.i.d. sequence `ξ` of law `ν`, the prefix `(ξ 0, …, ξ (n - 1))` has law `ν^{⊗ n}`. -/
-lemma iIndepFun.measure_prefix_mem_eq_pi [Countable β] [MeasurableSingletonClass β]
-    {ν : Measure β} (hind : iIndepFun ξ μ) (hlaw : ∀ k, HasLaw (ξ k) ν μ) (n : ℕ)
-    (C : Set (Fin n → β)) :
-    μ {ω | (fun k : Fin n ↦ ξ k ω) ∈ C} = Measure.pi (fun _ : Fin n ↦ ν) C := by
-  have hind' : iIndepFun (fun k : Fin n ↦ ξ k) μ := hind.precomp Fin.val_injective
-  have hmap : μ.map (fun ω (k : Fin n) ↦ ξ k ω) = Measure.pi (fun _ : Fin n ↦ ν) := by
-    rw [hind'.map_fun_eq_pi_map (fun k : Fin n ↦ (hlaw k).aemeasurable)]
-    simp_rw [(hlaw _).map_eq]
-  rw [← hmap, Measure.map_apply₀ (AEMeasurable.of_eval fun k : Fin n ↦ (hlaw k).aemeasurable)
-    (Set.to_countable C).measurableSet.nullMeasurableSet]
-  rfl
 
 end ProbabilityTheory

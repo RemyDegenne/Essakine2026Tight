@@ -1,17 +1,21 @@
 module
 
-public import LeanMachineLearning.SequentialLearning.IonescuTulceaSpace
-public import LeanMachineLearning.SequentialLearning.Deterministic
 public import Mathlib.Probability.Kernel.Basic
 public import Mathlib.MeasureTheory.Measure.Real
+public import LMLExplore.MarkovDecisionProcess.Episodic.Basic
 public import LeanMachineLearning.SequentialLearning.StationaryEnv
 public import LeanMachineLearning.SequentialLearning.IdentificationAlg
+public import LMLExplore.MarkovDecisionProcess.Basic
+public import LMLExplore.Probability.HasCondDistrib
 public import Mathlib.Probability.HasCondDistrib
+public import Mathlib.Probability.Kernel.Composition.IntegralCompProd
 public import Mathlib.Probability.Kernel.Composition.Lemmas
 public import Mathlib.MeasureTheory.Function.EssSup
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
+public import LeanMachineLearning.SequentialLearning.Deterministic
 public import LeanMachineLearning.ForMathlib.MeasureTheory.MeasurableSpace.Sigma
+public import LMLExplore.Identification.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.Complex.ExponentialBounds
 public import Mathlib.Analysis.Real.Sqrt
@@ -19,44 +23,48 @@ public import Mathlib.Basic.Real.ENatENNReal
 public import Mathlib.Algebra.Order.Floor.Semiring
 public import Mathlib.Basic.ENNReal.Real
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.MeasureTheory.Function.L2Space
 public import Mathlib.Analysis.SpecialFunctions.Exp
 public import Mathlib.MeasureTheory.Integral.Prod
-public import Mathlib.Probability.Kernel.Composition.IntegralCompProd
+public import LMLExplore.MarkovDecisionProcess.Episodic.Occupancy
+public import TauCeti.Probability.Kernel.Composition.MeasureCompProd
+public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.Probability.Moments.Variance
 public import Mathlib.Algebra.Order.Field.Basic
 public import Mathlib.Tactic.FieldSimp
 public import Mathlib.Tactic.Linarith
 public import Mathlib.Tactic.Positivity
 public import Mathlib.Tactic.Ring
+public import LMLExplore.MeasureTheory.Measure.Weighted
 public import Mathlib.InformationTheory.KullbackLeibler.Basic
-public import Mathlib.MeasureTheory.Measure.GiryMonad
-public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.Data.Nat.Log
-public import Mathlib.MeasureTheory.Measure.Tilted
+public import LMLExplore.Probability.Moments.Bernstein
+public import TauCeti.InformationTheory.KullbackLeibler.Variational
 public import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Analysis.SpecialFunctions.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Algebra.BigOperators.Intervals
 public import Mathlib.Probability.HasLawExists
 public import Mathlib.Probability.HasLaw
+public import LMLExplore.Probability.Martingale.Freedman
+public import LMLExplore.Probability.Martingale.Mixture
+public import TauCeti.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.Probability.Martingale.OptionalStopping
-public import Mathlib.Probability.Process.HittingTime
-public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Probability.ConditionalExpectation
 public import Mathlib.Probability.Process.Filtration
 public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import Mathlib.Probability.Independence.InfinitePi
 public import Mathlib.Probability.Independence.Integration
+public import LMLExplore.Probability.Martingale.Ville
 public import Mathlib.Algebra.Order.Antidiag.FinsuppEquiv
 public import Mathlib.Data.Nat.Choose.Bounds
 public import Mathlib.Probability.Independence.Basic
+public import TauCeti.MeasureTheory.Measure.Decomposition.Lebesgue
 public import Mathlib.MeasureTheory.Measure.NullMeasurable
 public import Mathlib.MeasureTheory.MeasurableSpace.Pi
+public import LMLExplore.Probability.Martingale.Basic
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
 public import LeanMachineLearning.SequentialLearning.FiniteActions
 
@@ -75,93 +83,16 @@ namespace MeasureTheory
 end MeasureTheory
 namespace ProbabilityTheory
 end ProbabilityTheory
-namespace Learning
-end Learning
 namespace Learning.MDP
 end Learning.MDP
+namespace Learning
+end Learning
 namespace Learning.MDP.Episodic
 end Learning.MDP.Episodic
-namespace Learning.MDP.Episodic.EpisodicMDP
-end Learning.MDP.Episodic.EpisodicMDP
 namespace Learning.MDP.EmpiricalModel
 end Learning.MDP.EmpiricalModel
 namespace Essakine2026Tight
 end Essakine2026Tight
-
--- ═══ Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Basic ═══
-@[expose] public section
-open MeasureTheory ProbabilityTheory Learning
-
-/-- Markov decision process with state space `𝓢`, action space `𝓐`, and reward space `𝓡`, described
-by a transition kernel `P : Kernel (𝓢 × 𝓐) 𝓢` and a reward kernel `R : Kernel (𝓢 × 𝓐) 𝓡`.
-See `MDP.env` for the environment associated with the MDP. -/
-structure MDP (𝓢 𝓐 𝓡 : Type*) [MeasurableSpace 𝓢] [MeasurableSpace 𝓐] [MeasurableSpace 𝓡] where
-  /-- The transition kernel: the law of the next state given the current state and action. -/
-  P : Kernel (𝓢 × 𝓐) 𝓢
-  /-- The transition kernel is a Markov kernel. -/
-  [hP : IsMarkovKernel P]
-  /-- The reward kernel: the law of the reward given the current state and action. -/
-  R : Kernel (𝓢 × 𝓐) 𝓡
-  /-- The reward kernel is a Markov kernel. -/
-  [hR : IsMarkovKernel R]
-
-namespace Learning.MDP
-variable {𝓢 𝓐 𝓡 : Type*} {m𝓢 : MeasurableSpace 𝓢} {m𝓐 : MeasurableSpace 𝓐} {m𝓡 : MeasurableSpace 𝓡}
-
-instance instIsMarkovKernelProdR (M : MDP 𝓢 𝓐 𝓡) : IsMarkovKernel M.R := M.hR
-
-/-- The state and the action of the last round of a history of `n + 1` rounds. -/
-def lastObsAction (n : ℕ) (h : Hist 𝓢 𝓐 𝓡 (n + 1)) : 𝓢 × 𝓐 :=
-  ((h (Fin.last n)).obs, (h (Fin.last n)).action)
-
-lemma measurable_lastObsAction (n : ℕ) :
-    Measurable (lastObsAction (𝓢 := 𝓢) (𝓐 := 𝓐) (𝓡 := 𝓡) n) := sorry
-
-/-- The current state and the action of a round, from the history, the observation and the
-action. -/
-def obsAction (n : ℕ) (p : (Hist 𝓢 𝓐 𝓡 n × 𝓢) × 𝓐) : 𝓢 × 𝓐 := (p.1.2, p.2)
-
-lemma measurable_obsAction (n : ℕ) : Measurable (obsAction (𝓢 := 𝓢) (𝓐 := 𝓐) (𝓡 := 𝓡) n) := sorry
-
-/-- The observation kernel of the environment of `M` with initial state distribution `μ₀`: the
-initial state is drawn from `μ₀`, and the state of round `n + 1` from `M.P` applied to the state
-and action of round `n`. -/
-noncomputable def envObs (M : MDP 𝓢 𝓐 𝓡) (μ₀ : Measure 𝓢) (n : ℕ) : Kernel (Hist 𝓢 𝓐 𝓡 n) 𝓢 :=
-  Nat.rec (motive := fun n ↦ Kernel (Hist 𝓢 𝓐 𝓡 n) 𝓢) (Kernel.const _ μ₀)
-    (fun n _ ↦ M.P.comap (lastObsAction n) (measurable_lastObsAction n)) n
-
-lemma isMarkovKernel_envObs (M : MDP 𝓢 𝓐 𝓡) (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] (n : ℕ) :
-    IsMarkovKernel (envObs M μ₀ n) := sorry
-
-instance instIsMarkovKernelHistEnvObsOfIsProbabilityMeasure (M : MDP 𝓢 𝓐 𝓡) (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] (n : ℕ) :
-    IsMarkovKernel (envObs M μ₀ n) :=
-  isMarkovKernel_envObs M μ₀ n
-
-/-- The environment of the MDP `M` with initial state distribution `μ₀`: the observation of a
-round is the current state (drawn from `μ₀` at the first round, then from `M.P (s, a)` for the
-state `s` and action `a` of the previous round), and the feedback is the reward, drawn from
-`M.R (s, a)`. -/
-protected noncomputable def env (M : MDP 𝓢 𝓐 𝓡) (μ₀ : Measure 𝓢) [IsProbabilityMeasure μ₀] :
-    Environment 𝓢 𝓐 𝓡 where
-  obs := envObs M μ₀
-  feedback n := M.R.comap (obsAction n) (measurable_obsAction n)
-
-lemma measurable_policyAlg_next {π : 𝓢 → 𝓐} (hπ : Measurable π) (n : ℕ) :
-    Measurable fun p : Hist 𝓢 𝓐 𝓡 n × 𝓢 ↦ π p.2 := sorry
-
-/-- The stationary deterministic policy `π` as an algorithm: it plays `π s` in the current
-state `s`. -/
-noncomputable def policyAlg (π : 𝓢 → 𝓐) (hπ : Measurable π) : Algorithm 𝓢 𝓐 𝓡 :=
-  Algorithm.deterministic (fun _ p ↦ π p.2) (measurable_policyAlg_next hπ)
-
-/-- The law of the trajectory of the policy `π` started at the state `s`: `E^π_s`. -/
-noncomputable def policyMeasure (M : MDP 𝓢 𝓐 𝓡) (π : 𝓢 → 𝓐) (hπ : Measurable π) (s : 𝓢) :
-    Measure (ℕ → Round 𝓢 𝓐 𝓡) :=
-  trajMeasure (policyAlg π hπ) (M.env (Measure.dirac s))
-
-variable [NormedAddCommGroup 𝓡] [NormedSpace ℝ 𝓡]
-end Learning.MDP
-end
 
 -- ═══ Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Vec ═══
 @[expose] public section
@@ -185,18 +116,6 @@ end
 open MeasureTheory ProbabilityTheory Finset Learning Learning.MDP
 namespace Learning.MDP.Episodic
 variable {S A : Type*} [MeasurableSpace S] [MeasurableSpace A]
-
-/-- A finite-horizon MDP: the transition kernels `trans h : Kernel (S × A) S` and the reward
-kernels `reward h : Kernel (S × A) ℝ` at each step `h : ℕ`. -/
-structure EpisodicMDP (S A : Type*) [MeasurableSpace S] [MeasurableSpace A] where
-  /-- The transition kernel at step `h`: the law of the next state. -/
-  trans : ℕ → Kernel (S × A) S
-  /-- The transition kernels are Markov kernels. -/
-  [isMarkovKernel_trans : ∀ h, IsMarkovKernel (trans h)]
-  /-- The reward kernel at step `h`: the law of the reward. -/
-  reward : ℕ → Kernel (S × A) ℝ
-  /-- The reward kernels are Markov kernels. -/
-  [isMarkovKernel_reward : ∀ h, IsMarkovKernel (reward h)]
 
 omit [MeasurableSpace S] [MeasurableSpace A] in
 /-- The stationary policy of the time-augmented state space `S × ℕ` associated with the policy
@@ -222,49 +141,12 @@ noncomputable def Policy.extend (π : Policy S A H) (h : ℕ) (s : S) : A :=
   if hh : h < H then π ⟨h, hh⟩ s else Classical.arbitrary A
 
 end Extend
-namespace EpisodicMDP
-variable (M : EpisodicMDP S A)
 
-/-- The rewards of `M` are the deterministic reward function `r`: the reward of `(s, a)` at step
-`h` is `r h s a` almost surely. -/
-def HasRewardFn (r : ℕ → S → A → ℝ) : Prop := ∀ h s a, M.reward h (s, a) = Measure.dirac (r h s a)
-
-/-- The transition function of the time-augmented MDP: from `(s, h)` with action `a`, the next
-augmented state is `(s', h + 1)` with `s' ∼ M.trans h (s, a)`. -/
-noncomputable def augTransFun (p : (S × ℕ) × A) : Measure (S × ℕ) :=
-  (M.trans p.1.2 (p.1.1, p.2)).map fun s' ↦ (s', p.1.2 + 1)
-
-lemma measurable_augTransFun : Measurable M.augTransFun := sorry
-
-/-- The transition kernel of the time-augmented MDP. -/
-noncomputable def augTrans : Kernel ((S × ℕ) × A) (S × ℕ) :=
-  ⟨M.augTransFun, M.measurable_augTransFun⟩
-
-lemma isProbabilityMeasure_augTrans (p : (S × ℕ) × A) : IsProbabilityMeasure (M.augTrans p) := sorry
-
-instance instIsMarkovKernelProdNatAugTrans : IsMarkovKernel M.augTrans := ⟨M.isProbabilityMeasure_augTrans⟩
-
-/-- The reward function of the time-augmented MDP: `M.reward h (s, a)` at `(s, h)`. -/
-noncomputable def augRewardFun (p : (S × ℕ) × A) : Measure ℝ := M.reward p.1.2 (p.1.1, p.2)
-
-lemma measurable_augRewardFun : Measurable M.augRewardFun := sorry
-
-/-- The reward kernel of the time-augmented MDP. -/
-noncomputable def augReward : Kernel ((S × ℕ) × A) ℝ :=
-  ⟨M.augRewardFun, M.measurable_augRewardFun⟩
-
-lemma isProbabilityMeasure_augReward (p : (S × ℕ) × A) :
-    IsProbabilityMeasure (M.augReward p) := sorry
-
-instance instIsMarkovKernelProdNatRealAugReward : IsMarkovKernel M.augReward := ⟨M.isProbabilityMeasure_augReward⟩
-
-/-- The stationary MDP on the time-augmented state space `S × ℕ` which embeds the finite-horizon
-MDP `M`. -/
-noncomputable def augmented : MDP (S × ℕ) A ℝ where
-  P := M.augTrans
-  R := M.augReward
-
-end EpisodicMDP
+omit [MeasurableSpace S] in
+/-- An augmented state witnesses that the augmented state space is nonempty. The trajectory laws
+below take the instance `Nonempty (S × ℕ)` of the environment of `M.augmented` from this lemma
+rather than from an anonymous constructor, so that they contain no nested proof. -/
+lemma nonempty_augState (p : S × ℕ) : Nonempty (S × ℕ) := sorry
 
 open Classical in
 /-- The law of the trajectory of the time-augmented MDP under the policy `π` started at the
@@ -273,6 +155,7 @@ state `s` at the step `h`. It is `0` if `π` is not measurable at every step. -/
 noncomputable def stepLaw (M : EpisodicMDP S A) (π : ℕ → S → A) (p₀ : S × ℕ) :
     Measure (ℕ → Round (S × ℕ) A ℝ) :=
   if hπ : ∀ k, Measurable (π k) then
+    haveI := nonempty_augState p₀
     M.augmented.policyMeasure (augPolicy π) (measurable_augPolicy hπ) p₀
   else 0
 
@@ -585,10 +468,12 @@ open scoped ENNReal
 namespace Essakine2026Tight
 variable {S A : Type*} [Fintype S] [Fintype A] [DecidableEq S] [DecidableEq A] [Nonempty A] [MeasurableSpace S] [MeasurableSingletonClass S] [MeasurableSpace A] [MeasurableSingletonClass A] {H : ℕ}
 
-/-- **Theorem 4, first part** (Essakine, Vernade 2026; PAC property). For every reward function
-`r` with values in `[0, 1]`, `β ≠ 0`, `δ ∈ (0, 1)` and `ε ∈ (0, 2 / (|β| H S)]`, Entropic-BPI
-with parameters `r, β, δ, ε` and initial state `s₁` is `(ε, δ)`-PAC for entropic best-policy
-identification on the class of MDPs with reward function `r`. -/
+/-- **PAC property of Entropic-BPI** [EV26, Theorem 4], its first conclusion, for Entropic-BPI
+with the corrected bonus, clips, greedy policy and stopping condition (errata E4–E7). For every
+reward function `r` with values in `[0, 1]`, `β ≠ 0`, `δ ∈ (0, 1)` and
+`ε ∈ (0, 2 / (|β| H S)]`, Entropic-BPI with parameters `r, β, δ, ε` and initial state `s₁` is
+`(ε, δ)`-PAC for entropic best-policy identification on the class of MDPs with reward
+function `r`. -/
 theorem isEntropicPAC_entropicBPI (r : ℕ → S → A → ℝ) (hr : ∀ h s a, r h s a ∈ Set.Icc 0 1)
     {β δ ε : ℝ} (hβ : β ≠ 0) (hδ : δ ∈ Set.Ioo 0 1)
     (hε : ε ∈ Set.Ioc 0 (2 / (|β| * H * Fintype.card S))) (s₁ : S) :

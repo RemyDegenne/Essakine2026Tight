@@ -365,7 +365,7 @@ $(\mathcal F_t)$ (since $n_h^t(s, a)$ is $\mathcal F_t$-measurable), $T_k \le T_
 $T_{n_h^t(s, a)} \le t$.
 
 \begin{lemma}[Domination of the observed transitions by an i.i.d.\ sample, time-uniform form]\label{lem:empirical_visits_domination}
-\lean{ProbabilityTheory.iIndepFun.measure_prefix_mem_eq_pi, MeasureTheory.firstEntrance, MeasureTheory.firstEntrance_subset, MeasureTheory.pairwise_disjoint_setOf_mem_firstEntrance, MeasureTheory.exists_mem_firstEntrance, MeasureTheory.measure_exists_mem_le_of_forall_measure_inter_le, Learning.MDP.Episodic.measure_exists_le_pullCount_visitNextState_mem_le, Learning.MDP.Episodic.measure_exists_visitNextState_mem_le}\leanok
+\lean{ProbabilityTheory.iIndepFun.hasLaw_pi, MeasureTheory.firstEntrance, MeasureTheory.firstEntrance_subset, MeasureTheory.pairwise_disjoint_setOf_mem_firstEntrance, MeasureTheory.exists_mem_firstEntrance, MeasureTheory.measure_exists_mem_le_of_forall_measure_inter_le, Learning.MDP.Episodic.measure_exists_le_pullCount_visitNextState_mem_le, Learning.MDP.Episodic.measure_exists_visitNextState_mem_le}\leanok
 \uses{lem:visits_iid, def:counts, def:episode_env}
 Fix $(h, s, a)$ and let $\xi_1, \xi_2, \dots$ be i.i.d.\ with law $p = p_h(\cdot \mid s, a)$ on some
 auxiliary probability space $(\Omega', \Prob')$. Then:
@@ -403,7 +403,7 @@ $\sum_n p^{\otimes n}(B'_n) = \Prob'(\exists n, (\xi_1, \dots, \xi_n) \in B_n)$.
 \end{proof}
 
 \textbf{Lean remark.} (i) is Lemma~\ref{lem:visits_iid}(i) (\texttt{measure\_visitNextState\_mem\_le\_pi})
-together with \texttt{iIndepFun.measure\_prefix\_mem\_eq\_pi}: the prefix $(\xi_1, \dots, \xi_n)$ of an
+together with Mathlib's \texttt{iIndepFun.hasLaw\_pi}: the prefix $(\xi_1, \dots, \xi_n)$ of an
 i.i.d.\ sequence of law $p$ has law $p^{\otimes n}$. (ii) is proved in two steps. The
 first-entrance decomposition is library material,
 \texttt{MeasureTheory.measure\_exists\_mem\_le\_of\_forall\_measure\_inter\_le}

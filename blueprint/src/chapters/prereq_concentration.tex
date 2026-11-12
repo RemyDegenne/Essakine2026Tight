@@ -32,7 +32,7 @@ specializations to \texttt{weightedMeasure}s (Lemma~\ref{lem:pconc_weighted_meas
 finite-sum formula for $\KL$ is Lemma~\ref{lem:pconc_kl_finite_sum}.
 
 \begin{lemma}[Weighted measures of probability vectors]\label{lem:pconc_weighted_measure}
-\lean{MeasureTheory.weightedMeasure_singleton, MeasureTheory.measureReal_weightedMeasure_singleton, MeasureTheory.isFiniteMeasure_weightedMeasure, MeasureTheory.isProbabilityMeasure_weightedMeasure, MeasureTheory.weightedMeasure_absolutelyContinuous}\leanok
+\lean{LMLExplore.weightedMeasure_singleton, LMLExplore.measureReal_weightedMeasure_singleton, LMLExplore.isFiniteMeasure_weightedMeasure, LMLExplore.isProbabilityMeasure_weightedMeasure, LMLExplore.weightedMeasure_absolutelyContinuous}\leanok
 Let $p, q : \mathcal X \to \R$ on a finite set. The measure $\sum_x p(x)\delta_x$ gives mass
 $\max(p(x), 0)$ to $\{x\}$, is finite, is a probability measure when $p$ is a probability vector,
 and $\sum_x q(x)\delta_x \ll \sum_x p(x)\delta_x$ as soon as $q(x) > 0 \Rightarrow p(x) > 0$.
@@ -45,7 +45,7 @@ Evaluate the finite sum of Dirac masses on singletons and on $\mathcal X$
 \end{proof}
 
 \begin{lemma}[The Kullback--Leibler divergence on a finite set]\label{lem:pconc_kl_finite_sum}
-\lean{InformationTheory.rnDeriv_apply_eq_div, InformationTheory.toReal_klDiv_eq_sum, InformationTheory.klDiv_ne_top_of_finite}\leanok
+\lean{MeasureTheory.Measure.rnDeriv_eq_measure_singleton_div, InformationTheory.toReal_klDiv_eq_sum, InformationTheory.klDiv_ne_top_of_finite}\leanok
 Let $\mu \ll \nu$ be probability measures on a finite set (with measurable singletons). Then
 $\KL(\mu \| \nu) < \infty$ and $\KL(\mu \| \nu) = \sum_x \mu(\{x\}) \log\big(\mu(\{x\})/\nu(\{x\})\big)$
 (with $0 \log 0 = 0$).
@@ -72,7 +72,7 @@ $\phat_n(x) := \frac1n \sum_{k \le n} \indic\{X_k = x\}$, a random probability v
 $\phat_n$ is a type.
 
 \begin{lemma}[Probability of a type]\label{lem:type_prob_le}
-\lean{InformationTheory.typeCount, InformationTheory.empiricalFreq, InformationTheory.sum_typeCount, InformationTheory.prod_comp_eq_prod_pow_typeCount, InformationTheory.measure_typeCount_eq, InformationTheory.pi_weightedMeasure_typeCount_eq, InformationTheory.measure_typeCount_eq_le}\leanok
+\lean{InformationTheory.typeCount, InformationTheory.empiricalFreq, InformationTheory.sum_typeCount, InformationTheory.prod_comp_eq_prod_pow_typeCount, ProbabilityTheory.iIndepFun.hasLaw_pi, InformationTheory.pi_weightedMeasure_typeCount_eq, InformationTheory.measure_typeCount_eq_le}\leanok
 For every type $q$ of denominator $n$,
 $\Prob(\phat_n = q) \le e^{-n \KL(q \| p)}$, with $e^{-\infty} := 0$.
 \end{lemma}
@@ -224,7 +224,7 @@ $y = -P/2$, \texttt{Real.add\_one\_le\_exp}). Multiplying by $e^{P/2} > 0$ gives
 pointwise rather than almost sure.
 
 \begin{lemma}[Ville's maximal inequality]\label{lem:ville}
-\lean{MeasureTheory.Supermartingale.mul_measureReal_exists_le_le, MeasureTheory.Supermartingale.measure_exists_ge_le}\leanok
+\lean{MeasureTheory.Supermartingale.maximal_ineq, MeasureTheory.Supermartingale.measure_exists_le_le}\leanok
 Let $(M_t)_{t \ge 0}$ be a nonnegative supermartingale with respect to $(\mathcal F_t)$ with
 $\E[M_0] \le 1$. Then for every $c > 0$, $\Prob(\exists t \ge 0,\ M_t \ge c) \le 1/c$; in
 particular $\Prob(\exists t,\ M_t \ge 1/\delta) \le \delta$ for $\delta \in (0, 1]$.
@@ -249,9 +249,9 @@ $\Prob(\exists t, M_t \ge c) = \lim_N \Prob(\tau \le N) \le 1/c$
 \textbf{Lean remark.} The Lean statement is the general form
 \texttt{μ \{ω | ∃ n, c ≤ M n ω\} ≤ ENNReal.ofReal ((∫ ω, M 0 ω ∂μ) / c)} for a supermartingale
 \texttt{M : ℕ → Ω → ℝ} with \texttt{∀ n ω, 0 ≤ M n ω}, \texttt{0 < c}, on a finite measure space
-(\texttt{Supermartingale.measure\_exists\_ge\_le}), via the finite-horizon bound
-$c\,\Prob(\exists n \le N, M_n \ge c) \le \E[M_0]$ (\texttt{mul\_measureReal\_exists\_le\_le}, which does
-not need $c > 0$). In this Mathlib the hitting time is \texttt{hittingBtwn M (Set.Ici c) 0 N}
+(LMLExplore's \texttt{Supermartingale.measure\_exists\_le\_le}, which needs only almost-everywhere
+nonnegativity), via the finite-horizon bound $c\,\Prob(\exists n \le N, M_n \ge c) \le \E[M_0]$
+(LMLExplore's \texttt{Supermartingale.maximal\_ineq}). In this Mathlib the hitting time is \texttt{hittingBtwn M (Set.Ici c) 0 N}
 (\texttt{Adapted.isStoppingTime\_hittingBtwn}, \texttt{stoppedValue\_hittingBtwn\_mem}), and the
 limit is \texttt{Monotone.measure\_iUnion}. Mathlib's \texttt{MeasureTheory.maximal\_ineq} is Doob's inequality
 for nonnegative \emph{sub}martingales and does not apply directly; the proof above uses the
@@ -363,7 +363,7 @@ Lemma~\ref{lem:sqrt_add_le} (\texttt{Real.sqrt\_le\_sqrt}, \texttt{abs\_le\_of\_
 \end{proof}
 
 \begin{lemma}[A Taylor bound for the exponential of a bounded variable]\label{lem:pconc_exp_taylor_bound}
-\lean{Real.expSubOneSub_eq_tsum, Real.expSubOneSub_mul_le, Real.exp_mul_le_of_abs_le}\leanok
+\lean{Real.hasSum_pow_add_two_div_factorial, Real.exp_mul_le_one_add_mul_add_mul_sq}\leanok
 For $b > 0$, $\lambda \ge 0$ and $y \in [-b, b]$:
 $e^{\lambda y} \le 1 + \lambda y + \dfrac{y^2}{b^2}\, \varphi_b(\lambda)$.
 \end{lemma}
@@ -381,7 +381,7 @@ $e^{\lambda y} - 1 - \lambda y \le \frac{y^2}{b^2} \sum_{k \ge 2} (\lambda b)^k/
 
 \begin{lemma}[The exponential supermartingale]\label{lem:bernstein_exp_supermartingale}
 \uses{lem:pconc_exp_taylor_bound}
-\lean{ProbabilityTheory.selfNormSum, ProbabilityTheory.selfNormVar, ProbabilityTheory.abs_selfNormSum_le, ProbabilityTheory.selfNormVar_nonneg, ProbabilityTheory.selfNormVar_le, ProbabilityTheory.condExp_exp_mul_sub_le_one, ProbabilityTheory.supermartingale_exp_selfNorm, ProbabilityTheory.supermartingale_exp_neg_selfNorm}\leanok
+\lean{ProbabilityTheory.selfNormSum, ProbabilityTheory.selfNormVar, ProbabilityTheory.abs_selfNormSum_le, ProbabilityTheory.selfNormVar_nonneg, ProbabilityTheory.selfNormVar_le, LMLExplore.condExp_exp_mul_sub_mul_condExp_sq_le_one, ProbabilityTheory.supermartingale_exp_selfNorm, ProbabilityTheory.supermartingale_exp_neg_selfNorm}\leanok
 Let $b > 0$, $(Y_t)_{t \ge 1}$ random variables with $Y_t$ $\mathcal F_t$-measurable,
 $\abs{Y_t} \le b$ and $\E[Y_t \mid \mathcal F_{t-1}] = 0$, and $(w_t)_{t \ge 1}$ random variables
 with $w_t$ $\mathcal F_{t-1}$-measurable and $w_t \in [0, 1]$. Let $\sigma_t^2 := \E[Y_t^2 \mid \mathcal F_{t-1}]$
@@ -439,8 +439,10 @@ the processes are $0$-indexed: \texttt{Y w v : ℕ → Ω → ℝ} with \texttt{
 \texttt{μ[Y i \^{} 2 | ℱ i]} itself, which is only a.e.\ in $[0, b^2]$). Then
 \texttt{selfNormSum Y w t ω = ∑ i ∈ range t, w i ω * Y i ω} and
 \texttt{selfNormVar v w t ω = ∑ i ∈ range t, w i ω \^{} 2 * v i ω}; (i) is
-\texttt{condExp\_exp\_mul\_sub\_le\_one} (for one step, any sub-$\sigma$-algebra), (ii) is
-\texttt{supermartingale\_exp\_selfNorm} (by \texttt{supermartingale\_nat} and the pull-out property;
+LMLExplore's one-step Freedman bound \texttt{condExp\_exp\_mul\_sub\_mul\_condExp\_sq\_le\_one}
+applied to the increments $w_i Y_i$ (for one step, any sub-$\sigma$-algebra), (ii) is
+\texttt{supermartingale\_exp\_selfNorm} (by LMLExplore's
+\texttt{supermartingale\_exp\_sum\_of\_condExp\_exp\_le\_one};
 the bound $M^\lambda_t \le e^{\lambda b t}$ holds a.s.), (iii) is
 \texttt{supermartingale\_exp\_neg\_selfNorm}. \texttt{ProbabilityTheory.variance} does not appear
 (the conditional variance is the conditional expectation of the square of a centered variable).
@@ -503,7 +505,7 @@ integral is at least $e^{T - 1} \cdot (e/4) \cdot 1/(1 + \sqrt{s + v}) = e^T/(4(
 
 \begin{lemma}[The mixture supermartingale]\label{lem:pconc_bernstein_mixture}
 \uses{lem:bernstein_exp_supermartingale}
-\lean{ProbabilityTheory.bernsteinMixtureIntegrand, ProbabilityTheory.bernsteinMixture, ProbabilityTheory.measurable_bernsteinMixture, ProbabilityTheory.bernsteinMixture_zero_zero, ProbabilityTheory.ofReal_le_bernsteinMixture, ProbabilityTheory.supermartingale_bernsteinMixtureIntegrand, ProbabilityTheory.setLIntegral_selfNorm_mixture_le, ProbabilityTheory.lintegral_selfNorm_mixture_le_one, ProbabilityTheory.ae_bernsteinMixture_lt_top, ProbabilityTheory.selfNormMixture, ProbabilityTheory.selfNormMixture_zero, ProbabilityTheory.selfNormMixture_nonneg, ProbabilityTheory.supermartingale_selfNormMixture, ProbabilityTheory.ae_exp_div_le_selfNormMixture}\leanok
+\lean{ProbabilityTheory.bernsteinMixtureIntegrand, ProbabilityTheory.bernsteinMixture, ProbabilityTheory.measurable_bernsteinMixture, ProbabilityTheory.bernsteinMixture_zero_zero, ProbabilityTheory.ofReal_le_bernsteinMixture, ProbabilityTheory.supermartingale_bernsteinMixtureIntegrand, LMLExplore.supermartingale_integral_of_integrable, ProbabilityTheory.lintegral_selfNorm_mixture_le_one, ProbabilityTheory.ae_bernsteinMixture_lt_top, ProbabilityTheory.selfNormMixture, ProbabilityTheory.selfNormMixture_zero, ProbabilityTheory.selfNormMixture_nonneg, ProbabilityTheory.supermartingale_selfNormMixture, ProbabilityTheory.ae_exp_div_le_selfNormMixture}\leanok
 In the setting of Lemma~\ref{lem:bernstein_exp_supermartingale}, define for $t \ge 0$
 \[
   M_t := \frac12 \int_0^\infty \Big[ \exp\Big(\frac{\mu S_t}{b} - \varphi(\mu)\frac{V_t}{b^2}\Big) + \exp\Big(-\frac{\mu S_t}{b} - \varphi(\mu)\frac{V_t}{b^2}\Big) \Big] e^{-\mu}\, d\mu .
@@ -522,10 +524,9 @@ $[0, \infty]$, \texttt{bernsteinMixture b s v = ∫⁻ u in Ioi 0, ENNReal.ofRea
 $\frac12\big(e^{us/b - \varphi(u)v/b^2} + e^{-us/b - \varphi(u)v/b^2}\big)e^{-u}$, which is measurable
 in $(s, v)$ (\texttt{Measurable.lintegral\_prod\_right'}); then
 \texttt{selfNormMixture b Y w v t ω = (bernsteinMixture b (S t ω) (V t ω)).toReal} ($0$ where the
-integral is infinite). The supermartingale property is proved in $[0, \infty]$
-(\texttt{setLIntegral\_selfNorm\_mixture\_le}: Tonelli \texttt{lintegral\_lintegral\_swap}, then
-\texttt{Supermartingale.setIntegral\_le} for each fixed $u$) and transferred with
-\texttt{integral\_toReal} (\texttt{supermartingale\_of\_setIntegral\_succ\_le}); the lower bound is
+integral is infinite). The mixture is the Bochner integral of the integrand over $(0, \infty)$
+(\texttt{selfNormMixture\_eq\_integral}), and its supermartingale property is LMLExplore's method of
+mixtures \texttt{LMLExplore.supermartingale\_integral\_of\_integrable}; the lower bound is
 \texttt{ae\_exp\_div\_le\_selfNormMixture}: almost surely, for all $t$,
 $e^{T_t}/(8(1 + \sqrt{2t})) \le M_t$.
 
@@ -661,7 +662,7 @@ In this section $\mathcal X$ is a finite set, $p, q$ are probability vectors on 
 $f, g : \mathcal X \to \R$; the conventions are those of the beginning of the chapter.
 
 \begin{lemma}[Gibbs variational inequality on a finite set]\label{lem:donsker_varadhan_finite}
-\lean{InformationTheory.ofReal_integral_sub_log_integral_exp_le_klDiv, InformationTheory.integral_sub_log_integral_exp_le_of_klDiv_le}\leanok
+\lean{TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv, InformationTheory.integral_sub_log_integral_exp_le_of_klDiv_le}\leanok
 For every $g : \mathcal X \to \R$: $\KL(p \| q) \ge pg - \log\big(q e^{g}\big)$, where
 $q e^g := \sum_x q(x) e^{g(x)}$ (the inequality is trivial when $\KL(p\|q) = +\infty$).
 \end{lemma}
@@ -790,7 +791,7 @@ property $\Var_q(f) \le q(f - m)^2$ is \texttt{variance\_le\_integral\_sub\_sq}
 absolute value in Lemma~\ref{lem:kl_bernstein}.
 
 \begin{lemma}[Lemma 26: variance transport between functions and between measures]\label{lem:transport_var}
-\lean{ProbabilityTheory.integrable_of_ae_mem_Icc, ProbabilityTheory.variance_le_integral_sub_sq, ProbabilityTheory.variance_le_two_mul_variance_add, ProbabilityTheory.variance_le_variance_add_sum_abs_sub}\leanok
+\lean{MeasureTheory.Integrable.of_mem_Icc, ProbabilityTheory.variance_le_integral_sub_sq, ProbabilityTheory.variance_le_two_mul_variance_add, ProbabilityTheory.variance_le_variance_add_sum_abs_sub}\leanok
 Let $b \ge 0$ and $f, g$ with values in $[0, b]$. Then
 \[
   \Var_p(f) \le 2\Var_p(g) + 2b\, p\abs{f - g} \qquad \text{and} \qquad

@@ -9,7 +9,8 @@ public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import Mathlib.Probability.Independence.InfinitePi
 public import Mathlib.Probability.Independence.Integration
 public import Essakine2026Tight.ForLMLExplore.InformationTheory.MethodOfTypes
-public import Essakine2026Tight.ForLMLExplore.Probability.Martingale.Ville
+public import Essakine2026Tight.ForLMLExplore.Probability.Independence.NaturalPast
+public import LMLExplore.Probability.Martingale.Ville
 
 /-!
 # Time-uniform KL concentration of the empirical distribution
@@ -42,13 +43,18 @@ ratio* is `Mₙ = ∏_{k < n} ((N_k(ξ k) + 1) / (k + m)) / p(ξ k)` (`Informati
   `exp (n KL(q̂ₙ ‖ ν)) ≤ Mₙ (n + 1)^{m - 1} e √n`, from `N^N ≤ e^N N!`,
   `m (m + 1) ⋯ (m + n - 1) = n! binom(n + m - 1, n) ≤ n! (n + 1)^{m - 1}` and Stirling's upper
   bound `n! ≤ e √n (n/e)^n` (`Stirling.factorial_le_exp_one_mul_sqrt_mul_div_pow`).
-* Ville's inequality `ℙ(∃ n, Mₙ ≥ 1/δ) ≤ δ` concludes, the sample points of mass zero forming a
-  null event.
+* Ville's inequality `ℙ(∃ n, Mₙ ≥ 1/δ) ≤ δ` (LMLExplore's
+  `MeasureTheory.Supermartingale.measure_exists_le_le`) concludes, the sample points of mass zero
+  forming a null event.
+
+For the coordinate process of `ν^{⊗ℕ}` the filtration is the strict past
+`MeasureTheory.Filtration.naturalPast`, and an i.i.d. sequence reduces to it through its law
+(Mathlib's `ProbabilityTheory.iIndepFun.hasLaw_infinitePi`).
 -/
 
 @[expose] public section
 
-open MeasureTheory Real Finset
+open MeasureTheory Real Finset LMLExplore
 open scoped ENNReal Nat
 
 /-- **Stirling's upper bound**: `n! ≤ e √n (n/e)^n` for `n ≥ 1`. -/
@@ -197,13 +203,17 @@ noncomputable def laplaceRatio (ν : Measure α) (x : ℕ → α) (n : ℕ) : �
   ∏ k ∈ range n,
     (typeCount (fun i : Fin k ↦ x i) (x k) + 1 : ℝ) / (k + Fintype.card α) / ν.real {x k}
 
+/-- The Laplace ratio of the empty prefix is `1`. -/
 @[simp]
 lemma laplaceRatio_zero (ν : Measure α) (x : ℕ → α) : laplaceRatio ν x 0 = 1 := by
   simp [laplaceRatio]
 
+/-- The Laplace ratio is nonnegative. -/
 lemma laplaceRatio_nonneg (ν : Measure α) (x : ℕ → α) (n : ℕ) : 0 ≤ laplaceRatio ν x n :=
   Finset.prod_nonneg fun _ _ ↦ by positivity
 
+/-- The Laplace ratio of the prefix of length `n + 1` is that of the prefix of length `n` times
+the factor `((N_n(x n) + 1) / (n + m)) / ν{x n}`. -/
 lemma laplaceRatio_succ (ν : Measure α) (x : ℕ → α) (n : ℕ) :
     laplaceRatio ν x (n + 1) = laplaceRatio ν x n
       * ((typeCount (fun i : Fin n ↦ x i) (x n) + 1 : ℝ) / (n + Fintype.card α)
@@ -233,7 +243,8 @@ lemma laplaceRatio_eq (ν : Measure α) (x : ℕ → α) (n : ℕ) :
 lemma isProbabilityMeasure_weightedMeasure_empiricalFreq {n : ℕ} (hn : n ≠ 0) (y : Fin n → α) :
     IsProbabilityMeasure (weightedMeasure (empiricalFreq y)) := by
   have hnR : (0 : ℝ) < n := by exact_mod_cast Nat.pos_of_ne_zero hn
-  refine isProbabilityMeasure_weightedMeasure (fun a ↦ by unfold empiricalFreq; positivity) ?_
+  refine isProbabilityMeasure_weightedMeasure (mem_simplex_iff.2
+    ⟨fun a ↦ by unfold empiricalFreq; positivity, ?_⟩)
   simp only [empiricalFreq, ← Finset.sum_div]
   rw [div_eq_one_iff_eq hnR.ne']
   exact_mod_cast sum_typeCount y
@@ -526,8 +537,8 @@ lemma measure_exists_le_klDiv_empiricalFreq_le_of_filtration
         ≤ klDiv (weightedMeasure (empiricalFreq fun k : Fin n ↦ ξ k ω)) ν}
       ≤ ENNReal.ofReal δ := by
   have := (hlaw 0).isProbabilityMeasure_iff.1 inferInstance
-  have hville := (supermartingale_laplaceRatio hξ hind hlaw).measure_exists_ge_le
-    (fun n ω ↦ laplaceRatio_nonneg _ _ _) (c := 1 / δ) (by positivity)
+  have hville := (supermartingale_laplaceRatio hξ hind hlaw).measure_exists_le_le
+    (fun n ↦ ae_of_all _ fun ω ↦ laplaceRatio_nonneg _ _ _) (c := 1 / δ) (by positivity)
   simp only [laplaceRatio_zero, integral_const, probReal_univ, smul_eq_mul, mul_one,
     one_div_one_div] at hville
   refine le_trans (measure_mono_ae ?_) hville
@@ -562,21 +573,12 @@ lemma measure_exists_le_klDiv_empiricalFreq_le_infinitePi [IsProbabilityMeasure 
         ((log (1 / δ) + ((Fintype.card α - 1 : ℕ) : ℝ) * log (n + 1) + 1 + log n / 2) / n)
         ≤ klDiv (weightedMeasure (empiricalFreq fun k : Fin n ↦ x k)) ν}
       ≤ ENNReal.ofReal δ := by
-  let ℱ : Filtration ℕ (MeasurableSpace.pi : MeasurableSpace (ℕ → α)) :=
-    { seq := fun n ↦ ⨆ k ∈ Set.Iio n, MeasurableSpace.comap (fun x : ℕ → α ↦ x k) inferInstance
-      mono' := fun i j hij ↦ biSup_mono fun k hk ↦ lt_of_lt_of_le hk hij
-      le' := fun n ↦ iSup₂_le fun k _ ↦ (measurable_pi_apply k).comap_le }
   have hindep : iIndepFun (fun k (x : ℕ → α) ↦ x k) (Measure.infinitePi fun _ : ℕ ↦ ν) :=
     iIndepFun_infinitePi (X := fun _ a ↦ a) fun _ ↦ measurable_id
-  refine measure_exists_le_klDiv_empiricalFreq_le_of_filtration (ℱ := ℱ) (fun k ↦ ?_)
-    (fun n ↦ ?_) (fun n ↦ (measurePreserving_eval_infinitePi _ n).hasLaw) hδ
-  · rw [measurable_iff_comap_le]
-    exact le_iSup₂ (f := fun j (_ : j ∈ Set.Iio (k + 1)) ↦
-      MeasurableSpace.comap (fun x : ℕ → α ↦ x j) inferInstance) k (by simp)
-  · have h := indep_iSup_of_disjoint (fun k ↦ (measurable_pi_apply k).comap_le)
-      ((iIndepFun_iff_iIndep _ _ _).1 hindep) (S := Set.Iio n) (T := {n}) (by simp)
-    rw [_root_.iSup_singleton] at h
-    exact h
+  exact measure_exists_le_klDiv_empiricalFreq_le_of_filtration
+    (ℱ := Filtration.naturalPast (fun k (x : ℕ → α) ↦ x k) measurable_pi_apply)
+    (Filtration.measurable_naturalPast_succ _ _) (fun n ↦ (hindep.indep_comap_naturalPast _ n).symm)
+    (fun n ↦ (measurePreserving_eval_infinitePi _ n).hasLaw) hδ
 
 /-- **Time-uniform KL concentration of the empirical distribution**, for the coordinate process of
 `ν^{⊗ℕ}`, simplified threshold: for every `δ > 0`,
@@ -612,14 +614,9 @@ omit [Fintype α] [DecidableEq α] in
 lemma measure_exists_prefix_eq_infinitePi [Countable α] (hξ : iIndepFun ξ μ)
     (hlaw : ∀ k, HasLaw (ξ k) ν μ) (P : ∀ n : ℕ, (Fin n → α) → Prop) :
     μ {ω | ∃ n, P n fun k : Fin n ↦ ξ k ω}
-      = Measure.infinitePi (fun _ : ℕ ↦ ν) {x : ℕ → α | ∃ n, P n fun k : Fin n ↦ x k} := by
-  have hmeas : AEMeasurable (fun ω k ↦ ξ k ω) μ :=
-    AEMeasurable.of_eval fun k ↦ (hlaw k).aemeasurable
-  have hmap : μ.map (fun ω k ↦ ξ k ω) = Measure.infinitePi (fun _ ↦ ν) := by
-    rw [hξ.map_fun_eq_infinitePi_map₀' fun k ↦ (hlaw k).aemeasurable]
-    simp_rw [(hlaw _).map_eq]
-  rw [← hmap, Measure.map_apply₀ hmeas (measurableSet_exists_prefix P).nullMeasurableSet]
-  rfl
+      = Measure.infinitePi (fun _ : ℕ ↦ ν) {x : ℕ → α | ∃ n, P n fun k : Fin n ↦ x k} :=
+  (hξ.hasLaw_infinitePi hlaw (AEMeasurable.of_eval fun k ↦ (hlaw k).aemeasurable)).measure_eq
+    (p := fun x : ℕ → α ↦ ∃ n, P n fun k : Fin n ↦ x k) (measurableSet_exists_prefix P)
 
 variable [IsProbabilityMeasure μ]
 

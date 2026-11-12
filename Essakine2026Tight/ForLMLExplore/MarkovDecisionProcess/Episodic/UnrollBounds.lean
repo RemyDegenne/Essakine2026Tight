@@ -76,10 +76,6 @@ lemma sum_integral_exp_mul_sqrt_vecVar_mul_le [Fintype S] [Fintype A] {r : ℕ �
   have hvar (h : ℕ) (s : S) (a : A) :
       0 ≤ vecVar (M.transVec h s a) (expValue M H β π (h + 1)) :=
     vecVar_nonneg (M.transVec_nonneg h s a) (M.sum_transVec h s a)
-  have hW (h : ℕ) : Measurable fun x : ℕ → Round (S × ℕ) A ℝ ↦
-      Real.exp (β * ∑ i ∈ range (h + 1), r i (IT.obs i x).1 (IT.action i x)) :=
-    Real.measurable_exp.comp (measurable_const.mul
-      (Finset.measurable_sum _ fun i _ ↦ measurable_comp_obs_action (r i) i))
   have hWV (h : ℕ) : Integrable (fun x ↦
       Real.exp (β * ∑ i ∈ range (h + 1), r i (IT.obs i x).1 (IT.action i x)) ^ 2
         * vecVar (M.transVec h (IT.obs h x).1 (IT.action h x)) (expValue M H β π (h + 1))) P := by
@@ -93,10 +89,7 @@ lemma sum_integral_exp_mul_sqrt_vecVar_mul_le [Fintype S] [Fintype A] {r : ℕ �
     (W := fun h x ↦ Real.exp (β * ∑ i ∈ range (h + 1), r i (IT.obs i x).1 (IT.action i x)))
     (V := fun h x ↦
       vecVar (M.transVec h (IT.obs h x).1 (IT.action h x)) (expValue M H β π (h + 1)))
-    (U := fun h x ↦ ρ h (IT.obs h x).1 (IT.action h x)) (fun h _ ↦ (hW h).aestronglyMeasurable)
-    (fun h _ ↦ (measurable_comp_obs_action
-      (fun s a ↦ vecVar (M.transVec h s a) (expValue M H β π (h + 1))) h).aestronglyMeasurable)
-    (fun h _ ↦ (measurable_comp_obs_action (ρ h) h).aestronglyMeasurable)
+    (U := fun h x ↦ ρ h (IT.obs h x).1 (IT.action h x))
     (fun h _ ↦ Filter.Eventually.of_forall fun x ↦ hvar _ _ _)
     (fun h _ ↦ Filter.Eventually.of_forall fun x ↦ hρ _ _ _)
     (fun h _ ↦ hWV h) (fun h _ ↦ integrable_comp_obs_action P (ρ h) h)

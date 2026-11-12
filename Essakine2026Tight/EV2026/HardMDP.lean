@@ -9,8 +9,8 @@ public import Essakine2026Tight.EV2026.HardTree
 public import Essakine2026Tight.EV2026.HardParams
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.StateSeq
 public import Essakine2026Tight.ForLMLExplore.MarkovDecisionProcess.Episodic.Values
-public import Mathlib.Probability.Distributions.Bernoulli
-public import Essakine2026Tight.ForLMLExplore.InformationTheory.Pinsker
+public import Essakine2026Tight.ForLMLExplore.Probability.Distributions.Bernoulli
+public import Essakine2026Tight.ForLMLExplore.InformationTheory.KullbackLeibler.Bernoulli
 
 /-!
 # The hard instances of the lower bound
@@ -329,18 +329,6 @@ lemma hardTransFun_arrival (π : Policy S A H) (hS : 6 ≤ Fintype.card S)
 
 end Transitions
 
-lemma _root_.ProbabilityTheory.ae_bernoulliMeasure {X : Type*} [MeasurableSpace X]
-    [MeasurableSingletonClass X] {x y : X} (p : unitInterval) :
-    ∀ᵐ z ∂bernoulliMeasure x y p, z = x ∨ z = y := by
-  rw [bernoulliMeasure_def, ae_add_measure_iff]
-  constructor
-  · refine Measure.ae_smul_measure ?_ _
-    rw [ae_dirac_eq]
-    simp
-  · refine Measure.ae_smul_measure ?_ _
-    rw [ae_dirac_eq]
-    simp
-
 /-! ### The law of an episode -/
 
 section Law
@@ -349,7 +337,8 @@ variable [Nonempty A] {β ε : ℝ} {u : Option (ℕ × ℕ × ℕ)}
 
 omit [Nonempty A] in
 lemma hardMDP_trans_apply (h : ℕ) (s : S) (a : A) :
-    (hardMDP H β ε u).trans h (s, a) = hardTransFun H β ε u h s a := rfl
+    (hardMDP H β ε u).trans h (s, a) = hardTransFun H β ε u h s a := by
+  rw [hardMDP, EpisodicMDP.ofDet_trans]; rfl
 
 /-- In the good and bad states the sequence of states is constant. -/
 lemma stateSeqLaw_hardMDP_absorbing (π : Policy S A H) (hS : 6 ≤ Fintype.card S) {i : ℕ}
@@ -455,7 +444,7 @@ lemma klDiv_statesLaw_hardMDP_le (π : Policy S A H) (hS : 6 ≤ Fintype.card S)
     (u u' : Option (ℕ × ℕ × ℕ)) :
     InformationTheory.klDiv (statesLaw (hardMDP H β ε u) H (stateAt S 0) π.extend)
         (statesLaw (hardMDP H β ε u') H (stateAt S 0) π.extend)
-      ≤ InformationTheory.klBer (succProb β ε H u π) (succProb β ε H u' π) := by
+      ≤ LMLExplore.klBer (succProb β ε H u π) (succProb β ε H u' π) := by
   rw [statesLaw_hardMDP π hS hA hH, statesLaw_hardMDP π hS hA hH]
   refine (InformationTheory.klDiv_map_le _ _ (measurable_of_countable _)).trans_eq ?_
   exact InformationTheory.klDiv_bernoulliMeasure
@@ -472,8 +461,7 @@ variable [Nonempty A] {β ε : ℝ} {u : Option (ℕ × ℕ × ℕ)}
 omit [Nonempty A] in
 /-- The rewards of the hard instances lie in `[0, 1]`. -/
 lemma rewardsIn_hardMDP : (hardMDP (S := S) (A := A) H β ε u).RewardsIn (Set.Icc 0 1) :=
-  rewardsIn_of_hasRewardFn _ (hasRewardFn_hardMDP H β ε u) measurableSet_Icc
-    (hardReward_mem_Icc H)
+  (hasRewardFn_hardMDP H β ε u).rewardsIn (hardReward_mem_Icc H)
 
 /-- The number of rewarded steps from the step `m` in the good state. -/
 def rewardCount (H rs m : ℕ) : ℕ := H - max m rs
@@ -775,7 +763,7 @@ lemma maxReturn_hardMDP_le (hS : 6 ≤ Fintype.card S) (hA : 2 ≤ Fintype.card 
   have hM : ∀ (k : ℕ) (s : S) (a : A), ∀ᵐ x ∂(hardMDP H β ε u).reward k (s, a),
       x ∈ Set.Icc 0 (c k) := by
     intro k s a
-    rw [hasRewardFn_hardMDP H β ε u k s a]
+    rw [(EpisodicMDP.hasRewardFn_def _ _).1 (hasRewardFn_hardMDP H β ε u) k s a]
     refine (ae_dirac_iff (p := fun x ↦ x ∈ Set.Icc 0 (c k)) measurableSet_Icc).2 ?_
     simp only [hardReward, c, Set.mem_Icc]
     split_ifs with h1 h2 h2

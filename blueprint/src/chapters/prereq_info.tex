@@ -75,14 +75,14 @@ general process is \texttt{ForLMLExplore/InformationTheory/KLStoppedPrefix.lean}
 project; its specialization to algorithm-environment sequences and the reindexing by actions are
 \texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/\{StoppedHistory,
 DivergenceDecomposition\}.lean}; runs of identification algorithms are
-\texttt{…/ForLMLExplore/Identification/IdentificationAlg.lean} and the change of measure
+LMLExplore's \texttt{LMLExplore/Identification/Basic.lean} and the change of measure
 \texttt{…/ForLMLExplore/Identification/ChangeOfMeasure.lean}.
 
 \section{The binary relative entropy}
 \label{sec:pinfo_klbin}
 
 \begin{definition}[Binary relative entropy]\label{def:klbin}
-\lean{InformationTheory.klBer, InformationTheory.klBerReal}\leanok
+\lean{LMLExplore.klBer, LMLExplore.klBerReal}\leanok
 For $x, y \in [0, 1]$, the \emph{binary relative entropy} is
 \[
   \klbin(x, y) := x\log\frac{x}{y} + (1 - x)\log\frac{1 - x}{1 - y} \in [0, \infty],
@@ -95,21 +95,22 @@ Bernoulli measures $\mathrm{Ber}(p) := p\,\delta_1 + (1 - p)\,\delta_0$ on $\{0,
 $\klbin(x, y) = x\log x + (1-x)\log(1-x) - x\log y - (1-x)\log(1-y)$ with $0\log 0 = 0$.
 \end{definition}
 
-\textbf{Lean remark.} The project uses the two functions of the sister project
-(\texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/KLBer.lean}): the real-valued
-\texttt{InformationTheory.klBerReal (p q : ℝ) : ℝ := p * log (p / q) + (1 - p) * log ((1 - p) / (1 - q))}
-(the function called \texttt{klBin} in LMLPapers, same formula), which agrees with $\klbin$ for
-$p \in [0,1]$ and $q \in (0,1)$ (Lean's \texttt{Real.log 0 = 0} gives the convention $0\log 0 = 0$
-for free) but is a junk real number when $q \in \{0, 1\}$, and the $[0,\infty]$-valued
-\texttt{InformationTheory.klBer (p q : ℝ) : ℝ≥0∞}, equal to \texttt{ENNReal.ofReal (klBerReal p q)}
-for $q \notin \{0, 1\}$ (\texttt{klBer\_eq\_ofReal}) and to the values of
-Definition~\ref{def:klbin} at the boundary (\texttt{klBer\_zero\_right}, \texttt{klBer\_one\_right}),
-which is $\klbin$ exactly. Statements in which $y$ may be $0$ or $1$ are formalized with
-\texttt{klBer}, the real inequalities for $y \in (0, 1)$ with \texttt{klBerReal}; the passage to
-the divergence of Bernoulli measures is Lemma~\ref{lem:klbin_bernoulli}. The symmetry
-$\klbin(1-x, 1-y) = \klbin(x, y)$ is \texttt{klBer\_one\_sub}, and
-$\klbin(x,y) = -h(x) - x\log y - (1-x)\log(1-y)$ with the binary entropy
-$h$ (Mathlib \texttt{Real.binEntropy}) is \texttt{klBerReal\_eq\_neg\_binEntropy\_sub}.
+\textbf{Lean remark.} The project uses LMLExplore's two functions
+(\texttt{LMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean}): the real-valued
+\texttt{LMLExplore.klBerReal (p q : ℝ) : ℝ := p * log (p / q) + (1 - p) * log ((1 - p) / (1 - q))}
+(\texttt{klBerReal\_def}), which agrees with $\klbin$ for $p \in [0,1]$ and $q \in (0,1)$ (Lean's
+\texttt{Real.log 0 = 0} gives the convention $0\log 0 = 0$ for free) but is a junk real number
+when $q \in \{0, 1\}$, and the $[0,\infty]$-valued \texttt{LMLExplore.klBer (p q : ℝ) : ℝ≥0∞}, the
+divergence of the Bernoulli laws at the parameters clipped to $[0, 1]$, which is $\klbin$ on
+$[0, 1]^2$: it is \texttt{ENNReal.ofReal (klBerReal p q)} for $q \in (0, 1)$
+(\texttt{klBer\_eq\_ofReal\_klBerReal}) and infinite exactly at the boundary values of
+Definition~\ref{def:klbin} (\texttt{klBer\_eq\_top\_iff}). Statements in which $y$ may be $0$ or
+$1$ are formalized with \texttt{klBer}, the real inequalities for $y \in (0, 1)$ with
+\texttt{klBerReal}; the passage to the divergence of Bernoulli measures is
+Lemma~\ref{lem:klbin_bernoulli}. The symmetry $\klbin(1-x, 1-y) = \klbin(x, y)$ is
+\texttt{klBer\_one\_sub\_one\_sub}, and $\klbin(x,y) = -h(x) - x\log y - (1-x)\log(1-y)$ with the
+binary entropy $h$ (Mathlib \texttt{Real.binEntropy}) is
+\texttt{klBerReal\_eq\_neg\_binEntropy\_sub}.
 
 \begin{lemma}[Divergence of two Bernoulli measures]\label{lem:klbin_bernoulli}
 \lean{InformationTheory.klDiv_bernoulliMeasure, InformationTheory.klDiv_bernoulliMeasure_eq_klBerReal}\leanok
@@ -146,7 +147,7 @@ Radon--Nikodym derivative is \texttt{ProbabilityTheory.rnDeriv\_bernoulliMeasure
 (\texttt{Essakine2026Tight/ForLMLExplore/Probability/Distributions/Bernoulli.lean}).
 
 \begin{lemma}[Data processing to an event]\label{lem:klbin_le_kl}
-\lean{InformationTheory.klBer_measureReal_le_klDiv}\leanok
+\lean{LMLExplore.klBer_measureReal_le_klDiv}\leanok
 \uses{def:klbin, lem:klbin_bernoulli}
 Let $\mu, \nu$ be probability measures on a measurable space and $E$ a measurable set. Then
 \[
@@ -164,18 +165,17 @@ The left-hand side is $\klbin(\mu(E), \nu(E))$ by Lemma~\ref{lem:klbin_bernoulli
 (finite, infinite, or $\mu(E) = \nu(E)$).
 \end{proof}
 
-\textbf{Lean remark.} \texttt{InformationTheory.klBer\_measureReal\_le\_klDiv}:
+\textbf{Lean remark.} LMLExplore's \texttt{LMLExplore.klBer\_measureReal\_le\_klDiv}:
 \texttt{klBer (μ.real E) (ν.real E) ≤ klDiv μ ν} for probability measures and a measurable
-\texttt{E} (file \texttt{Essakine2026Tight/ForLMLExplore/InformationTheory/Pinsker.lean}). The map is
-the \texttt{Prop}-valued \texttt{(· ∈ E)} rather than \texttt{decide (· ∈ E)}, with image measure
-\texttt{Ber(True, False, ⟨μ.real E, …⟩)} (\texttt{map\_mem\_eq\_bernoulliMeasure}); this is the first
-half of the proof of Pinsker's inequality \texttt{InformationTheory.sq\_sub\_le\_klDiv}, kept in
-the same file. The real form \texttt{klBerReal (μ.real E) (ν.real E) ≤ (klDiv μ ν).toReal} follows
-by \texttt{klBer\_eq\_ofReal} and \texttt{ENNReal.ofReal\_le\_iff\_le\_toReal} when
+\texttt{E}; the image of a measure by the indicator of an event is a Bernoulli law by Mathlib's
+\texttt{hasLaw\_indicator\_one\_bernoulliMeasure}, and Pinsker's inequality for an event is Tau Ceti's
+\texttt{TauCeti.two\_mul\_sq\_measureReal\_sub\_le\_klDiv}. The real form
+\texttt{klBerReal (μ.real E) (ν.real E) ≤ (klDiv μ ν).toReal} follows by
+\texttt{klBer\_eq\_ofReal\_klBerReal} and \texttt{ENNReal.ofReal\_le\_iff\_le\_toReal} when
 $\nu(E) \in (0,1)$ and $\KL(\mu\|\nu) < \infty$.
 
 \begin{lemma}[Lower bound on the binary relative entropy]\label{lem:klbin_lower}
-\lean{InformationTheory.sub_log_two_le_klBerReal, InformationTheory.mul_log_sub_log_two_le_klBerReal}\leanok
+\lean{LMLExplore.sub_log_two_le_klBerReal, LMLExplore.mul_log_sub_log_two_le_klBerReal}\leanok
 \uses{def:klbin}
 For $x \in [0, 1]$ and $y \in (0, 1)$,
 \[
@@ -201,7 +201,7 @@ $\klbin(x, y) \ge x\log\frac1y - \log 2$ for $x \le 1$, used for the lower semic
 $y = 0$, is \texttt{mul\_log\_sub\_log\_two\_le\_klBerReal}.
 
 \begin{lemma}[Upper bound on the binary relative entropy]\label{lem:klbin_upper}
-\lean{InformationTheory.klBerReal_le_div}\leanok
+\lean{LMLExplore.klBerReal_le_sq_sub_div}\leanok
 \uses{def:klbin}
 For $x \in [0, 1]$ and $y \in (0, 1)$,
 \[
@@ -224,7 +224,7 @@ this also holds for $x = 1$. Summing,
 \end{proof}
 
 \begin{lemma}[Convexity in the second argument]\label{lem:pinfo_klbin_convex_right}
-\lean{InformationTheory.klBer_le_max, InformationTheory.klBerReal_le_klBerReal_of_le_of_le, InformationTheory.klBerReal_le_klBerReal_of_le_of_le', InformationTheory.hasDerivAt_klBerReal, InformationTheory.continuousOn_klBerReal}\leanok
+\lean{LMLExplore.klBer_le_max, LMLExplore.strictMonoOn_klBerReal, LMLExplore.strictAntiOn_klBerReal, LMLExplore.hasDerivAt_klBerReal, LMLExplore.continuousOn_klBerReal}\leanok
 \uses{def:klbin}
 Fix $x \in [0, 1]$. The function $y \mapsto \klbin(x, y)$ is nonincreasing on $(0, x] \cap (0,1)$
 and nondecreasing on $[x, 1)$. Consequently, for $0 \le y_1 \le y \le y_2 \le 1$,
@@ -249,14 +249,15 @@ $\klbin(x, y) \le \klbin(x, y_2)$; when $y_2 = 1$, $x \le y < 1$ and $\klbin(x, 
 
 \textbf{Lean remark.} The convexity of $y \mapsto \klbin(x,y)$ as a $[0,\infty]$-valued function
 is not stated (\texttt{ConvexOn} needs a module structure on the values); the formalized statement
-is its consequence \texttt{InformationTheory.klBer\_le\_max}, the only form used
-(Theorem~\ref{thm:change_of_measure}), proved through the unimodality above; it needs no
-hypothesis on $x$ (the function \texttt{klBer} is defined for all reals). The monotonicity
-statements are \texttt{klBerReal\_le\_klBerReal\_of\_le\_of\_le} (right of $x$) and
-\texttt{klBerReal\_le\_klBerReal\_of\_le\_of\_le'} (left of $x$), for $0 < y_1 \le y_2 < 1$.
+is its consequence, LMLExplore's \texttt{LMLExplore.klBer\_le\_max}, proved through the
+unimodality above; it needs no hypothesis on $x$ (the function \texttt{klBer} is defined for all
+reals). The monotonicity statements are LMLExplore's \texttt{strictMonoOn\_klBerReal} (right of
+$x$) and \texttt{strictAntiOn\_klBerReal} (left of $x$). The Lean proof of
+Theorem~\ref{thm:change_of_measure} no longer uses this lemma (see the remark after
+Lemma~\ref{lem:pinfo_truncated_pair}).
 
 \begin{lemma}[Lower semicontinuity]\label{lem:pinfo_klbin_lsc}
-\lean{InformationTheory.klBer_le_of_tendsto, InformationTheory.klBer_le_of_tendsto_zero, InformationTheory.exp_neg_le_of_klBer_le}\leanok
+\lean{LMLExplore.lowerSemicontinuous_klBer, LMLExplore.exp_neg_le_of_klBer_le}\leanok
 \uses{def:klbin, lem:klbin_lower}
 Let $(x_n, y_n) \to (x, y)$ with $x_n, y_n \in [0, 1]$ and $D \in [0, \infty]$ with
 $\klbin(x_n, y_n) \le D$ for all $n$. Then $\klbin(x, y) \le D$.
@@ -280,11 +281,11 @@ $y \ge \exp(-2(D + \log 2)/x) > 0$, a contradiction.
 $\klbin(1-u, 1-v) = \klbin(u, v)$.
 \end{proof}
 
-\textbf{Lean remark.} \texttt{InformationTheory.klBer\_le\_of\_tendsto} for sequences
-\texttt{x y : ℕ → ℝ} with values in \texttt{Icc 0 1} and \texttt{D : ℝ≥0∞}; the case $y = 0$ is
-\texttt{klBer\_le\_of\_tendsto\_zero} and the quantitative bound
-$y \ge \exp(-(D + \log 2)/x)$ is \texttt{exp\_neg\_le\_of\_klBer\_le}. The statement is slightly
-more general than the text above had it ($D = \infty$ allowed).
+\textbf{Lean remark.} The lower semicontinuity of $\klbin$ is LMLExplore's
+\texttt{LMLExplore.lowerSemicontinuous\_klBer}, and the quantitative bound
+$y \ge \exp(-(D + \log 2)/x)$ is \texttt{LMLExplore.exp\_neg\_le\_of\_klBer\_le}. The Lean proof of
+Theorem~\ref{thm:change_of_measure} no longer passes to the limit (see the remark after
+Lemma~\ref{lem:pinfo_truncated_pair}).
 
 \section{The divergence decomposition}
 \label{sec:pinfo_decomposition}
@@ -335,7 +336,7 @@ write $\mathrm{trunc}_M : \mathcal H \to \mathcal H$ for the truncation to the f
 so that $\mathrm{trunc}_M(\hist_\tau) = \hist_{\tau\wedge M}$ on $\{\tau < \infty\}$.
 
 \begin{lemma}[Divergence decomposition for a fixed number of rounds]\label{lem:kl_history_le}
-\lean{Learning.IsAlgEnvSeq.klDiv_map_history_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_compProd_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_klDiv_eq_sum_pullCount, Learning.lintegral_sum_klDiv_eq_sum_pullCount}\leanok
+\lean{Learning.IsAlgEnvSeq.klDiv_map_history_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_compProd_bandit, Learning.IsAlgEnvSeq.klDiv_map_history_eq_sum_pullCount, Learning.sum_pullCount_mul, LMLExplore.sum_lintegral_pullCount_mul}\leanok
 In the standing setting, for every $n \in \N$,
 \[
   \KL\big(\mathrm{law}_\nu(\hist_n)\,\big\|\,\mathrm{law}_{\nu'}(\hist_n)\big)
@@ -466,7 +467,7 @@ composition is the project's \texttt{Learning.klDiv\_compProd\_compProd\_prodMkL
 \texttt{lintegral\_fintype}).
 
 \begin{lemma}[Chain rule at a bounded stopping time]\label{lem:pinfo_stopped_chain_rule}
-\lean{Learning.IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_compProd, Learning.IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory, Learning.IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_eq_sum_pullCount, Learning.IsAlgEnvSeq.klDiv_map_hittingProcess_sigmaHistory_stepKernel, InformationTheory.klDiv_map_stoppedProcess_sigmaPrefix_compProd, InformationTheory.klDiv_map_hittingProcess_sigmaPrefix_compProd}\leanok
+\lean{Learning.IsAlgEnvSeq.klDiv_map_stoppedProcess_sigmaHistory_compProd, Learning.IsAlgEnvSeq.klDiv_map_stoppedProcess_sigmaHistory, Learning.IsAlgEnvSeq.klDiv_map_stoppedProcess_sigmaHistory_eq_sum_pullCount, Learning.IsAlgEnvSeq.klDiv_map_stoppedProcess_sigmaHistory_stepKernel, InformationTheory.klDiv_map_stoppedProcess_sigmaPrefix_compProd, InformationTheory.klDiv_map_stoppedProcess_sigmaPrefix_hittingAfter_compProd}\leanok
 \uses{lem:pinfo_kl_restrict, lem:pinfo_kl_step}
 In the standing setting, let $S$ be a stopping rule with stopping times $\tau$ on $\Omega$ and
 $\tau'$ on $\Omega'$, and let $M \in \N$. Then
@@ -530,31 +531,35 @@ term is $\sum_a \Prob(t < \tau, X_t = a)\,\KL(\nu_a\|\nu'_a)$, and
 $\sum_{t<M}\Prob(t<\tau, X_t = a) = \E_\nu[\sum_{t<M}\indic\{t<\tau, X_t = a\}] = \E_\nu[N_a(\tau\wedge M)]$.
 \end{proof}
 
-\textbf{Lean remark.} This is the sister project's
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_hittingProcess\_sigmaHistory\_compProd} (first
-equality, composition-product form, for \texttt{hittingProcess (sigmaHistory O X Y) S 0 M})
-and \texttt{klDiv\_map\_hittingProcess\_sigmaHistory} (integral form), both derived from the
+\textbf{Lean remark.} This is
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_stoppedProcess\_sigmaHistory\_compProd} (first
+equality, composition-product form, for
+\texttt{stoppedProcess (sigmaHistory O X Y) (hittingAfter (sigmaHistory O X Y) S 0) M})
+and \texttt{klDiv\_map\_stoppedProcess\_sigmaHistory} (integral form), both derived from the
 general chain rule for a process with conditional laws given its prefixes,
-\texttt{InformationTheory.klDiv\_map\_stoppedProcess\_sigmaPrefix\_compProd}
+\texttt{InformationTheory.klDiv\_map\_stoppedProcess\_sigmaPrefix\_hittingAfter\_compProd}
 (\texttt{Maiti2026Power/Mathlib/InformationTheory/KLStoppedPrefix.lean}), transported to the
 two spaces through the laws of the paths. The splitting of the law of $Z_{M+1}$ is
 \texttt{map\_stoppedProcess\_sigmaPrefix\_succ\_eq\_add}, the set $B$ comes from
 \texttt{IsStoppingTime.exists\_measurableSet\_preimage\_finPrefix}, and the restriction of the
 conditional law of the step to $\{M < \tau\}$ is \texttt{HasCondDistrib.restrict\_lt\_of\_isStoppingTime}.
-These files are copied, unchanged up to imports, in
+These files are in
 \texttt{Essakine2026Tight/ForLMLExplore/\{InformationTheory/KLStoppedPrefix,
-Probability/Process/SigmaPrefix, Probability/Process/HittingTime\}.lean} and
+Probability/Process/SigmaPrefix\}.lean} and
 \texttt{Essakine2026Tight/ForLMLExplore/SequentialLearning/\{StoppedHistory,
 DivergenceDecomposition\}.lean} (the latter without the linear Gaussian part of the sister
-project). The history stopped at time $M$ is \texttt{hittingProcess (sigmaHistory O X Y) S 0 M}
+project). The history stopped at time $M$ is
+\texttt{stoppedProcess (sigmaHistory O X Y) (hittingAfter (sigmaHistory O X Y) S 0) M}
 and the integral form reads
 \texttt{∫⁻ ω, ∑ t ∈ range (ENat.toNat (min τ M)), klDiv (κ (X t ω)) (κ' (X t ω)) ∂P}, the step
 through \texttt{sum\_ite\_lt\_eq\_sum\_range\_toNat\_min}; the reindexing by actions is
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_hittingProcess\_sigmaHistory\_eq\_sum\_pullCount}, with
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_stoppedProcess\_sigmaHistory\_eq\_sum\_pullCount} (through
+LMLExplore's \texttt{sum\_lintegral\_pullCount\_mul}; LMLExplore's
+\texttt{IsAlgEnvSeq.klDiv\_map\_history\_eq\_sum\_pullCount} is the case of a fixed time), with
 $N_a(\tau\wedge M)$ = \texttt{pullCount X a (ENat.toNat (min τ M))}.
 
 \begin{lemma}[Divergence decomposition at a stopping time]\label{lem:kl_stopped_hist_le}
-\lean{Learning.IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_compProd, Learning.IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory, Learning.IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_eq_sum_pullCount, Learning.IsAlgEnvSeq.klDiv_map_hittingValue_sigmaHistory_stepKernel, InformationTheory.klDiv_map_stoppedValue_sigmaPrefix_compProd, Learning.sum_lintegral_pullCount_mul_klDiv_ne_top, Learning.natCast_pullCount_toNat_le}\leanok
+\lean{Learning.IsAlgEnvSeq.klDiv_map_stoppedValue_sigmaHistory_compProd, Learning.IsAlgEnvSeq.klDiv_map_stoppedValue_sigmaHistory, Learning.IsAlgEnvSeq.klDiv_map_stoppedValue_sigmaHistory_eq_sum_pullCount, Learning.IsAlgEnvSeq.klDiv_map_stoppedValue_sigmaHistory_stepKernel, InformationTheory.klDiv_map_stoppedValue_sigmaPrefix_compProd, Learning.sum_lintegral_pullCount_mul_klDiv_ne_top, LMLExplore.natCast_pullCount_toNat_le}\leanok
 \uses{lem:pinfo_stopped_chain_rule, lem:pinfo_kl_restrict}
 In the standing setting, let $S$ be a stopping rule whose stopping times $\tau$ and $\tau'$
 are almost surely finite under $\Prob$ and under $\Prob'$ respectively. Then
@@ -604,24 +609,26 @@ $\sup_M \sum_a\E_\nu[N_a(\tau\wedge M)]\KL(\nu_a\|\nu'_a) = \sum_a\E_\nu[N_a(\ta
 $\E_\nu[N_a(\tau)] \le \E_\nu[\tau]$.
 \end{proof}
 
-\textbf{Lean remark.} Sister project
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_hittingValue\_sigmaHistory\_compProd} and
-\texttt{klDiv\_map\_hittingValue\_sigmaHistory}, from
-\texttt{InformationTheory.klDiv\_map\_stoppedValue\_sigmaPrefix\_compProd}, whose proof is
+\textbf{Lean remark.}
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_stoppedValue\_sigmaHistory\_compProd} and
+\texttt{klDiv\_map\_stoppedValue\_sigmaHistory}, from
+\texttt{InformationTheory.klDiv\_map\_stoppedValue\_sigmaPrefix\_hittingAfter\_compProd}, whose proof is
 exactly the argument above (\texttt{HasLaw.stoppedProcess\_sigmaPrefix} for
 $\mu_M = (\mathrm{trunc}_M)_*\mu$, \texttt{restrict\_map\_truncFin} for the restriction
 identity, \texttt{klDiv\_eq\_iSup\_restrict} and \texttt{klDiv\_restrict\_le}). The hypotheses
 are \texttt{∀ᵐ ω ∂P, τ ω ≠ ⊤} and \texttt{∀ᵐ ω ∂P', τ' ω ≠ ⊤}. For an identification algorithm
 $A$ the stopping rule is \texttt{A.stopSet}, the stopping times are \texttt{A.stoppingTime O X Y}
 and the stopped histories \texttt{A.stoppedHist O X Y} (definitionally
-\texttt{hittingValue (sigmaHistory O X Y) A.stopSet 0}), with laws
+\texttt{stoppedValue (sigmaHistory O X Y) (hittingAfter (sigmaHistory O X Y) A.stopSet 0)}), with laws
 \texttt{stoppedHistMeasure A.alg env A.stopSet} (LML
 \texttt{IsAlgEnvSeq.hasLaw\_stoppedValue\_sigmaHistory}). The reindexed form is
-\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_hittingValue\_sigmaHistory\_eq\_sum\_pullCount}, with
+\texttt{Learning.IsAlgEnvSeq.klDiv\_map\_stoppedValue\_sigmaHistory\_eq\_sum\_pullCount}, with
 $N_a(\tau)$ = \texttt{pullCount X a (ENat.toNat τ)} (\texttt{ENat.toNat ⊤ = 0}, harmless since
 $\tau < \infty$ almost surely). The finiteness claim is
 \texttt{Learning.sum\_lintegral\_pullCount\_mul\_klDiv\_ne\_top}, from
-$N_a(\tau) \le \tau$ (\texttt{Learning.natCast\_pullCount\_toNat\_le}, also for $\tau = \infty$).
+$N_a(\tau) \le \tau$ (LMLExplore's \texttt{natCast\_pullCount\_toNat\_le}, also for $\tau = \infty$).
+LMLExplore has the inequalities for any two pairs (\texttt{Learning.klDiv\_stoppedHistMeasure\_le});
+the equality is not there.
 
 \begin{lemma}[Appending the output does not change the divergence]\label{lem:kl_output_pair}
 \lean{InformationTheory.klDiv_compProd_left, Learning.IdentAlg.IsRun.klDiv_map_stoppedHist_out, Learning.IdentAlg.IsRun.klDiv_map_out_le_stoppedHist}\leanok
@@ -660,7 +667,7 @@ time is needed: when $\tau = \infty$ the stopped history is an arbitrary element
 $\rho$ applied to it.
 
 \begin{lemma}[Runs exist]\label{lem:pinfo_canonical_run}
-\lean{Learning.IdentAlg.runMeasure, Learning.IdentAlg.isRun_runMeasure, Learning.IdentAlg.map_snd_runMeasure, Learning.IsAlgEnvSeq.comp_hasLaw, Learning.IdentAlg.IsRun.comp_hasLaw}\leanok
+\lean{LMLExplore.Identification.runMeasure, LMLExplore.Identification.isRun_runMeasure, LMLExplore.Identification.snd_runMeasure, Learning.IsAlgEnvSeq.comp_hasLaw, Learning.IdentAlg.IsRun.comp_hasLaw}\leanok
 Every identification algorithm $A$ has a run in every environment $\mathrm{env}$: on
 $\Omega_A := (\N \to \mathcal O \times \As \times \mathcal Y) \times \mathcal D$ with the measure
 $\Prob_A := \mathrm{traj}(\mathrm{alg}, \mathrm{env}) \otimes (\rho \circ \hist_\tau)$ (the law of
@@ -681,14 +688,12 @@ first, which is the output condition. The law of the output of any run is determ
 $\mathrm{env}$ (LML \texttt{IsRun.hasLaw\_output}).
 \end{proof}
 
-\textbf{Lean remark.} \texttt{Learning.IdentAlg.runMeasure},
-\texttt{Learning.IdentAlg.isRun\_runMeasure}, \texttt{Learning.IdentAlg.map\_snd\_runMeasure}
-(output law \texttt{A.outputMeasure env}), \texttt{Learning.IsAlgEnvSeq.comp\_hasLaw},
-\texttt{Learning.IdentAlg.IsRun.comp\_hasLaw}, copied from the sister project (\texttt{Run.lean})
-to \texttt{Essakine2026Tight/ForLMLExplore/Identification/IdentificationAlg.lean}; the
-conditional-law facts are \texttt{ProbabilityTheory.HasCondDistrib.comp\_of\_hasLaw} and
-\texttt{ProbabilityTheory.hasCondDistrib\_snd\_compProd\_comap}
-(\texttt{Essakine2026Tight/ForLMLExplore/Probability/CondDistrib.lean}). This is how
+\textbf{Lean remark.} LMLExplore's \texttt{LMLExplore.Identification.runMeasure},
+\texttt{LMLExplore.Identification.isRun\_runMeasure}, \texttt{LMLExplore.Identification.snd\_runMeasure}
+(output law \texttt{A.outputMeasure env}), \texttt{Learning.IsAlgEnvSeq.comp\_hasLaw} and
+\texttt{Learning.IdentAlg.IsRun.comp\_hasLaw} (\texttt{LMLExplore/Identification/Basic.lean});
+the conditional-law facts are LML's \texttt{ProbabilityTheory.HasCondDistrib.comp\_hasLaw} and
+LMLExplore's \texttt{ProbabilityTheory.hasCondDistrib\_snd\_compProd\_comap}. This is how
 Chapter~\ref{chap:lower_bound} obtains the runs in the alternative environments, whose
 existence the headline statement does not provide.
 
@@ -696,7 +701,7 @@ existence the headline statement does not provide.
 \label{sec:pinfo_change_of_measure}
 
 \begin{lemma}[Change of measure at a bounded stopping time]\label{lem:pinfo_truncated_pair}
-\lean{Learning.IdentAlg.truncSet, Learning.IdentAlg.map_hittingProcess_compProd_apply_truncSet, Learning.IdentAlg.IsRun.klBer_le_klDiv_map_hittingProcess, Learning.IdentAlg.IsRun.klBer_measureReal_inter_le_sum_pullCount, Learning.IdentAlg.stoppedHist_mem_stopSet_iff, Learning.IdentAlg.preimage_truncSet, Learning.IdentAlg.output_apply_hittingProcess_eq}\leanok
+\lean{LMLExplore.Identification.klBer_measureReal_histOutputMeasure_le, Learning.IdentAlg.stoppedHist_mem_stopSet_iff}\leanok
 \uses{lem:kl_output_pair, lem:klbin_le_kl, lem:pinfo_stopped_chain_rule}
 In the standing setting, let $A$ be an identification algorithm with sampling rule
 $\mathrm{alg}$, stopping rule $S$ and output kernel $\rho$, consider a run of $A$ in
@@ -736,19 +741,14 @@ $\mathrm{law}_{\nu'}(\hist'_{\tau'\wedge M})\otimes\rho$ and the set $C_M$, then
 \texttt{klDiv\_compProd\_left} and Lemma~\ref{lem:pinfo_stopped_chain_rule}.
 \end{proof}
 
-\textbf{Lean remark.} The set $C_M$ is \texttt{Learning.IdentAlg.truncSet A C M}; the identity is
-\texttt{Learning.IdentAlg.map\_hittingProcess\_compProd\_apply\_truncSet} (with
-\texttt{stoppedHist\_mem\_stopSet\_iff}, \texttt{preimage\_truncSet} and the pointwise
-\texttt{output\_apply\_hittingProcess\_eq}), the bound by the divergence
-\texttt{Learning.IdentAlg.IsRun.klBer\_le\_klDiv\_map\_hittingProcess} (runs in arbitrary
-environments) and the bound by $\sum_a \E_\nu[N_a(\tau)]\KL(\nu_a\|\nu'_a)$, using
-$N_a(\tau\wedge M) \le N_a(\tau)$ almost surely under the assumption $\tau < \infty$ $\Prob$-a.s.,
-is \texttt{Learning.IdentAlg.IsRun.klBer\_measureReal\_inter\_le\_sum\_pullCount}. This lemma
-replaces the auxiliary algorithm $A_M$ with stopping rule $S \cup \{\mathrm{length} = M\}$, its
-runs and the set $F_S$ of histories at which the rule fires, which an earlier version of the
-proof of Theorem~\ref{thm:change_of_measure} used: only the laws
-$\mathrm{law}_\nu(\hist_{\tau\wedge M})$ of the given runs are needed, and $S$ itself (rather than
-$F_S$) separates $\{\tau \le M\}$ from $\{\tau > M\}$.
+\textbf{Lean remark.} The Lean proof does not go through this truncation. LMLExplore's
+transportation lemma \texttt{LMLExplore.Identification.klBer\_measureReal\_histOutputMeasure\_le}
+bounds $\klbin$ of the probabilities of an event of the stopped history and the output, for the
+laws \texttt{histOutputMeasure} of the two pairs, by $\sum_a \E_\nu[N_a(\tau)]\KL(\nu_a\|\nu'_a)$,
+under almost sure stopping in the first environment only (it rests on
+\texttt{Learning.klDiv\_stoppedHistMeasure\_le}); the runs reach these laws through
+\texttt{Learning.IdentAlg.IsRun.hasLaw\_stoppedHist\_output}. The general case of
+Theorem~\ref{thm:change_of_measure} is that lemma, read on the runs.
 
 \begin{theorem}[Change of measure at a stopping time]\label{thm:change_of_measure}
 \lean{Learning.IdentAlg.IsRun.klBer_measureReal_le_sum_pullCount, Learning.IdentAlg.IsRun.klDiv_bernoulliMeasure_le_sum_pullCount, Learning.IdentAlg.IsRun.klBerReal_measureReal_le_toReal_sum_pullCount, Learning.IdentAlg.IsRun.klBer_measureReal_outputMeasure_le_sum_pullCount, Learning.IdentAlg.IsRun.klDiv_map_stoppedHist_out_eq_sum_pullCount}\leanok

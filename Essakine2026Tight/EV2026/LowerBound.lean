@@ -25,6 +25,7 @@ episodes in every run on `M₀`. Theorem 18 is the restatement of this theorem i
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Learning Learning.MDP.Episodic InformationTheory
+open LMLExplore (klBer klBer_eq_ofReal_klBerReal klBer_ne_top)
 open scoped ENNReal
 
 universe u v
@@ -241,7 +242,8 @@ theorem exists_hardMDP_lowerBound_le_lintegral_stoppingTime
     have : 0 < c + 1 := by linarith
     positivity
   have hK : klBer pm pp ≤ ENNReal.ofReal (72 * (c + 1) * (q - 1) ^ 2 / c ^ 2) := by
-    rw [klBer_eq_ofReal (by linarith) hp1.ne]
+    rw [klBer_eq_ofReal_klBerReal ⟨hp0.le, (hp01.trans hp1).le⟩ ⟨(hp0.trans hp01).le, hp1.le⟩
+      (klBer_ne_top ⟨hp0.trans hp01, hp1⟩)]
     exact ENNReal.ofReal_le_ofReal (klBerReal_hardPMinus_hardPPlus_le hβ hH' hε hcond)
   have h2 : ENNReal.ofReal (U.card / 2 * Real.log (1 / δ))
       ≤ ENNReal.ofReal (72 * (c + 1) * (q - 1) ^ 2 / c ^ 2) * T :=
@@ -252,8 +254,7 @@ theorem exists_hardMDP_lowerBound_le_lintegral_stoppingTime
     exact ENNReal.div_le_of_le_mul' h2
   refine le_trans (ENNReal.ofReal_le_ofReal ?_) h3
   have hG0 : 0 ≤ maxReturn M₀ H s₀ := maxReturn_nonneg M₀ H
-    (rewardsIn_of_hasRewardFn _ (hasRewardFn_hardMDP H β ε none) measurableSet_Icc
-      (hardReward_mem_Icc H)) s₀
+    ((hasRewardFn_hardMDP H β ε none).rewardsIn (hardReward_mem_Icc H)) s₀
   exact lowerBound_le_of_card hβ hε hδ hH' hG0 (maxReturn_hardMDP_le hS hA hH none) hUcard
 
 end Essakine2026Tight

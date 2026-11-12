@@ -153,7 +153,7 @@ lemma ae_episodeReturn_mem_Icc {a b : ℝ} (hM : M.RewardsIn (Set.Icc a b)) {π 
     have h0 : ∀ᵐ x ∂stepLaw M π (s, h), IT.feedback 0 x ∈ Set.Icc a b := by
       have hl := hasLaw_feedback_zero_stepLaw M hπ s h
       exact ae_of_ae_map (p := fun r ↦ r ∈ Set.Icc a b) hl.aemeasurable
-        (by rw [hl.map_eq]; exact hM h s (π h s))
+        (by rw [hl.map_eq]; exact (M.rewardsIn_def _).1 hM h s (π h s))
     have h1 : ∀ᵐ x ∂stepLaw M π (s, h),
         episodeReturn n (shiftRound x) ∈ Set.Icc (n * a) (n * b) :=
       ae_stepLaw_succ_of_ae M hπ (P := fun _ _ y ↦ episodeReturn n y ∈ Set.Icc (n * a) (n * b))
@@ -213,20 +213,13 @@ lemma integrable_exp_mul_of_rewardsIn {a b : ℝ} (hM : M.RewardsIn (Set.Icc a b
   refine Integrable.of_bound
     (Real.measurable_exp.comp (measurable_id.const_mul β)).aestronglyMeasurable
     (Real.exp (|β| * max |a| |b|)) ?_
-  filter_upwards [hM h s a'] with x hx
+  filter_upwards [(M.rewardsIn_def _).1 hM h s a'] with x hx
   rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _), Real.exp_le_exp]
   calc β * x ≤ |β * x| := le_abs_self _
     _ = |β| * |x| := abs_mul _ _
     _ ≤ |β| * max |a| |b| := by
         gcongr
         exact abs_le_max_abs_abs hx.1 hx.2
-
-omit [MeasurableSingletonClass S] [MeasurableSingletonClass A] in
-lemma rewardsIn_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r) {I : Set ℝ}
-    (hI : MeasurableSet I) (hr : ∀ h s a, r h s a ∈ I) : M.RewardsIn I := by
-  intro h s a
-  rw [hM h s a]
-  exact (ae_dirac_iff (p := (· ∈ I)) hI).2 (hr h s a)
 
 /-! ### The exponential Bellman equation -/
 
@@ -279,14 +272,14 @@ lemma expQ_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r) (
     (h : ℕ) (s : S) (a : A) :
     expQ M H β π h s a
       = Real.exp (β * r h s a) * ∫ s', expValue M H β π (h + 1) s' ∂M.trans h (s, a) := by
-  rw [expQ, hM h s a, integral_dirac]
+  rw [expQ, (M.hasRewardFn_def r).1 hM h s a, integral_dirac]
 
 omit [MeasurableSingletonClass S] [MeasurableSingletonClass A] in
 /-- The optimal exponential Bellman operator for an MDP with a reward function. -/
 lemma optExpQ_of_hasRewardFn {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r) (h : ℕ) (s : S) (a : A) :
     optExpQ M H β h s a
       = Real.exp (β * r h s a) * ∫ s', optExpValue M H β (h + 1) s' ∂M.trans h (s, a) := by
-  rw [optExpQ, hM h s a, integral_dirac]
+  rw [optExpQ, (M.hasRewardFn_def r).1 hM h s a, integral_dirac]
 
 omit [MeasurableSingletonClass A] in
 /-- On a finite state space, the integral against a transition kernel is the expectation under
@@ -302,14 +295,14 @@ lemma expQ_of_hasRewardFn_eq_vecExp [Fintype S] {r : ℕ → S → A → ℝ} (h
     (π : ℕ → S → A) (h : ℕ) (s : S) (a : A) :
     expQ M H β π h s a
       = Real.exp (β * r h s a) * vecExp (M.transVec h s a) (expValue M H β π (h + 1)) := by
-  rw [expQ, hM h s a, integral_dirac, integral_eq_vecExp_transVec]
+  rw [expQ, (M.hasRewardFn_def r).1 hM h s a, integral_dirac, integral_eq_vecExp_transVec]
 
 omit [MeasurableSingletonClass A] in
 lemma optExpQ_of_hasRewardFn_eq_vecExp [Fintype S] {r : ℕ → S → A → ℝ} (hM : M.HasRewardFn r)
     (h : ℕ) (s : S) (a : A) :
     optExpQ M H β h s a
       = Real.exp (β * r h s a) * vecExp (M.transVec h s a) (optExpValue M H β (h + 1)) := by
-  rw [optExpQ, hM h s a, integral_dirac, integral_eq_vecExp_transVec]
+  rw [optExpQ, (M.hasRewardFn_def r).1 hM h s a, integral_dirac, integral_eq_vecExp_transVec]
 
 /-! ### Ranges for rewards in `[0, 1]` -/
 
@@ -346,7 +339,8 @@ omit [MeasurableSingletonClass S] [MeasurableSingletonClass A] in
 lemma integral_exp_mul_reward_mem_Icc (hM : M.RewardsIn (Set.Icc 0 1)) (h : ℕ) (s : S) (a : A) :
     ∫ x, Real.exp (β * x) ∂M.reward h (s, a)
       ∈ Set.Icc (min 1 (Real.exp (β * 1))) (max 1 (Real.exp (β * 1))) :=
-  integral_mem_Icc_of_ae_mem_Icc ((hM h s a).mono fun _ hx ↦ exp_mul_mem_Icc_min_max hx)
+  integral_mem_Icc_of_ae_mem_Icc
+    (((M.rewardsIn_def _).1 hM h s a).mono fun _ hx ↦ exp_mul_mem_Icc_min_max hx)
     (Real.measurable_exp.comp (measurable_id.const_mul β)).aestronglyMeasurable
 
 omit [MeasurableSingletonClass S] [MeasurableSingletonClass A] in

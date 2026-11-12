@@ -746,7 +746,7 @@ $\klbin(p_-,p_+) \le 8(c+1)\cdot 9(q-1)^2/c^2 = 72\,(c+1)(q-1)^2/c^2$.
 \end{proof}
 
 \textbf{Lean remark.} Stated for the real-valued divergence \texttt{klBerReal}, which is
-\texttt{klBer} since $p_+ \in (0, 1)$ (\texttt{klBer\_eq\_ofReal}). The positivity
+\texttt{klBer} since $p_+ \in (0, 1)$ (\texttt{klBer\_eq\_ofReal\_klBerReal}). The positivity
 $\klbin(p_-, p_+) > 0$ of the paper is not needed: the proof of Theorem~\ref{thm:lower_bound} divides
 by the positive right-hand side.
 
@@ -818,7 +818,7 @@ which holds because $\frac{\abs{\mathcal U}}{2} - 1 \ge \frac{\abs{\mathcal U}}{
 $\abs{\mathcal U} \ge 4$) and $\frac14\log\frac1\delta \ge \frac14\log 16 = \log 2$ (as $\delta \le 1/16$).
 \end{proof}
 
-\textbf{Lean remark.} $\klbin$ is the $\texttt{ℝ≥0∞}$-valued \texttt{InformationTheory.klBer} of
+\textbf{Lean remark.} $\klbin$ is the $\texttt{ℝ≥0∞}$-valued \texttt{LMLExplore.klBer} of
 Definition~\ref{def:klbin} (infinite when the second argument is $0$ or $1$ and differs from the
 first); the sum is a \texttt{Finset.sum} in \texttt{ℝ≥0∞} and the
 right-hand side is \texttt{ENNReal.ofReal} of a real number; \texttt{ofReal\_le\_sum\_klBer} proves
