@@ -21,7 +21,7 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 | R13 | Ville's inequality | exists | `MeasureTheory.Supermartingale.measure_exists_le_le` | – | |
 | R14 | Weighted measures of probability vectors | exists | `LMLExplore.weightedMeasure` | – | |
 | R15 | Bernoulli measures, the binary relative entropy, Pinsker's inequality and data processing to an event | exists | `LMLExplore.klBer` | – | `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean`, `ForLMLExplore/Probability/Distributions/Bernoulli.lean` |
-| R16 | The divergence of two Bernoulli measures on any two distinct points | refactor | `LMLExplore.klDiv_bernoulliMeasure` | proved | `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean` |
+| R16 | The divergence of two Bernoulli measures on any two distinct points | refactor | `LMLExplore.klDiv_bernoulliMeasure` | PR #300 | `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean` |
 | R17 | Canonical runs of identification algorithms and their transport | exists | `LMLExplore.Identification.runMeasure` | – | |
 | R18 | Change of measure at a stopping time for identification algorithms | exists | `LMLExplore.Identification.klBer_measureReal_histOutputMeasure_le` | – | `ForLMLExplore/Identification/ChangeOfMeasure.lean` |
 | R19 | Chain rule for the KL divergence at a stopping time, with equality: prefix filtrations, stopped histories, regrouping by action counts | target | Identification 2.1 | PR #288 | `ForLMLExplore/Probability/Process/SigmaPrefix.lean`, `ForLMLExplore/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean`, `ForLMLExplore/InformationTheory/KLStoppedPrefix.lean`, `ForLMLExplore/SequentialLearning/StoppedHistory.lean`, `ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean` |
@@ -151,7 +151,9 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
   bad absorbing states. The refactor restates LMLExplore's lemma in that generality and updates
   its uses (the current statement is the case `x = 1`, `y = 0`). The local lemma now reads
   `klDiv Ber(x, y, p) Ber(x, y, q) = LMLExplore.klBer p q`, proved by data processing both ways
-  from LMLExplore's.
+  from LMLExplore's. PR #300 makes LMLExplore's lemma this statement (new hypothesis `x ≠ y`, its
+  uses pass `one_ne_zero`), so the bump deletes the local lemma, moves its two uses to LMLExplore's
+  and keeps `klDiv_bernoulliMeasure_eq_klBerReal`, re-proved on top of it.
 - R17: the project uses LMLExplore's `Identification.runMeasure`, `isRun_runMeasure`,
   `snd_runMeasure`, `IsAlgEnvSeq.comp_hasLaw`, `IdentAlg.IsRun.comp_hasLaw` and
   `IdentAlg.measurable_stoppedHist`; the local file is deleted (2026-11-12).
