@@ -1,6 +1,6 @@
 # Paper roadmap: Tight Sample Complexity Bounds for Entropic Best Policy Identification
 
-Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps d01bdd6b89ce · Refreshed 2026-11-09
+Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 468f19f45fae · Refreshed 2026-11-12
 
 ## Items
 
