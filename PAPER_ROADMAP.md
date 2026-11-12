@@ -9,7 +9,7 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 | R1 | MDPs, their environment and stationary deterministic policies (`MDP`, `MDP.env`, `policyAlg`, `policyMeasure`, `stateLaw`, `meanReward`) | exists | `Learning.MDP.env` | – | |
 | R2 | Episodic MDPs and the time-augmented MDP (`EpisodicMDP`, `ofDet`, `meanReward`, `RewardsIn`, `HasRewardFn`, `augmented`) | exists | `Learning.MDP.Episodic.EpisodicMDP` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean` |
 | R3 | State marginals and occupancy measures of an episodic MDP | exists | `Learning.MDP.Episodic.EpisodicMDP.occupancy` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Occupancy.lean` |
-| R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
+| R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | PR #297 | `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
 | R5 | Markov property of the trajectory of a stationary deterministic policy (`policyKernel` through `Kernel.traj`, shifted trajectories) | target | ReinforcementLearning 7.2 | PR #295 | `ForLMLExplore/MarkovDecisionProcess/Markov.lean` |
 | R6 | `H`-step policies and episode trajectories (`Policy`, `Policy.extend`, `stepLaw`, `episodeReturn`, `episodeStates`), with the Markov property along an episode | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean` |
 | R7 | Episodes as rounds: the law of the state sequence of an episode, `statesEnv` and best policy identification algorithms `BPIAlg` | target | ReinforcementLearning 7.7 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StateSeq.lean` |
@@ -26,7 +26,7 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 | R18 | Change of measure at a stopping time for identification algorithms | exists | `LMLExplore.Identification.klBer_measureReal_histOutputMeasure_le` | – | `ForLMLExplore/Identification/ChangeOfMeasure.lean` |
 | R19 | Chain rule for the KL divergence at a stopping time, with equality: prefix filtrations, stopped histories, regrouping by action counts | target | Identification 2.1 | PR #288 | `ForLMLExplore/Probability/Process/SigmaPrefix.lean`, `ForLMLExplore/MeasureTheory/MeasurableSpace/PiFinSuccProd.lean`, `ForLMLExplore/InformationTheory/KLStoppedPrefix.lean`, `ForLMLExplore/SequentialLearning/StoppedHistory.lean`, `ForLMLExplore/SequentialLearning/DivergenceDecomposition.lean` |
 | R20 | Method of types and Sanov's bound on a finite set | target | ReinforcementLearning 3.4 | PR #290 | `ForLMLExplore/InformationTheory/MethodOfTypes.lean`, `ForLMLExplore/InformationTheory/KullbackLeibler/Fintype.lean` |
-| R21 | Time-uniform KL concentration of the empirical distribution by the Laplace mixture | target | ReinforcementLearning 3.4 | proved | `ForLMLExplore/InformationTheory/KLTimeUniform.lean` |
+| R21 | Time-uniform KL concentration of the empirical distribution by the Laplace mixture | target | ReinforcementLearning 3.4 | PR #296 | `ForLMLExplore/InformationTheory/KLTimeUniform.lean` |
 | R22 | Donsker–Varadhan inequality and the Bernstein bound on the log-moment generating function | exists | `TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv` | – | |
 | R23 | KL-to-Bernstein transport and variance transport under a KL constraint | target | ReinforcementLearning 19.2 | PR #291 | `ForLMLExplore/InformationTheory/KLBernstein.lean`, `ForLMLExplore/Probability/Moments/VarianceTransport.lean` |
 | R24 | Square roots, logarithms against powers and the self-bounding inequality | target | ReinforcementLearning 19.2 | PR #287 | `ForLMLExplore/Analysis/Real/Sqrt.lean`, `ForLMLExplore/Analysis/SpecialFunctions/Pow/Real.lean`, `ForLMLExplore/Analysis/SpecialFunctions/Log/SelfBounding.lean` |
@@ -66,7 +66,9 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
   `HasCondDistrib.compProd_left` is `HasCondDistrib.compProd_left_of_sectR` with
   `Kernel.sectR_prodMkLeft`. New: `HasCondDistrib.integral_prodMk`,
   `hasCondDistrib_of_lintegral_eq`, `HasCondDistrib.compProd_left_of_sectR`, `restrict_preimage`,
-  `of_comp_hasLaw`, and `condExp_comap_ae_eq_integral` without a standard Borel space.
+  `of_comp_hasLaw`, and `condExp_comap_ae_eq_integral` without a standard Borel space. PR #297
+  ports the item on its own, at a greater generality (integrability for the joint law, s-finite
+  measures and kernels), except `HasCondDistrib.restrict_preimage`, which PR #288 (R19) adds.
 - R5: Layer 7.2 asks for stochastic Markov policies (`Algorithm.markov`) and for the law of the
   state process as Tau Ceti's `markovChainLaw`, whose shift Markov property Tau Ceti has
   (`condExp_shift_iterate_markovChainLaw`). The port states the Markov property of runs for
@@ -193,7 +195,10 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
   another bound on the same mixture (`laplaceRatio`): the port proves the roadmap's form and may
   keep this one. `Stirling.factorial_le_exp_one_mul_sqrt_mul_div_pow`,
   `Nat.ascFactorial_le_factorial_mul_add_one_pow` and
-  `Measure.absolutelyContinuous_of_forall_singleton` are Mathlib-shaped helpers.
+  `Measure.absolutelyContinuous_of_forall_singleton` are Mathlib-shaped helpers. PR #296 proves
+  the roadmap's form, for every predictable predictor and through the multinomial bound; it ports
+  neither the local threshold nor the Stirling helpers, so the final bump keeps them, re-proved on
+  top of LMLExplore if needed.
 - R22: the project uses Tau Ceti's `TauCeti.ofReal_integral_sub_log_integral_exp_le_klDiv`;
   the local copy is deleted (2026-11-12), and `log_integral_exp_mul_sub_le` is proved from
   LMLExplore's `MeasureTheory.MemLp.mgf_le_exp_mul_exp_sub_one_sub_of_ae_le`.
