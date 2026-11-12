@@ -10,7 +10,7 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 | R2 | Episodic MDPs and the time-augmented MDP (`EpisodicMDP`, `ofDet`, `meanReward`, `RewardsIn`, `HasRewardFn`, `augmented`) | exists | `Learning.MDP.Episodic.EpisodicMDP` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean` |
 | R3 | State marginals and occupancy measures of an episodic MDP | exists | `Learning.MDP.Episodic.EpisodicMDP.occupancy` | – | `ForLMLExplore/MarkovDecisionProcess/Episodic/Occupancy.lean` |
 | R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
-| R5 | Markov property of the trajectory of a stationary deterministic policy (`policyKernel` through `Kernel.traj`, shifted trajectories) | target | ReinforcementLearning 7.2 | proved | `ForLMLExplore/MarkovDecisionProcess/Markov.lean` |
+| R5 | Markov property of the trajectory of a stationary deterministic policy (`policyKernel` through `Kernel.traj`, shifted trajectories) | target | ReinforcementLearning 7.2 | PR #295 | `ForLMLExplore/MarkovDecisionProcess/Markov.lean` |
 | R6 | `H`-step policies and episode trajectories (`Policy`, `Policy.extend`, `stepLaw`, `episodeReturn`, `episodeStates`), with the Markov property along an episode | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean` |
 | R7 | Episodes as rounds: the law of the state sequence of an episode, `statesEnv` and best policy identification algorithms `BPIAlg` | target | ReinforcementLearning 7.7 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StateSeq.lean` |
 | R8 | Exponential and entropic values: Bellman equations, ranges, optimal entropic values and a greedy optimal policy, maximal return, entropic PAC property | staged | S1 | proved | `ForLMLExplore/MarkovDecisionProcess/Vec.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/Entropic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/Values.lean`, `ForLMLExplore/Probability/Moments/Variance.lean`, `ForLMLExplore/Algebra/Order/Field/Basic.lean` |
@@ -74,7 +74,11 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
   LMLExplore's `policyAlg_eq_markov`. The local file is on LMLExplore's `MDP.env` since
   2026-11-12; `Kernel.traj_congr` is gone (`congr`), and `measurable_finCons` and
   `measurable_finSnoc` are proved from Mathlib's `MeasurableEquiv.piFinSuccAbove` and LML's
-  `MeasurableEquiv.finSuccProd`.
+  `MeasurableEquiv.finSuccProd`. PR #295 proves it from Tau Ceti's Markov chain theory
+  (`hasLaw_trajectory_markovChainLaw`, `hasCondDistrib_processShift_history_obs`, with the
+  trajectory kernel `trajKernel` and `policyMeasure_eq_trajKernel`), without porting the local
+  reconstruction (`policyKernel`, `shiftMeasure`, `consRound`): at the bump, the local
+  `hasCondDistrib_shiftRound_trajMeasure` and its uses move to these.
 - R6: Layer 7.6 takes the `H`-step policies `Policy 𝓢 𝓐 H = Fin H → 𝓢 → 𝓐` and `Policy.extend`
   from here, with measurability as a separate hypothesis. LMLExplore has the Markov-policy side
   (`augMarkovPolicy`, `EpisodicMDP.value`, `runReturn_augmented_markov`, the one-step laws
