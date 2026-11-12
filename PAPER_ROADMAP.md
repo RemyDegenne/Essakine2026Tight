@@ -12,10 +12,10 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 | R4 | Conditional distributions: integrals and conditional expectations against `HasCondDistrib`, restrictions, compositions with laws | target | ReinforcementLearning 7.6 | PR #297 | `ForLMLExplore/Probability/HasCondDistribIntegral.lean`, `ForLMLExplore/Probability/HasCondDistribCondExp.lean`, `ForLMLExplore/Probability/CondDistrib.lean` |
 | R5 | Markov property of the trajectory of a stationary deterministic policy (`policyKernel` through `Kernel.traj`, shifted trajectories) | target | ReinforcementLearning 7.2 | PR #295 | `ForLMLExplore/MarkovDecisionProcess/Markov.lean` |
 | R6 | `H`-step policies and episode trajectories (`Policy`, `Policy.extend`, `stepLaw`, `episodeReturn`, `episodeStates`), with the Markov property along an episode | target | ReinforcementLearning 7.6 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StepLaw.lean` |
-| R7 | Episodes as rounds: the law of the state sequence of an episode, `statesEnv` and best policy identification algorithms `BPIAlg` | target | ReinforcementLearning 7.7 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StateSeq.lean` |
+| R7 | Episodes as rounds: the law of the state sequence of an episode, `statesEnv` and best policy identification algorithms `BPIAlg` | target | ReinforcementLearning 7.7 | PR #299 | `ForLMLExplore/MarkovDecisionProcess/Episodic/Basic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/StateSeq.lean` |
 | R8 | Exponential and entropic values: Bellman equations, ranges, optimal entropic values and a greedy optimal policy, maximal return, entropic PAC property | staged | S1 | proved | `ForLMLExplore/MarkovDecisionProcess/Vec.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/Entropic.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/Values.lean`, `ForLMLExplore/Probability/Moments/Variance.lean`, `ForLMLExplore/Algebra/Order/Field/Basic.lean` |
 | R9 | Entropic variances and backward recursions along the trajectory: variance recursion and telescoping, weighted unrolling, Cauchy–Schwarz bounds | staged | S1 | proved | `ForLMLExplore/MarkovDecisionProcess/Episodic/EntropicVariance.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/Unroll.lean`, `ForLMLExplore/MarkovDecisionProcess/Episodic/UnrollBounds.lean`, `ForLMLExplore/MeasureTheory/Integral/CauchySchwarz.lean`, `ForLMLExplore/Analysis/SpecialFunctions/Exp.lean` |
-| R10 | Empirical models of episodes: visit counts, reward sums, transition counts and empirical transitions | target | ReinforcementLearning 14.1 | proved | `ForLMLExplore/ReinforcementLearning/Episodic/Empirical.lean`, `ForLMLExplore/ReinforcementLearning/Episodic/EmpiricalCounts.lean` |
+| R10 | Empirical models of episodes: visit counts, reward sums, transition counts and empirical transitions | target | ReinforcementLearning 14.1 | PR #298 | `ForLMLExplore/ReinforcementLearning/Episodic/Empirical.lean`, `ForLMLExplore/ReinforcementLearning/Episodic/EmpiricalCounts.lean` |
 | R11 | Visits of a step–state–action pair across episodes, the next states observed at them and their domination by i.i.d. samples | target | ReinforcementLearning 14.2 | proved | `ForLMLExplore/ReinforcementLearning/Episodic/Visits.lean`, `ForLMLExplore/ReinforcementLearning/Episodic/VisitConcentration.lean`, `ForLMLExplore/Probability/Process/FirstEntrance.lean` |
 | R12 | Counts versus pseudo-counts: the Bernoulli maximal inequality | target | ReinforcementLearning 19.2 | PR #292 | `ForLMLExplore/Probability/Martingale/Ville.lean` |
 | R13 | Ville's inequality | exists | `MeasureTheory.Supermartingale.measure_exists_le_le` | – | |
@@ -93,7 +93,11 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
   `𝓐`; the local `statesEnv M H s₁` is the case `μ = δ_{s₁}`. Layer 19.1 defines best policy
   identification algorithms as `BPIAlg`. The law of the state sequence (`stateSeqLaw`, with its
   backward recursion `stateSeqLaw_succ`) gives the kernel of `statesEnv`; `hasCondDistrib_statesLaw`
-  and the laws of `statesEnv` are in `StepLaw.lean` (R6).
+  and the laws of `statesEnv` are in `StepLaw.lean` (R6). PR #299 ports `statesEnv M H μ` and
+  `episodeEnv M H μ` from an initial law, `BPIAlg`, and the `Policy` and `Policy.extend` part of
+  R6, with `statesLaw` for Markov policies through `augMarkovPolicy` and `hasCondDistrib_statesLaw`
+  proved directly from the run lemmas of LMLExplore; it does not port `stateSeqLaw_succ` or the
+  iterated Markov property of R6, which build on PRs #295 and #297.
 - R8: risk-sensitive MDPs are outside the scope of the ReinforcementLearning roadmap, hence S1.
   `expValue` is Mathlib's `mgf (episodeReturn (H - h)) (stepLaw M π (s, h)) β` and `entropicValue`
   is `β⁻¹ * cgf …`: the port states them through `mgf` and `cgf`. `vecExp` is Mathlib's
@@ -111,7 +115,10 @@ Paper: RemyDegenne/Essakine2026Tight · LMLExplore afd365492580 · LMLRoadmaps 4
 - R10: Layer 14.1 asks for the episodic counts before episode `k` as LML `pullCount`s of the
   step–state–action process, for an empirical kernel that is a probability measure (the uniform
   law on `𝓢` at an unvisited pair, where the local `empTrans` is `0`) and for measurability in the
-  history. The additive-monoid `EmpiricalModel` is what the paper's algorithm updates.
+  history. The additive-monoid `EmpiricalModel` is what the paper's algorithm updates. PR #298
+  ports the counts as `pullCount`s and the empirical kernels (`empiricalLaw`, `MDP.empTrans`,
+  `Episodic.stepEmpTrans`, `Episodic.pooledEmpTrans`), uniform at an unvisited pair, without
+  `EmpiricalModel`; the counts are not yet restated inside `statesEnv` (R7, PR #299).
 - R11: Layer 14.2 cites `Visits.lean`. It asks for per-`(h, s, a)` streams of law `P_h(s, a)` read
   at the visits, with the stream representation and the keyed transfer of ReinforcementLearning
   6.1; the local results are the conclusion of that transfer, as a domination of the next states
